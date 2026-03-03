@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiniHack × MDP/POMDP 一步步学</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        :root {
+            --bg: #0a0e1a;
+            --card: #1e293b;
+            --accent: #6366f1;
+            --cyan: #06b6d4;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --green: #10b981;
+            --warn: #f59e0b;
+            --border: #334155
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7
+        }
+
+        a {
+            color: var(--cyan)
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            text-align: center;
+            margin: 3rem 0 .5rem;
+            background: linear-gradient(135deg, #fff, var(--accent), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--muted);
+            margin-bottom: 3rem;
+            font-size: .95rem
+        }
+
+        /* Steps */
+        .step {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: all .3s
+        }
+
+        .step.locked {
+            opacity: .4;
+            pointer-events: none;
+            filter: blur(1px)
+        }
+
+        .step-header {
+            padding: 1.2rem 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            user-select: none
+        }
+
+        .step-header:hover {
+            background: rgba(99, 102, 241, .05)
+        }
+
+        .step-num {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: .85rem;
+            flex-shrink: 0;
+            background: var(--border);
+            color: var(--muted);
+            transition: all .3s
+        }
+
+        .step.active .step-num,
+        .step.done .step-num {
+            background: var(--accent);
+            color: #fff
+        }
+
+        .step.done .step-num {
+            background: var(--green)
+        }
+
+        .step-title {
+            font-weight: 600;
+            font-size: 1.05rem;
+            flex: 1
+        }
+
+        .step-tag {
+            font-size: .7rem;
+            padding: .2rem .6rem;
+            border-radius: 99px;
+            border: 1px solid var(--border);
+            color: var(--muted)
+        }
+
+        .step-arrow {
+            color: var(--muted);
+            transition: transform .3s;
+            font-size: 1.2rem
+        }
+
+        .step.open .step-arrow {
+            transform: rotate(90deg)
+        }
+
+        .step-body {
+            display: none;
+            padding: 0 1.5rem 1.5rem;
+            animation: fadeIn .3s
+        }
+
+        .step.open .step-body {
+            display: block
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-8px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        /* Content */
+        .concept {
+            background: rgba(99, 102, 241, .08);
+            border-left: 3px solid var(--accent);
+            padding: 1rem 1.2rem;
+            border-radius: 0 10px 10px 0;
+            margin: .8rem 0;
+            font-size: .9rem
+        }
+
+        .concept h4 {
+            color: var(--accent);
+            margin-bottom: .3rem;
+            font-size: .85rem;
+            font-weight: 700
+        }
+
+        .concept p {
+            color: var(--muted);
+            font-size: .85rem
+        }
+
+        .code-box {
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin: .8rem 0;
+            overflow: hidden
+        }
+
+        .code-label {
+            background: rgba(99, 102, 241, .15);
+            padding: .4rem 1rem;
+            font-size: .72rem;
+            font-weight: 600;
+            color: var(--accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .code-label .file {
+            color: var(--cyan)
+        }
+
+        .code-content {
+            padding: 1rem;
+            font-family: 'Fira Code', monospace;
+            font-size: .8rem;
+            line-height: 1.7;
+            color: #c9d1d9;
+            overflow-x: auto;
+            white-space: pre
+        }
+
+        .output-box {
+            background: #0d1117;
+            border: 1px solid var(--green);
+            border-radius: 10px;
+            margin: .8rem 0;
+            overflow: hidden
+        }
+
+        .output-label {
+            background: rgba(16, 185, 129, .15);
+            padding: .4rem 1rem;
+            font-size: .72rem;
+            font-weight: 600;
+            color: var(--green)
+        }
+
+        .output-content {
+            padding: 1rem;
+            font-family: monospace;
+            font-size: .78rem;
+            line-height: 1.6;
+            color: var(--green);
+            white-space: pre;
+            overflow-x: auto
+        }
+
+        .explain {
+            color: var(--muted);
+            font-size: .87rem;
+            margin: .6rem 0;
+            line-height: 1.7
+        }
+
+        .explain strong {
+            color: var(--text)
+        }
+
+        .mapping {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: .3rem .8rem;
+            margin: .8rem 0;
+            font-size: .82rem;
+            align-items: center
+        }
+
+        .mapping .left {
+            text-align: right;
+            color: var(--cyan);
+            font-weight: 600
+        }
+
+        .mapping .arrow {
+            color: var(--muted)
+        }
+
+        .mapping .right {
+            color: var(--muted)
+        }
+
+        .highlight {
+            background: rgba(245, 158, 11, .1);
+            border: 1px solid rgba(245, 158, 11, .3);
+            border-radius: 10px;
+            padding: .8rem 1rem;
+            margin: .8rem 0;
+            font-size: .85rem;
+            color: var(--warn)
+        }
+
+        .highlight strong {
+            color: var(--text)
+        }
+
+        .next-btn {
+            display: block;
+            width: 100%;
+            padding: .8rem;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent), var(--cyan));
+            color: #fff;
+            font-weight: 700;
+            font-size: .9rem;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: transform .2s, box-shadow .2s
+        }
+
+        .next-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, .4)
+        }
+
+        .next-btn:active {
+            transform: scale(.98)
+        }
+
+        .progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--cyan));
+            transition: width .4s;
+            z-index: 100
+        }
+
+        .done-banner {
+            text-align: center;
+            padding: 2rem;
+            color: var(--green);
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: none
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="progress" id="progress"></div>
+    <div class="container">
+        <h1>🎮 MiniHack × MDP/POMDP</h1>
+        <p class="subtitle">一步一步、由浅入深 — 每步一个小概念 + 一段可运行代码</p>
+
+        <!-- ===== STEP 1 ===== -->
+        <div class="step open active" data-step="1">
+            <div class="step-header" onclick="toggle(1)">
+                <div class="step-num">1</div>
+                <div class="step-title">你的第一个 MiniHack 环境</div>
+                <span class="step-tag">入门</span>
+                <span class="step-arrow">›</span>
+            </div>
+            <div class="step-body">
+                <p class="explain">先不管任何理论，让我们创建一个环境并<strong>看一眼</strong>它长什么样。</p>
+
+                <div class="code-box">
+                    <div class="code-label"><span>运行</span><span class="file">step1_look.py</span></div>
+                    <div class="code-content">import gymnasium as gym
+                        import minihack
+
+                        env = gym.make("MiniHack-Room-5x5-v0",
+                        observation_keys=("chars_crop", "blstats"))
+
+                        obs, info = env.reset(seed=42)
+
+                        # 把地图打印出来看看
+                        print("你看到的世界（9×9 局部视野）：")
+                        for row in obs["chars_crop"]:
+                        print(" " + "".join(chr(c) if c > 32 else "·" for c in row))
+
+                        env.close()</div>
+                </div>
+
+                <div class="output-box">
+                    <div class="output-label">预期输出</div>
+                    <div class="output-content">你看到的世界（9×9 局部视野）：
+                        ·········
+                        ·········
+                        ··-----··
+                        ··|...|··
+                        ··|.@.|·· ← @ 就是你（智能体）
+                        ··|...|·· ← . 是可走的地板
+                        ··-----·· ← - 和 | 是墙壁
+                        ·········
+                        ·········</div>
+                </div>
+
+                <div class="concept">
+                    <h4>💡 你刚做了什么？</h4>
+                    <p>你创建了一个 5×5 的小房间，然后通过 <code>chars_crop</code> 看到了以 @ 为中心的 9×9 视野。这就是智能体"看到"的世界。</p>
+                </div>
+
+                <button class="next-btn" onclick="unlock(2)">理解了，下一步 →</button>
+            </div>
+        </div>
+
+        <!-- ===== STEP 2 ===== -->
+        <div class="step locked" data-step="2">
+            <div class="step-header" onclick="toggle(2)">
+                <div class="step-num">2</div>
+                <div class="step-title">执行一个动作，观察世界变化</div>
+                <span class="step-tag">动作 & 转移</span>
+                <span class="step-arrow">›</span>
+            </div>
+            <div class="step-body">
+                <p class="explain">现在让智能体<strong>走一步</strong>，看看世界如何变化。</p>
+
+                <div class="code-box">
+                    <div class="code-label"><span>运行</span><span class="file">step2_move.py</span></div>
+                    <div class="code-content">import gymnasium as gym
+                        import minihack
+
+                        env = gym.make("MiniHack-Room-5x5-v0",
+                        observation_keys=("chars_crop", "blstats"))
+
+                        obs, info = env.reset(seed=42)
+
+                        def show(obs, label=""):
+                        print(f"\n{label}")
+                        for row in obs["chars_crop"]:
+                        print(" " + "".join(chr(c) if c > 32 else "·" for c in row))
+                        bl = obs["blstats"]
+                        print(f" 位置: ({bl[0]}, {bl[1]})")
+
+                        show(obs, "【移动前】")
+
+                        # 动作 2 = 向南走
+                        obs, reward, terminated, truncated, info = env.step(2)
+
+                        show(obs, "【向南走一步后】")
+                        print(f" 奖励: {reward}")
+
+                        env.close()</div>
+                </div>
+
+                <div class="concept">
+                    <h4>🔑 这就是 MDP 的"转移函数" T(s'|s,a)</h4>
+                    <p><code>env.step(action)</code> 就是 T 的实现。你给一个动作 a，环境返回新状态 s'（通过观测 obs 体现）和奖励 r。<br><br>
+                        <strong>一句话理解 MDP：</strong>你在某个状态 → 选一个动作 → 到达新状态 + 获得奖励。重复这个循环。
+                    </p>
+                </div>
+
+                <div class="mapping">
+                    <span class="left">env.step(action)</span><span class="arrow">=</span><span class="right">转移函数
+                        T(s'|s,a)</span>
+                    <span class="left">obs（观测字典）</span><span class="arrow">=</span><span class="right">新状态 s' 的观测</span>
+                    <span class="left">reward</span><span class="arrow">=</span><span class="right">奖励函数 R(s,a)</span>
+                    <span class="left">terminated</span><span class="arrow">=</span><span class="right">是否到达终止状态</span>
+                </div>
+
+                <button class="next-btn" onclick="unlock(3)">理解了，下一步 →</button>
+            </div>
+        </div>
+
+        <!-- ===== STEP 3 ===== -->
+        <div class="step locked" data-step="3">
+            <div class="step-header" onclick="toggle(3)">
+                <div class="step-num">3</div>
+                <div class="step-title">动作有哪些？— 动作空间 A</div>
+                <span class="step-tag">MDP · A</span>
+                <span class="step-arrow">›</span>
+            </div>
+            <div class="step-body">
+                <p class="explain">MDP 的第二个元素是<strong>动作空间 A</strong>。让我们看看智能体能做什么。</p>
+
+                <div class="code-box">
+                    <div class="code-label"><span>运行</span><span class="file">step3_actions.py</span></div>
+                    <div class="code-content">import gymnasium as gym
+                        import minihack
+                        from nle import nethack
+
+                        env = gym.make("MiniHack-Room-5x5-v0")
+                        obs, info = env.reset()
+
+                        print(f"动作空间大小: {env.action_space.n} 种动作\n")
+
+                        # MiniHack/NLE 的动作名称
+                        ACTIONS = {
+                        0: "↖ 左上", 1: "↑ 上", 2: "↗ 右上",
+                        3: "← 左", 5: "→ 右",
+                        6: "↙ 左下", 7: "↓ 下", 8: "↘ 右下",
+                        4: "等待(不动)",
+                        }
+
+                        print("常见动作（移动为主）：")
+                        for idx, name in ACTIONS.items():
+                        print(f" 动作 {idx} = {name}")
+
+                        print(f"\n其余动作 (9-{env.action_space.n-1}): 拾取、吃、攻击、施法...")
+                        print("在你的项目中，还会额外加入 QUERY 动作！")
+
+                        env.close()</div>
+                </div>
+
+                <div class="concept">
+                    <h4>📐 MDP 动作空间在你项目中的扩展</h4>
+                    <p>标准 MiniHack: A = {8方向移动 + 等待 + 拾取 + 吃 + ...}<br>
+                        你的项目: A = A<sub>标准</sub> ∪ {<strong>QUERY</strong>}<br><br>
+                        QUERY 是一个新动作——花费一个时间步去查询知识库。和其他动作一样，它也会被 <code>env.step()</code> 处理。</p>
+                </div>
+
+                <button class="next-btn" onclick="unlock(4)">理解了，下一步 →</button>
+            </div>
+        </div>
+
+        <!-- ===== STEP 4 ===== -->
+        <div class="step locked" data-step="4">
+            <div class="step-header" onclick="toggle(4)">
+                <div class="step-num">4</div>
+                <div class="step-title">blstats：智能体的"内部状态"</div>
+                <span class="step-tag">MDP · S</span>
+                <span class="step-arrow">›</span>
+            </div>
+            <div class="step-body">
+                <p class="explain">除了看到的地图，智能体还有<strong>内部属性</strong>——血量、饥饿度。这些就是状态空间 S 的一部分。</p>
+
+                <div class="code-box">
+                    <div class="code-label"><span>运行</span><span class="file">step4_blstats.py</span></div>
+                    <div class="code-content">import gymnasium as gym
+                        import minihack
+
+                        env = gym.make("MiniHack-Room-5x5-v0",
+                        observation_keys=("chars_crop", "blstats"))
+
+                        obs, info = env.reset(seed=42)
+                        bl = obs["blstats"]
+
+                        # blstats 中与你项目最相关的字段
+                        IMPORTANT = {
+                        0: ("x坐标", bl[0]),
+                        1: ("y坐标", bl[1]),
+                        10: ("HP (当前)", bl[10]),
+                        11: ("HP (最大)", bl[11]),
+                        20: ("游戏步数", bl[20]),
+                        21: ("饥饿状态", bl[21]), # ← 重要！
+                        }
+
+                        print("blstats 关键字段（共27维）：\n")
+                        for idx, (name, val) in IMPORTANT.items():
+                        marker = " ← 你项目的'能量'来源！" if idx == 21 else ""
+                        print(f" [{idx:2d}] {name:12s} = {val}{marker}")
+
+                        print(f"\n饥饿状态含义：")
+                        print(f" 0=正常 1=饥饿 2=虚弱 3=晕倒 4=昏厥 5=饿死")
+                        print(f"\n这就是你项目中 E_t 的自然基础！")
+
+                        env.close()</div>
+                </div>
+
+                <div class="concept">
+                    <h4>⚡ 这就是能量 E_t 的来源</h4>
+                    <p><code>blstats[21]</code> 是 NetHack 的饥饿状态。你的项目会在此基础上建立自己的<strong>能量系统</strong>：<br>
+                        • 每步消耗 c_step 能量<br>
+                        • 吃正确食物恢复能量<br>
+                        • E_t ≤ 0 → 死亡<br><br>
+                        <strong>这把 MDP 的状态空间 S 扩展成了 S̃ = (S, E_t)</strong>
+                    </p>
+                </div>
+
+                <button class="next-btn" onclick="unlock(5)">理解了，下一步 →</button>
+            </div>
+        </div>
+
+        <!-- ===== STEP 5 ===== -->
+        <div class="step locked" data-step="5">
+            <div class="step-header" onclick="toggle(5)">
+                <div class="step-num">5</div>
+                <div class="step-title">MDP vs POMDP — 你看不到全部</div>
+                <span class="step-tag">核心概念</span>
+                <span class="step-arrow">›</span>
+            </div>
+            <div class="step-body">
+                <p class="explain">到目前为止你看到的 <code>chars_crop</code> 只有 9×9。但<strong>完整地图是 21×79</strong>。来对比一下：</p>
+
+                <div class="code-box">
+                    <div class="code-label"><span>运行</span><span class="file">step5_pomdp.py</span></div>
+                    <div class="code-content">import gymnasium as gym
+                        import minihack
+
+                        env = gym.make("MiniHack-Room-15x15-v0",
+                        observation_keys=("chars", "chars_crop", "blstats"))
+
+                        obs, info = env.reset(seed=42)
+
+                        # ① 完整地图（上帝视角）
+                        print("① 完整地图 chars (21×79) — 上帝视角：")
+                        for row in obs["chars"]:
+                        line = "".join(chr(c) if c > 32 else " " for c in row).rstrip()
+                        if line.strip():
+                        print(f" {line}")
+
+                        # ② 智能体的视野（局部裁剪）
+                        print("\n② 智能体看到的 chars_crop (9×9) — 只有这么多：")
+                        for row in obs["chars_crop"]:
+                        print(" " + "".join(chr(c) if c > 32 else "·" for c in row))
+
+                        print("\n★ 关键区别：")
+                        print(" 完整地图 = MDP 的'状态 s'（包含一切信息）")
+                        print(" 裁剪视野 = POMDP 的'观测 o'（只能看到一部分）")
+                        print(" 观测 ≠ 状态 → 这就是为什么是 POMDP！")
+
+                        env.close()</div>
+                </div>
+
+                <div class="highlight">
+                    <strong>🎯 一句话理解 POMDP：</strong><br>
+                    MDP = 你能看到所有牌的牌局（完全信息）<br>
+                    POMDP = 你只能看到自己手牌的牌局（不完全信息）<br><br>
+                    在 MiniHack 中，用 <code>chars</code> 训练 ≈ MDP，用 <code>chars_crop</code> 训练 ≈ POMDP
+                </div>
+
+                <div class="concept">
+                    <h4>🔍 所以 QUERY 的价值在哪里？</h4>
+                    <p>因为观测不完整，智能体<strong>不知道某些关键信息</strong>（哪种食物安全？前方有没有陷阱？）。<br>
+                        QUERY 动作 = 花一步时间去问知识库 → 获得 hint → 补充缺失信息。<br>
+                        这就是"主动减少不确定性"。</p>
+                </div>
+
+                <button class="next-btn" onclick="unlock(6)">理解了，下一步 →</button>
+            </div>
+        </div>
+
+        <!-- ===== STEP 6 ===== -->
+        <div class="step locked" data-step="6">
+            <div class="step-header" onclick="toggle(6)">
+                <div class="step-num">6</div>
+                <div class="step-title">跑一个完整 Episode — 累积奖励</div>
+                <span class="step-tag">RL 目标</span>
+                <span class="step-arrow">›</span>
+            </div>
+            <div class="step-body">
+                <p class="explain">RL 的目标是<strong>最大化累积奖励</strong>。让我们跑一局看看"好策略"和"差策略"的区别。</p>
+
+                <div class="code-box">
+                    <div class="code-label"><span>运行</span><span class="file">step6_episode.py</span></div>
+                    <div class="code-content">import gymnasium as gym
+                        import minihack
+
+                        env = gym.make("MiniHack-Room-5x5-v0",
+                        observation_keys=("chars_crop", "blstats"),
+                        max_episode_steps=30)
+
+                        total_reward = 0
+                        obs, info = env.reset(seed=42)
+
+                        print("随机策略的一局游戏：")
+                        print(f"{'步':>3} {'动作':>4} {'奖励':>6} {'累积':>7}")
+                        print("-" * 28)
+
+                        for step in range(30):
+                        action = env.action_space.sample() # 随机策略
+                        obs, reward, terminated, truncated, info = env.step(action)
+                        total_reward += reward
+                        done = terminated or truncated
+
+                        print(f"{step+1:3d} {action:4d} {reward:+6.2f} {total_reward:+7.3f}")
+                        if done:
+                        reason = "到达目标!" if reward > 0.5 else "超时"
+                        print(f"\n结果: {reason}")
+                        break
+
+                        print(f"\n总奖励 G = {total_reward:.3f}")
+                        print(f"RL的目标：找到策略π*让这个G尽可能大")
+
+                        env.close()</div>
+                </div>
+
+                <div class="concept">
+                    <h4>📈 G = r₁ + γr₂ + γ²r₃ + ...</h4>
+                    <p>每步 -0.01（鼓励快速完成），到达目标 +1.0。<br>
+                        <strong>随机策略</strong>的 G 通常很低（随便晃悠）。<br>
+                        <strong>好策略</strong>直奔目标，G ≈ +1.0。<br><br>
+                        RL 就是从随机策略出发，通过<strong>试错学习</strong>找到好策略。
+                    </p>
+                </div>
+
+                <button class="next-btn" onclick="unlock(7)">理解了，下一步 →</button>
+            </div>
+        </div>
+
+        <!-- ===== STEP 7 ===== -->
+        <div class="step locked" data-step="7">
+            <div class="step-header" onclick="toggle(7)">
+                <div class="step-num">7</div>
+                <div class="step-title">能量门控 — 何时该 QUERY？</div>
+                <span class="step-tag">项目核心</span>
+                <span class="step-arrow">›</span>
+            </div>
+            <div class="step-body">
+                <p class="explain">最后一步：理解你项目的<strong>核心创新</strong>——用能量状态决定何时查询。</p>
+
+                <div class="code-box">
+                    <div class="code-label"><span>运行</span><span class="file">step7_gating.py</span></div>
+                    <div class="code-content">import numpy as np
+
+                        def sigmoid(x):
+                        return 1.0 / (1.0 + np.exp(-x))
+
+                        # 参数
+                        E_star = 70 # 能量稳态设定点
+                        alpha = 0.15 # 门控斜率（越大越像硬阈值）
+                        epsilon = 10 # 偏移量
+
+                        # 模拟不同能量水平下的查询概率
+                        print("能量 E_t → 查询概率 P(QUERY)")
+                        print("-" * 42)
+                        for E in [100, 90, 80, 70, 60, 50, 40, 30, 20, 10]:
+                        p = sigmoid(alpha * (E_star - E - epsilon))
+                        bar = "█" * int(p * 30) + "░" * (30 - int(p * 30))
+                        print(f" E={E:3d} P={p:.3f} {bar}")
+
+                        print(f"""
+                        观察：
+                        能量高(100) → P≈0.00 几乎不查询（没必要）
+                        能量中(60) → P≈0.18 开始考虑查询
+                        能量低(20) → P≈0.99 几乎一定查询（生存危机！）
+
+                        这就是内稳态门控：
+                        能量偏离稳态 → 触发信息获取 → 帮助决策 → 恢复稳态
+                        就像人饿了会更主动找食物信息一样。""")</div>
+                </div>
+
+                <div class="concept">
+                    <h4>🧬 p(QUERY | E_t) = σ(α · (E* − E_t − ε))</h4>
+                    <p>这个公式就是你整个项目的核心：<br>
+                        • <strong>E*</strong> = 能量稳态点（"舒适区"）<br>
+                        • <strong>E_t</strong> = 当前能量<br>
+                        • 当 E_t 远低于 E* → σ输入正值大 → P(QUERY)↑<br>
+                        • 当 E_t 接近 E* → σ输入负值 → P(QUERY)↓<br><br>
+                        你项目的实验就是对比这个门控策略 vs 其他4种基线（不查/总查/定期/随机）。</p>
+                </div>
+
+                <div class="highlight">
+                    <strong>🎉 恭喜！你已经理解了项目的全部核心概念：</strong><br>
+                    Step 1-2: MiniHack环境 + env.step() = MDP转移函数<br>
+                    Step 3-4: 动作空间A + 状态空间S（含blstats/能量）<br>
+                    Step 5: POMDP = 观测≠状态（chars_crop vs chars）<br>
+                    Step 6: RL目标 = 最大化累积奖励G<br>
+                    Step 7: 能量门控 = 你项目的核心创新
+                </div>
+
+                <button class="next-btn" onclick="finish()"
+                    style="background:linear-gradient(135deg,var(--green),#059669)">🎉 全部完成！</button>
+            </div>
+        </div>
+
+        <div class="done-banner" id="done">
+            ✅ 全部 7 步学习完成！<br>
+            <span style="font-size:.85rem;color:var(--muted);font-weight:400">
+                现在你理解了 MiniHack、MDP、POMDP 和能量门控的联动。<br>
+                下一步可以开始实现 SurvivalWrapper 了。
+            </span>
+        </div>
+
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const total = 7;
+
+        function toggle(n) {
+            const el = document.querySelector(`[data-step="${n}"]`);
+            if (el.classList.contains('locked')) return;
+            el.classList.toggle('open');
+        }
+
+        function unlock(n) {
+            const prev = document.querySelector(`[data-step="${n - 1}"]`);
+            prev.classList.remove('active');
+            prev.classList.add('done');
+            prev.classList.remove('open');
+
+            const next = document.querySelector(`[data-step="${n}"]`);
+            next.classList.remove('locked');
+            next.classList.add('active', 'open');
+            currentStep = n;
+
+            document.getElementById('progress').style.width = ((n - 1) / total * 100) + '%';
+            next.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function finish() {
+            const last = document.querySelector(`[data-step="${total}"]`);
+            last.classList.remove('active');
+            last.classList.add('done');
+            last.classList.remove('open');
+            document.getElementById('progress').style.width = '100%';
+            document.getElementById('done').style.display = 'block';
+            document.getElementById('done').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+
+</html>

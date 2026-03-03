@@ -1,0 +1,9 @@
+# Group C: Energy + QUERY (Full)
+# Inherits from default.yaml, overrides group setting
+_base_: default.yaml
+
+group: "energy_query"
+
+query:
+  cost: 10
+  noise: 0.0

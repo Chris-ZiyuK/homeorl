@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homeostatic Grounding — Research Progress</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-card: #1a2234;
+            --bg-card-hover: #1f2940;
+            --border: #2a3650;
+            --text-primary: #e8ecf4;
+            --text-secondary: #8b95a8;
+            --text-muted: #5a6580;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #22d3ee;
+            --accent-green: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
+            --accent-purple: #a78bfa;
+            --accent-indigo: #6366f1;
+            --gradient-hero: linear-gradient(135deg, #1e3a5f 0%, #0a0e1a 50%, #1a1040 100%);
+            --gradient-card: linear-gradient(145deg, rgba(26, 34, 52, 0.9), rgba(17, 24, 39, 0.95));
+            --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.3);
+            --shadow-glow: 0 0 30px rgba(59, 130, 246, 0.1);
+            --radius: 16px;
+            --radius-sm: 10px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        /* ═══ HERO ═══ */
+        .hero {
+            background: var(--gradient-hero);
+            padding: 60px 0 80px;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(34, 211, 238, 0.06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(59, 130, 246, 0.12);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            color: var(--accent-blue);
+            font-weight: 500;
+            letter-spacing: 0.03em;
+            margin-bottom: 20px;
+        }
+
+        .hero h1 {
+            font-size: 2.4rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.15;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #e8ecf4 30%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-sub {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            max-width: 720px;
+            margin-bottom: 28px;
+        }
+
+        .hero-meta {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .hero-meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .hero-meta .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        /* ═══ LAYOUT ═══ */
+        .container {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 0 28px;
+        }
+
+        main {
+            padding: 48px 0 80px;
+        }
+
+        /* ═══ SECTION TITLES ═══ */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .section-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .section-header h2 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        /* ═══ PROGRESS OVERVIEW ═══ */
+        .progress-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 18px;
+            margin-bottom: 52px;
+        }
+
+        .stat-card {
+            background: var(--gradient-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow-card);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .stat-card .label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+
+        .stat-card .sub {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* ═══ OVERALL PROGRESS BAR ═══ */
+        .overall-progress {
+            background: var(--gradient-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px 32px;
+            margin-bottom: 52px;
+            box-shadow: var(--shadow-card);
+        }
+
+        .overall-progress .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 14px;
+        }
+
+        .overall-progress h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+        }
+
+        .overall-progress .pct {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--accent-cyan);
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 5px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+            transition: width 0.6s ease;
+        }
+
+        /* ═══ TIMELINE ═══ */
+        .timeline {
+            position: relative;
+            margin-bottom: 52px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--accent-blue), var(--border) 70%, transparent);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 52px;
+            padding-bottom: 32px;
+        }
+
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 12px;
+            top: 4px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 3px solid var(--bg-primary);
+            z-index: 2;
+        }
+
+        .timeline-dot.done {
+            background: var(--accent-green);
+        }
+
+        .timeline-dot.active {
+            background: var(--accent-amber);
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+            animation: pulse-dot 2s infinite;
+        }
+
+        .timeline-dot.todo {
+            background: var(--text-muted);
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
+            }
+        }
+
+        .timeline-date {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            margin-bottom: 4px;
+        }
+
+        .timeline-title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+
+        .timeline-desc {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.65;
+        }
+
+        /* ═══ FINDINGS CARDS ═══ */
+        .findings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-bottom: 52px;
+        }
+
+        .finding-card {
+            background: var(--gradient-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 26px;
+            box-shadow: var(--shadow-card);
+            transition: transform 0.2s;
+        }
+
+        .finding-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .finding-card .tag {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 3px 10px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+
+        .tag.confirmed {
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--accent-green);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+        }
+
+        .tag.partial {
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--accent-amber);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+        }
+
+        .tag.pending {
+            background: rgba(139, 149, 168, 0.12);
+            color: var(--text-secondary);
+            border: 1px solid rgba(139, 149, 168, 0.2);
+        }
+
+        .tag.issue {
+            background: rgba(244, 63, 94, 0.12);
+            color: var(--accent-rose);
+            border: 1px solid rgba(244, 63, 94, 0.25);
+        }
+
+        .finding-card h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .finding-card p {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.65;
+        }
+
+        /* ═══ FIGURES ═══ */
+        .figure-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-bottom: 52px;
+        }
+
+        .figure-card {
+            background: var(--gradient-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+        }
+
+        .figure-card.wide {
+            grid-column: 1 / -1;
+        }
+
+        .figure-card img {
+            width: 100%;
+            display: block;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .figure-card .caption {
+            padding: 16px 20px;
+        }
+
+        .figure-card .caption h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .figure-card .caption p {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+        }
+
+        /* ═══ NEXT STEPS TABLE ═══ */
+        .next-steps {
+            background: var(--gradient-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+            margin-bottom: 52px;
+        }
+
+        .next-steps table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .next-steps th {
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .next-steps td {
+            padding: 14px 20px;
+            font-size: 0.88rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            vertical-align: top;
+        }
+
+        .next-steps tr:last-child td {
+            border-bottom: none;
+        }
+
+        .next-steps tr:hover td {
+            background: rgba(255, 255, 255, 0.015);
+        }
+
+        .priority {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 3px 8px;
+            border-radius: 5px;
+        }
+
+        .priority.p1 {
+            background: rgba(244, 63, 94, 0.15);
+            color: var(--accent-rose);
+        }
+
+        .priority.p2 {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--accent-amber);
+        }
+
+        .priority.p3 {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--accent-blue);
+        }
+
+        /* ═══ HYPOTHESIS TABLE ═══ */
+        .hypothesis-grid {
+            display: grid;
+            gap: 18px;
+            margin-bottom: 52px;
+        }
+
+        .hyp-card {
+            background: var(--gradient-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 26px;
+            box-shadow: var(--shadow-card);
+            display: grid;
+            grid-template-columns: 80px 1fr auto;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .hyp-id {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            line-height: 1;
+        }
+
+        .hyp-content h4 {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 6px;
+        }
+
+        .hyp-content p {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+        }
+
+        .hyp-status {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        .hyp-status.supported {
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--accent-green);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .hyp-status.inconclusive {
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--accent-amber);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .hyp-status.untested {
+            background: rgba(139, 149, 168, 0.1);
+            color: var(--text-secondary);
+            border: 1px solid rgba(139, 149, 168, 0.2);
+        }
+
+        /* ═══ CHANGE LOG ═══ */
+        .changelog {
+            background: var(--gradient-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            box-shadow: var(--shadow-card);
+            margin-bottom: 52px;
+        }
+
+        .changelog h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+
+        .log-entry {
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            gap: 16px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            font-size: 0.88rem;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-entry .date {
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+        }
+
+        /* ═══ FOOTER ═══ */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 28px 0;
+            text-align: center;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        /* ═══ RESPONSIVE ═══ */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 1.6rem;
+            }
+
+            .findings-grid,
+            .figure-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hyp-card {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .next-steps {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- HERO                                                   -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <header class="hero">
+        <div class="container">
+            <div class="hero-badge">🧬 CS 2951X — Reintegrating Artificial Intelligence</div>
+            <h1>Homeostatic Grounding:<br>Research Progress Tracker</h1>
+            <p class="hero-sub">
+                Do internal energy states help RL agents learn the meaning of symbols?
+                This page tracks the progress of our experiments on homeostatic signal–driven
+                functional symbol grounding.
+            </p>
+            <div class="hero-meta">
+                <span><span class="dot" style="background:var(--accent-green)"></span> Phase: Pilot Experiments</span>
+                <span><span class="dot" style="background:var(--accent-blue)"></span> Brown University, Spring
+                    2026</span>
+                <span><span class="dot" style="background:var(--accent-purple)"></span> Last Updated: 2026-02-27</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <!-- OVERALL PROGRESS                                       -->
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <div class="overall-progress">
+                <div class="header-row">
+                    <h3>Overall Project Progress</h3>
+                    <span class="pct">35%</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: 35%"></div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <!-- KEY STATS                                              -->
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <div class="progress-overview">
+                <div class="stat-card">
+                    <div class="label">Completed Experiments</div>
+                    <div class="value" style="color:var(--accent-cyan)">3</div>
+                    <div class="sub">Single-seed, Multi-seed (10×), Query strategy</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Hypotheses Tested</div>
+                    <div class="value" style="color:var(--accent-amber)">1 / 3</div>
+                    <div class="sub">H1 partially supported; H2, H3 untested</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Seeds Completed</div>
+                    <div class="value" style="color:var(--accent-green)">10</div>
+                    <div class="sub">3 groups × 10 seeds × 3000 episodes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Paper Target</div>
+                    <div class="value" style="color:var(--accent-purple)">4-6 pg</div>
+                    <div class="sub">Workshop-format paper</div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <!-- HYPOTHESIS STATUS                                      -->
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <div class="section-header">
+                <div class="section-icon" style="background:rgba(167,139,250,0.12)">🎯</div>
+                <h2>Hypothesis Status</h2>
+            </div>
+
+            <div class="hypothesis-grid">
+                <div class="hyp-card">
+                    <div class="hyp-id" style="color:var(--accent-green)">H1</div>
+                    <div class="hyp-content">
+                        <h4>Grounding Acceleration</h4>
+                        <p>Energy-aware (B) agents learn correct object–effect associations faster than terminal-only
+                            (A) agents. Multi-seed results show <strong>B > A</strong> in FGS (peak ~0.45 vs ~0.10),
+                            survival rate (100% vs ~40%), and beneficial object consumption.</p>
+                    </div>
+                    <span class="hyp-status supported">✓ Partially Supported</span>
+                </div>
+                <div class="hyp-card">
+                    <div class="hyp-id" style="color:var(--accent-amber)">H2</div>
+                    <div class="hyp-content">
+                        <h4>Query Amplification</h4>
+                        <p>Energy+QUERY (C) should outperform B via interaction effect. Current results show <strong>C
+                                underperforms B</strong> on FGS — query mechanism may be too costly or agent fails to
+                            exploit hints. Needs redesign.</p>
+                    </div>
+                    <span class="hyp-status inconclusive">⚠ Inconclusive</span>
+                </div>
+                <div class="hyp-card">
+                    <div class="hyp-id" style="color:var(--text-muted)">H3</div>
+                    <div class="hyp-content">
+                        <h4>Transfer Robustness</h4>
+                        <p>After effect-swap, energy-aware agents should re-adapt faster. Transfer test not yet
+                            implemented — requires code for mid-training effect remapping and FGS recovery measurement.
+                        </p>
+                    </div>
+                    <span class="hyp-status untested">○ Not Tested</span>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <!-- KEY FINDINGS                                           -->
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <div class="section-header">
+                <div class="section-icon" style="background:rgba(16,185,129,0.12)">🔬</div>
+                <h2>Key Findings So Far</h2>
+            </div>
+
+            <div class="findings-grid">
+                <div class="finding-card">
+                    <span class="tag confirmed">Confirmed</span>
+                    <h4>Energy Observation Accelerates Grounding</h4>
+                    <p>Group B achieves FGS ~0.45 vs Group A's ~0.10 by episode 1500. Energy-aware agents learn to
+                        preferentially consume beneficial objects and avoid harmful ones, with 95% CI separating clearly
+                        from baseline.</p>
+                </div>
+                <div class="finding-card">
+                    <span class="tag confirmed">Confirmed</span>
+                    <h4>Dramatic Survival Rate Difference</h4>
+                    <p>Group B reaches ~100% survival by episode 500, while Group A slowly climbs to ~40% by episode
+                        3000. Energy observation provides the dense feedback needed to quickly learn survival
+                        strategies.</p>
+                </div>
+                <div class="finding-card">
+                    <span class="tag issue">Issue</span>
+                    <h4>Group C Underperforms Expectations</h4>
+                    <p>Energy+QUERY agents perform worse than Energy-only on FGS. Possible causes: query cost (8 energy)
+                        is too high relative to benefit; hint representation (one-hot) requires more episodes to
+                        exploit; larger action space slows learning.</p>
+                </div>
+                <div class="finding-card">
+                    <span class="tag partial">Partial</span>
+                    <h4>FGS Ceiling Below 0.5</h4>
+                    <p>Even Group B's FGS peaks around 0.45 with high variance across seeds. The agent learns survival
+                        but object-approach behavior remains noisy. May need longer training, reward shaping, or
+                        environment tuning.</p>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <!-- EXPERIMENT FIGURES                                     -->
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <div class="section-header">
+                <div class="section-icon" style="background:rgba(59,130,246,0.12)">📊</div>
+                <h2>Experiment Results</h2>
+            </div>
+
+            <div class="figure-grid">
+                <div class="figure-card wide">
+                    <img src="results/figures/grounding_multiseed.png" alt="Multi-seed grounding results">
+                    <div class="caption">
+                        <h4>Fig 1. Multi-Seed Statistical Experiment (10 seeds, 95% CI)</h4>
+                        <p>FGS learning curves, survival rate, P(eat beneficial), and P(eat harmful) across 3 groups.
+                            Clear B > A separation in all metrics. C shows intermediate performance with higher
+                            variance.</p>
+                    </div>
+                </div>
+                <div class="figure-card">
+                    <img src="results/figures/grounding_results.png" alt="Single-seed grounding results">
+                    <div class="caption">
+                        <h4>Fig 2. Single-Seed Pilot Experiment</h4>
+                        <p>Initial pilot confirming B > A trend. Single seed shows noisier patterns but directional
+                            support for H1.</p>
+                    </div>
+                </div>
+                <div class="figure-card">
+                    <img src="results/figures/experiment_results.png" alt="Query strategy comparison">
+                    <div class="caption">
+                        <h4>Fig 3. Query Strategy Comparison (4 strategies)</h4>
+                        <p>Comparing No-Query, Always-Query, Random-Query, and Energy-Gated Query. Gated query shows
+                            competitive performance while using fewer queries.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <!-- EXECUTABLE ACTION PLAN                                 -->
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <div class="section-header">
+                <div class="section-icon" style="background:rgba(244,63,94,0.12)">🚀</div>
+                <h2>Executable Action Plan</h2>
+            </div>
+
+            <div class="next-steps">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:40px">Status</th>
+                            <th>Actionable Task</th>
+                            <th style="width:100px">Phase</th>
+                            <th style="width:120px">Reference</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background:rgba(16,185,129,0.05)">
+                            <td style="text-align:center; color:var(--accent-green)">✅</td>
+                            <td><strong>Implement POMDP Survival Grid</strong><br><span
+                                    style="color:var(--text-secondary);font-size:0.82rem">Create MultiObjectEnv
+                                    with 3 observation modes (A: terminal, B: energy, C: energy+query)</span>
+                            </td>
+                            <td><span class="priority p3">Phase 0</span></td>
+                            <td>Proposal 3.1</td>
+                        </tr>
+                        <tr style="background:rgba(16,185,129,0.05)">
+                            <td style="text-align:center; color:var(--accent-green)">✅</td>
+                            <td><strong>Setup Baselines & Pipelines</strong><br><span
+                                    style="color:var(--text-secondary);font-size:0.82rem">Implement DQN agent,
+                                    training loops, and basic FGS (Functional Grounding Score) metric.</span>
+                            </td>
+                            <td><span class="priority p3">Phase 0</span></td>
+                            <td>Proposal 4.2</td>
+                        </tr>
+
+                        <!-- PHASE 1: Benchmark Finalization -->
+                        <tr>
+                            <td style="text-align:center; color:var(--text-muted)">⬜</td>
+                            <td><strong>Refine FGS Metric (Local Decision Contexts)</strong><br><span
+                                    style="color:var(--text-secondary);font-size:0.82rem">Modify env/eval to log
+                                    decisions only when agent is adjacent to object, ensuring clean
+                                    approach/avoid probability.</span></td>
+                            <td><span class="priority p1">Phase 1</span></td>
+                            <td>Report 4.4.2</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; color:var(--text-muted)">⬜</td>
+                            <td><strong>Add Sham & Permutation Controls</strong><br><span
+                                    style="color:var(--text-secondary);font-size:0.82rem">Implement
+                                    <code>B_sham</code> (uninformative scalar with same var) and
+                                    <code>B_perm</code> (temporally broken energy feedback).</span></td>
+                            <td><span class="priority p1">Phase 1</span></td>
+                            <td>Report 4.1.2</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; color:var(--text-muted)">⬜</td>
+                            <td><strong>Fix Group C (Query mechanism)</strong><br><span
+                                    style="color:var(--text-secondary);font-size:0.82rem">Lower query cost or
+                                    improve hint embedding so Group C reliably outperforms B.</span></td>
+                            <td><span class="priority p1">Phase 1</span></td>
+                            <td>Report 5.2</td>
+                        </tr>
+
+                        <!-- PHASE 2: Main Experiments -->
+                        <tr>
+                            <td style="text-align:center; color:var(--text-muted)">⬜</td>
+                            <td><strong>Run 3-Seed Pilot for A, B, B_sham</strong><br><span
+                                    style="color:var(--text-secondary);font-size:0.82rem">Validate
+                                    directionality (Ensure B > A and B_sham ≈ A). Adjust difficulty if B_sham
+                                    helps too much.</span></td>
+                            <td><span class="priority p2">Phase 2</span></td>
+                            <td>Report 5.4.3</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; color:var(--text-muted)">⬜</td>
+                            <td><strong>Lock Hyperparameters</strong><br><span
+                                    style="color:var(--text-secondary);font-size:0.82rem">Freeze configs to
+                                    avoid "tuned advantage" accusations before the massive multi-seed
+                                    run.</span></td>
+                            <td><span class="priority p2">Phase 2</span></td>
+                            <td>Report 5.4.4</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; color:var(--text-muted)">⬜</td>
+                            <td><strong>Run Main High-N Statistical Experiment</strong><br><span
+                                    style="color:var(--text-secondary);font-size:0.82rem">20+ seeds for all
+                                    conditions (A, B, C, B_sham, B_perm). Record AUC of FGS and survival.</span>
+                            </td>
+                            <td><span class="priority p2">Phase 2</span></td>
+                            <td>Report 4.3.1</td>
+                        </tr>
+
+                        <!-- PHASE 3: Generalization & Probes -->
+                        <tr>
+                            <td style="text-align:center; color:var(--text-muted)">⬜</td>
+                            <td><strong>Implement Transfer Test (H3)</strong><br><span
+                                    style="color:var(--text-secondary);font-size:0.82rem">Swap
+                                    harmful↔beneficial mappings mid-training. Measure FGS recovery slope.</span>
+                            </td>
+                            <td><span class="priority p3">Phase 3</span></td>
+                            <td>Proposal 3.4</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; color:var(--text-muted)">⬜</td>
+                            <td><strong>OOD Reskin & Layout Generalization</strong><br><span
+                                    style="color:var(--text-secondary);font-size:0.82rem">Permute visual IDs
+                                    while keeping effects. Ensure grounding transfers via function.</span></td>
+                            <td><span class="priority p3">Phase 3</span></td>
+                            <td>Report 4.2.4</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; color:var(--text-muted)">⬜</td>
+                            <td><strong>Representation Probing</strong><br><span
+                                    style="color:var(--text-secondary);font-size:0.82rem">Train linear probe on
+                                    frozen hidden states to predict object effects. Prove grounding exists in
+                                    representations.</span></td>
+                            <td><span class="priority p3">Phase 3</span></td>
+                            <td>Report 4.2.3</td>
+                        </tr>
+
+                        <!-- PHASE 4: Robustness & Writing -->
+                        <tr>
+                            <td style="text-align:center; color:var(--text-muted)">⬜</td>
+                            <td><strong>Run Ablations (Step Cost & Noise)</strong><br><span
+                                    style="color:var(--text-secondary);font-size:0.82rem">Test c_step variations
+                                    {2, 5, 8} and add Gaussian noise to interoception.</span></td>
+                            <td><span class="priority p3">Phase 4</span></td>
+                            <td>Report 4.4.4</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; color:var(--text-muted)">⬜</td>
+                            <td><strong>(Optional) PPO-Transformer Replication</strong><br><span
+                                    style="color:var(--text-secondary);font-size:0.82rem">Replicate core B > A
+                                    finding on a secondary architecture to ensure hardware/model
+                                    invariance.</span></td>
+                            <td><span class="priority p3">Phase 4</span></td>
+                            <td>Report 5.1.4</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; color:var(--text-muted)">⬜</td>
+                            <td><strong>Draft Paper & Formatting</strong><br><span
+                                    style="color:var(--text-secondary);font-size:0.82rem">Generate
+                                    publication-quality figures with 95% CI. Write Intro, Methods,
+                                    Results.</span></td>
+                            <td><span class="priority p3">Phase 4</span></td>
+                            <td>Proposal 8</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <!-- CODEBASE MAP                                           -->
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <div class="section-header">
+                <div class="section-icon" style="background:rgba(99,102,241,0.12)">🗂️</div>
+                <h2>Codebase Map</h2>
+            </div>
+
+            <div class="finding-card"
+                style="margin-bottom:52px; font-family:'JetBrains Mono',monospace; font-size:0.82rem; line-height:1.8">
+                <pre style="color:var(--text-secondary); overflow-x:auto;">
+homeostatic-grounding/
+├── <span style="color:var(--accent-cyan)">docs/</span>
+│   ├── proposal.md                  <span style="color:var(--text-muted)"># Research proposal</span>
+│   ├── deep_research_report.md      <span style="color:var(--text-muted)"># Deep research survey</span>
+│   └── references/                  <span style="color:var(--text-muted)"># PDF + HTML references</span>
+├── <span style="color:var(--accent-green)">src/</span>
+│   ├── envs/
+│   │   ├── multi_object_env.py      <span style="color:var(--accent-green)">✓ Complete</span>
+│   │   └── poison_food_env.py       <span style="color:var(--accent-green)">✓ Complete</span>
+│   ├── agents/                      <span style="color:var(--accent-amber)">○ To extract from experiments</span>
+│   ├── metrics/                     <span style="color:var(--accent-amber)">○ To extract from experiments</span>
+│   └── utils/                       <span style="color:var(--accent-amber)">○ To extract from experiments</span>
+├── <span style="color:var(--accent-blue)">configs/</span>
+│   ├── default.yaml                 <span style="color:var(--accent-green)">✓ Complete</span>
+│   └── group_{a,b,c}.yaml           <span style="color:var(--accent-green)">✓ Complete</span>
+├── <span style="color:var(--accent-purple)">experiments/</span>
+│   ├── run_experiment.py            <span style="color:var(--accent-green)">✓ Runs (monolithic)</span>
+│   ├── run_multiseed.py             <span style="color:var(--accent-green)">✓ Runs (monolithic)</span>
+│   └── grounding_experiment.py      <span style="color:var(--accent-green)">✓ Early version</span>
+├── <span style="color:var(--accent-rose)">results/</span>figures/
+│   ├── grounding_multiseed.png      <span style="color:var(--accent-green)">✓ 10-seed CI plots</span>
+│   ├── grounding_results.png        <span style="color:var(--accent-green)">✓ Single-seed plots</span>
+│   └── experiment_results.png       <span style="color:var(--accent-green)">✓ Query strategy plots</span>
+├── paper/                           <span style="color:var(--text-muted)">○ Empty (LaTeX pending)</span>
+├── tests/                           <span style="color:var(--accent-amber)">○ Basic test only</span>
+└── notebooks/                       <span style="color:var(--text-muted)">○ Empty</span></pre>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <!-- CHANGELOG                                              -->
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <div class="section-header">
+                <div class="section-icon" style="background:rgba(22,211,238,0.12)">📝</div>
+                <h2>Change Log</h2>
+            </div>
+
+            <div class="changelog">
+                <div class="log-entry">
+                    <span class="date">2026-02-27</span>
+                    <span>Created research progress tracker (<code>progress.html</code>). Analyzed all existing
+                        experiments and identified 9 prioritized next steps.</span>
+                </div>
+                <div class="log-entry">
+                    <span class="date">2026-02-26</span>
+                    <span>Restructured project directory to publication-standard layout: <code>src/</code>,
+                        <code>experiments/</code>, <code>configs/</code>, <code>docs/</code>,
+                        <code>results/</code>.
+                        Created <code>README.md</code>, <code>.gitignore</code>, <code>requirements.txt</code>,
+                        YAML
+                        configs.</span>
+                </div>
+                <div class="log-entry">
+                    <span class="date">2026-02-21</span>
+                    <span>Completed 10-seed multi-seed statistical experiment with bootstrap 95% CI across 3
+                        groups.
+                        Confirmed B > A for FGS and survival metrics.</span>
+                </div>
+                <div class="log-entry">
+                    <span class="date">2026-02-20</span>
+                    <span>Ran query strategy comparison experiment (4 strategies: no-query, always-query,
+                        random-query, gated-query). Energy-gated query shows competitive performance.</span>
+                </div>
+                <div class="log-entry">
+                    <span class="date">2026-02-18</span>
+                    <span>Single-seed pilot experiment confirmed directional support for H1 (B > A). Identified
+                        need
+                        for more seeds.</span>
+                </div>
+                <div class="log-entry">
+                    <span class="date">2026-02-16</span>
+                    <span>Finalized research proposal with 3 hypotheses, experimental design, and 12-week
+                        timeline.</span>
+                </div>
+                <div class="log-entry">
+                    <span class="date">2026-02-14</span>
+                    <span>Implemented <code>MultiObjectEnv</code> (3 obs modes, energy dynamics, QUERY action)
+                        and
+                        DQN training pipeline with FGS evaluation.</span>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            Homeostatic Grounding Project · CS 2951X · Brown University · Spring 2026
+        </div>
+    </footer>
+
+</body>
+
+</html>

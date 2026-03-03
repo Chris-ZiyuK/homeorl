@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Experiment outputs (large files)
+results/logs/
+results/checkpoints/
+!results/logs/.gitkeep
+!results/checkpoints/.gitkeep
+
+# Weights & models
+*.pt
+*.pth
+*.ckpt
+
+# WandB
+wandb/
+
+# other
+rl_basics_guide.html

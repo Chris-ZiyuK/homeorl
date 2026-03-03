@@ -1,0 +1,16 @@
+# Core
+numpy>=1.24.0
+torch>=2.0.0
+gymnasium>=0.29.0
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Experiment management
+pyyaml>=6.0
+tqdm>=4.65.0
+
+# Optional: advanced experiment tracking
+# wandb>=0.15.0
+# tensorboard>=2.13.0

@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>内稳态门控信息获取 — 背景知识教程</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    :root {
+      --bg: #0a0e1a;
+      --surface: #111827;
+      --card: #1e293b;
+      --accent: #6366f1;
+      --accent2: #8b5cf6;
+      --cyan: #06b6d4;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --green: #10b981;
+      --warn: #f59e0b;
+      --red: #ef4444;
+      --border: #334155
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      overflow-x: hidden
+    }
+
+    a {
+      color: var(--cyan);
+      text-decoration: none
+    }
+
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(10, 14, 26, .88);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem
+    }
+
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px
+    }
+
+    .nav-logo {
+      font-size: 1.1rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.2rem;
+      list-style: none;
+      font-size: .8rem
+    }
+
+    .nav-links a {
+      color: var(--muted)
+    }
+
+    .nav-links a:hover {
+      color: #fff
+    }
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6rem 2rem 4rem;
+      position: relative;
+      overflow: hidden
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(99, 102, 241, .12), transparent 70%);
+      top: -80px;
+      right: -80px;
+      border-radius: 50%
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 1.2rem;
+      background: linear-gradient(135deg, #fff, var(--accent), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      position: relative
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--muted);
+      max-width: 620px;
+      margin: 0 auto 2rem
+    }
+
+    .badge {
+      display: inline-block;
+      padding: .3rem .8rem;
+      border-radius: 999px;
+      font-size: .72rem;
+      font-weight: 600;
+      margin: .2rem;
+      border: 1px solid var(--border);
+      color: var(--muted)
+    }
+
+    .badge.a {
+      border-color: var(--accent);
+      color: var(--accent)
+    }
+
+    .badge.g {
+      border-color: var(--green);
+      color: var(--green)
+    }
+
+    .badge.c {
+      border-color: var(--cyan);
+      color: var(--cyan)
+    }
+
+    .sec {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 4.5rem 2rem
+    }
+
+    .sec-head {
+      text-align: center;
+      margin-bottom: 2.5rem
+    }
+
+    .sec-num {
+      font-size: .72rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: .4rem
+    }
+
+    .sec-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: .6rem
+    }
+
+    .sec-desc {
+      color: var(--muted);
+      max-width: 600px;
+      margin: 0 auto;
+      font-size: .95rem
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.3rem;
+      margin: 1.5rem 0
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      transition: all .3s
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 20px rgba(99, 102, 241, .25);
+      border-color: var(--accent)
+    }
+
+    .card-icon {
+      font-size: 1.8rem;
+      margin-bottom: .8rem
+    }
+
+    .card h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: .4rem
+    }
+
+    .card p {
+      color: var(--muted);
+      font-size: .85rem;
+      line-height: 1.6
+    }
+
+    .code {
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.1rem 1.3rem;
+      margin: 1.3rem 0;
+      overflow-x: auto;
+      font-family: 'Fira Code', monospace;
+      font-size: .82rem;
+      line-height: 1.7;
+      color: #c9d1d9
+    }
+
+    .hl {
+      border-left: 4px solid var(--accent);
+      background: rgba(99, 102, 241, .07);
+      padding: 1.1rem 1.3rem;
+      border-radius: 0 10px 10px 0;
+      margin: 1.3rem 0
+    }
+
+    .hl.g {
+      border-color: var(--green);
+      background: rgba(16, 185, 129, .07)
+    }
+
+    .hl.w {
+      border-color: var(--warn);
+      background: rgba(245, 158, 11, .07)
+    }
+
+    .hl h4 {
+      margin-bottom: .4rem;
+      font-size: .95rem
+    }
+
+    .hl p {
+      color: var(--muted);
+      font-size: .87rem
+    }
+
+    .formula {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.2rem;
+      margin: 1.3rem 0;
+      text-align: center;
+      font-size: 1.05rem;
+      font-family: 'Cambria Math', serif;
+      color: var(--cyan)
+    }
+
+    .formula-label {
+      font-family: Inter, sans-serif;
+      font-size: .72rem;
+      color: var(--muted);
+      margin-top: .4rem;
+      letter-spacing: 1px
+    }
+
+    .flow-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 2rem;
+      margin: 1.5rem 0
+    }
+
+    .flow-box h3 {
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: 1.15rem
+    }
+
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: .6rem;
+      margin: .8rem 0
+    }
+
+    .fn {
+      padding: .5rem 1rem;
+      border-radius: 8px;
+      font-size: .82rem;
+      font-weight: 600;
+      color: #fff;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, .3)
+    }
+
+    .fn.a {
+      background: linear-gradient(135deg, var(--accent), var(--accent2))
+    }
+
+    .fn.g {
+      background: linear-gradient(135deg, var(--green), #059669)
+    }
+
+    .fn.c {
+      background: linear-gradient(135deg, var(--cyan), #0284c7)
+    }
+
+    .fn.w {
+      background: linear-gradient(135deg, var(--warn), #d97706)
+    }
+
+    .fn.r {
+      background: linear-gradient(135deg, var(--red), #dc2626)
+    }
+
+    .fa {
+      color: var(--muted);
+      font-size: 1.3rem
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.3rem 0;
+      font-size: .85rem
+    }
+
+    th {
+      background: var(--card);
+      color: var(--cyan);
+      text-align: left;
+      padding: .7rem .9rem;
+      border-bottom: 2px solid var(--accent);
+      font-weight: 600
+    }
+
+    td {
+      padding: .65rem .9rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted)
+    }
+
+    tr:hover td {
+      color: var(--text);
+      background: rgba(99, 102, 241, .04)
+    }
+
+    .tl {
+      position: relative;
+      padding-left: 1.8rem;
+      margin: 1.5rem 0
+    }
+
+    .tl::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(var(--accent), var(--cyan))
+    }
+
+    .tl-item {
+      position: relative;
+      padding: 1rem 0 1rem 1.3rem
+    }
+
+    .tl-item::before {
+      content: '';
+      position: absolute;
+      left: -1.8rem;
+      top: 1.2rem;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 3px solid var(--bg);
+      transform: translateX(calc(50% - 1px))
+    }
+
+    .tl-item h4 {
+      font-size: .95rem;
+      margin-bottom: .3rem
+    }
+
+    .tl-item p {
+      font-size: .82rem;
+      color: var(--muted)
+    }
+
+    .footer {
+      text-align: center;
+      padding: 2.5rem 2rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: .8rem
+    }
+
+    @media(max-width:768px) {
+      .hero h1 {
+        font-size: 2rem
+      }
+
+      .sec-title {
+        font-size: 1.5rem
+      }
+
+      .nav-links {
+        display: none
+      }
+
+      .grid {
+        grid-template-columns: 1fr
+      }
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-logo">🧠 Homeostatic-Gated RL Tutorial</div>
+      <ul class="nav-links">
+        <li><a href="#nethack">NetHack</a></li>
+        <li><a href="#minihack">MiniHack</a></li>
+        <li><a href="#rl">RL基础</a></li>
+        <li><a href="#mdp">MDP</a></li>
+        <li><a href="#pomdp">POMDP</a></li>
+        <li><a href="#homeo">内稳态</a></li>
+        <li><a href="#system">系统设计</a></li>
+        <li><a href="#experiment">实验计划</a></li>
+        <li><a href="#links">知识联动</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div style="position:relative;z-index:1;max-width:800px">
+      <h1>内稳态门控的信息获取机制<br>在稀疏生存 RL 中的研究</h1>
+      <p>从 NetHack/MiniHack 游戏环境出发，系统学习强化学习、MDP/POMDP、内稳态机制，理解"何时获取信息"这一核心研究问题</p>
+      <div>
+        <span class="badge g">🎮 MiniHack</span>
+        <span class="badge a">🤖 强化学习</span>
+        <span class="badge">📐 POMDP</span>
+        <span class="badge c">⚡ 内稳态门控</span>
+        <span class="badge a">🔍 QUERY 动作</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CH1: NetHack -->
+  <section class="sec" id="nethack">
+    <div class="sec-head">
+      <div class="sec-num">Chapter 01</div>
+      <h2 class="sec-title">NetHack：终极 Roguelike 挑战</h2>
+      <p class="sec-desc">30年历史的经典游戏，如今成为AI研究最具挑战性的测试平台</p>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <div class="card-icon">🏰</div>
+        <h3>什么是 NetHack？</h3>
+        <p>1987年诞生的Roguelike地下城探险游戏。以ASCII字符渲染，每次随机生成地图，死亡即永久。目标：找到Yendor护符并返回地面。</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🧩</div>
+        <h3>为什么AI关注它？</h3>
+        <p>数百种实体、数千条隐藏交互规则、部分可观测、长时间跨度决策。传统RL几乎无法从头学习，特别适合测试<strong>知识获取</strong>与<strong>生存决策</strong>能力。</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <h3>生存压力</h3>
+        <p>
+          NetHack天然包含<strong>资源管理</strong>机制：饥饿度持续下降，不吃东西会饿死。这形成了<strong>生存压力</strong>——智能体必须在探索、战斗和资源补给之间做权衡。这正是本项目的核心场景。
+        </p>
+      </div>
+    </div>
+    <div class="hl">
+      <h4>🔑 与本项目的关系</h4>
+      <p>
+        NetHack的饥饿/生存机制正是我们研究的原型：智能体拥有有限的"能量"，必须决定<strong>何时花费宝贵的行动步骤去获取信息</strong>（而非直接探索或补给）。MiniHack让我们在受控环境中精确研究这一问题。
+      </p>
+    </div>
+  </section>
+
+  <!-- CH2: MiniHack -->
+  <section class="sec" id="minihack">
+    <div class="sec-head">
+      <div class="sec-num">Chapter 02</div>
+      <h2 class="sec-title">MiniHack：可定制的研究沙盒</h2>
+      <p class="sec-desc">基于NLE构建的轻量级框架，用des-file快速定义自定义任务</p>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <div class="card-icon">🔧</div>
+        <h3>MiniHack 是什么？</h3>
+        <p>Samvelyan et al. (2021) 基于NLE构建的沙盒。用ASCII描述语言定义关卡，精确控制房间、怪物、物品布局。<strong>本项目的首选实验环境</strong>。</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🎯</div>
+        <h3>为什么选择它？</h3>
+        <p>① 支持自定义observation_keys与action set ② 天然有资源管理/饥饿等生存语境 ③ 可快速造多难度任务 ④ NLE生态里常用PPO/RND等baseline，便于对比。</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📦</div>
+        <h3>观测空间</h3>
+        <p>你的测试脚本已验证：<code>glyphs</code>(实体ID)、<code>chars</code>(ASCII)、<code>blstats</code>(27维玩家状态 —
+          <strong>包含饥饿度！</strong>)、<code>message</code>(游戏消息)。这些构成智能体的感知输入。</p>
+      </div>
+    </div>
+    <table>
+      <tr>
+        <th>观测Key</th>
+        <th>形状</th>
+        <th>在本项目中的角色</th>
+      </tr>
+      <tr>
+        <td><code>glyphs_crop</code></td>
+        <td>(9,9)</td>
+        <td>局部视野 — 感知周围实体</td>
+      </tr>
+      <tr>
+        <td><code>blstats</code></td>
+        <td>(27,)</td>
+        <td><strong>核心：</strong>包含HP、饥饿度等，映射为内部能量E_t</td>
+      </tr>
+      <tr>
+        <td><code>message</code></td>
+        <td>(256,)</td>
+        <td>QUERY返回的hint通过此通道注入</td>
+      </tr>
+      <tr>
+        <td><code>chars_crop</code></td>
+        <td>(9,9)</td>
+        <td>辅助：ASCII字符版本的局部视野</td>
+      </tr>
+    </table>
+    <div class="hl g">
+      <h4>💡 备选方案：AFK / Q-BabyAI</h4>
+      <p>如果MiniHack工程风险过高（1周内QUERY注入不顺），可立即切换到AFK框架（Liu et al. 2022），它已实现queryable knowledge source与代码，适合快速收敛到可发表结果。</p>
+    </div>
+  </section>
+
+  <!-- CH3: RL Basics -->
+  <section class="sec" id="rl">
+    <div class="sec-head">
+      <div class="sec-num">Chapter 03</div>
+      <h2 class="sec-title">强化学习基础</h2>
+      <p class="sec-desc">Agent如何通过与环境交互来学习最优行为策略</p>
+    </div>
+    <div class="flow-box">
+      <h3>🔄 Agent-Environment 交互循环</h3>
+      <div class="flow">
+        <div class="fn a">Agent</div>
+        <div class="fa">→ aₜ →</div>
+        <div class="fn g">Environment</div>
+        <div class="fa">→ oₜ₊₁, rₜ₊₁ →</div>
+        <div class="fn a">Agent</div>
+      </div>
+      <p style="text-align:center;color:var(--muted);font-size:.82rem;margin-top:.8rem">每步选动作，环境返回观测+奖励。目标：最大化累积折扣奖励 Gₜ
+        = Σ γᵏ rₜ₊ₖ₊₁</p>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <div class="card-icon">🎯</div>
+        <h3>策略 π(a|s)</h3>
+        <p>从状态到动作的映射。可确定性或随机。本项目使用<strong>PPO</strong>（Proximal Policy
+          Optimization）作为固定RL主干，所有方法共享网络与超参，<strong>只改变QUERY调度策略</strong>。</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">💎</div>
+        <h3>价值函数 V(s)</h3>
+        <p>从状态s开始遵循策略π的期望累积奖励。本项目中价值函数需要同时考虑<strong>外部任务奖励</strong>和<strong>生存（能量耗尽=死亡）</strong>两个维度。</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🧪</div>
+        <h3>探索 vs 利用 vs 查询</h3>
+        <p>传统RL只有探索和利用的权衡。本项目引入<strong>第三选择：QUERY</strong>——花费行动步骤获取外部信息。核心问题变成：<em>何时查询最有价值？</em></p>
+      </div>
+    </div>
+    <div class="hl">
+      <h4>🔑 本项目的核心创新</h4>
+      <p>
+        我们<strong>不改变RL算法本身</strong>（固定PPO），只研究<strong>信息流的结构性控制</strong>——通过内稳态门控决定何时执行QUERY动作。这让实验对照更干净：所有性能差异都归因于查询调度策略。
+      </p>
+    </div>
+  </section>
+
+  <!-- CH4: MDP -->
+  <section class="sec" id="mdp">
+    <div class="sec-head">
+      <div class="sec-num">Chapter 04</div>
+      <h2 class="sec-title">马尔可夫决策过程 (MDP)</h2>
+      <p class="sec-desc">RL的数学基础——用五元组描述序列决策问题</p>
+    </div>
+    <div class="formula">M = ⟨ S, A, T, R, γ ⟩<div class="formula-label">MDP 五元组定义</div>
+    </div>
+    <table>
+      <tr>
+        <th>符号</th>
+        <th>含义</th>
+        <th>MiniHack中的对应</th>
+      </tr>
+      <tr>
+        <td><strong>S</strong></td>
+        <td>状态空间</td>
+        <td>地图+玩家属性+物品的完整组合</td>
+      </tr>
+      <tr>
+        <td><strong>A</strong></td>
+        <td>动作空间</td>
+        <td>移动+拾取+吃+QUERY（本项目扩展）</td>
+      </tr>
+      <tr>
+        <td><strong>T(s'|s,a)</strong></td>
+        <td>转移函数</td>
+        <td>游戏物理引擎 — env.step()</td>
+      </tr>
+      <tr>
+        <td><strong>R(s,a)</strong></td>
+        <td>奖励函数</td>
+        <td>到达出口+1.0，每步-0.01，死亡-1.0</td>
+      </tr>
+      <tr>
+        <td><strong>γ</strong></td>
+        <td>折扣因子</td>
+        <td>0.99（重视长远规划）</td>
+      </tr>
+    </table>
+    <div class="hl w">
+      <h4>⚠️ MDP的局限</h4>
+      <p>
+        MDP假设<strong>完全观测</strong>——但在MiniHack中玩家无法看到全部状态（隐藏属性、未探索区域）。更关键的是，本项目需要建模<strong>内部能量状态E_t</strong>——这需要扩展为POMDP。
+      </p>
+    </div>
+  </section>
+
+  <!-- CH5: POMDP -->
+  <section class="sec" id="pomdp">
+    <div class="sec-head">
+      <div class="sec-num">Chapter 05</div>
+      <h2 class="sec-title">部分可观测MDP (POMDP) 与扩展</h2>
+      <p class="sec-desc">当智能体看不清世界 + 拥有内部状态——引入能量扩展POMDP</p>
+    </div>
+    <div class="formula">M = ⟨ S, A, T, R, Ω, O ⟩ &nbsp;→&nbsp; 扩展状态 s̃ₜ = (sₜ, Eₜ)<div class="formula-label">标准POMDP →
+        本项目的能量扩展POMDP</div>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <div class="card-icon">👁️</div>
+        <h3>观测 ≠ 状态</h3>
+        <p>智能体收到观测o（通过O(o|s)生成），同一观测可能对应不同真实状态。在MiniHack中：物品效果未知、怪物属性隐藏、视野有限。</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <h3>能量扩展</h3>
+        <p>本项目的关键创新：将内部能量E_t <strong>显式嵌入状态</strong>。扩展状态 s̃=(s,E)，能量随时间衰减，吃正确食物恢复，QUERY消耗，E≤0则死亡。</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔍</div>
+        <h3>信息获取价值</h3>
+        <p>在POMDP中，获取信息本身有价值。本项目把这一洞察具体化：QUERY是有代价的动作，<strong>何时执行QUERY</strong>取决于内部能量状态。</p>
+      </div>
+    </div>
+    <div class="formula">Eₜ₊₁ = clip( Eₜ − c_step + g(sₜ,aₜ) − c_query · 𝟙[QUERY] )<div class="formula-label">能量动力学方程 —
+        终止条件：Eₜ ≤ 0 → death</div>
+    </div>
+    <div class="hl">
+      <h4>🔗 POMDP → 内稳态：概念桥梁</h4>
+      <p>标准POMDP关注"外部世界的不确定性"。本项目的扩展POMDP引入了"内部状态的偏离"——<strong>稳态偏差 Dₜ = max(0, E* −
+          Eₜ)</strong>。当Dₜ大时，智能体处于"生存危机"，此时信息获取的价值更高。这正是内稳态门控的数学基础。</p>
+    </div>
+  </section>
+
+  <!-- CH6: Homeostasis -->
+  <section class="sec" id="homeo">
+    <div class="sec-head">
+      <div class="sec-num">Chapter 06</div>
+      <h2 class="sec-title">内稳态强化学习（Homeostatic RL）</h2>
+      <p class="sec-desc">从生物学的恒温调节到AI的生存决策——内稳态如何门控信息获取</p>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <div class="card-icon">🌡️</div>
+        <h3>什么是内稳态？</h3>
+        <p>生物学概念：有机体维持内部环境稳定（体温、血糖）的自调节机制。Keramati & Gutkin (2014) 将其形式化：<strong>奖赏=驱动减少</strong>（drive
+          reduction），智能体的动机来自恢复内部变量到设定点。</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🎮</div>
+        <h3>在RL中的应用</h3>
+        <p>Homeostatic RL将内部状态（如能量、饥饿）作为奖励驱动。Yoshida et al. (2025)
+          强调HRRL能产生<strong>前瞻调节</strong>和<strong>风险规避</strong>——智能体不等能量耗尽才行动，而是预见性地补给。</p>
+      </div>
+      <div class="card" style="border-color:var(--warn)">
+        <div class="card-icon">💡</div>
+        <h3>本项目的创新</h3>
+        <p>
+          既有HRRL主要把内稳态用于<strong>奖励定义</strong>。我们首次将其用于<strong>信息获取调度</strong>——用能量偏差门控QUERY动作。这填补了"生存压力下的信息价值调度"这一<strong>研究空缺</strong>。
+        </p>
+      </div>
+    </div>
+    <div class="formula">p(QUERYₜ=1 | Eₜ) = σ( α · (E* − Eₜ − ε) )<div class="formula-label">随机门控函数 — α大→近似硬阈值，α可做消融实验
+      </div>
+    </div>
+    <div class="flow-box">
+      <h3>🔄 内稳态门控的信息获取循环</h3>
+      <div class="flow">
+        <div class="fn g">环境</div>
+        <div class="fa">→</div>
+        <div class="fn a">观测 oₜ + 能量 Eₜ</div>
+        <div class="fa">→</div>
+        <div class="fn w">门控 p(query|Eₜ)</div>
+      </div>
+      <div class="flow">
+        <div class="fn w">Eₜ 低？</div>
+        <div class="fa">→ Yes →</div>
+        <div class="fn c">QUERY → hint hₜ</div>
+        <div class="fa">→</div>
+        <div class="fn a">π(a|o,E,m)</div>
+        <div class="fa">→</div>
+        <div class="fn g">动作 aₜ</div>
+      </div>
+      <p style="text-align:center;color:var(--muted);font-size:.82rem;margin-top:.8rem">能量低时QUERY概率升高 → 获取hint帮助决策 →
+        做出更好行动 → 恢复能量 → 系统回到"稳态"</p>
+    </div>
+    <div class="hl g">
+      <h4>🧬 类比：生物体的信息获取</h4>
+      <p>想象一个饥饿的动物：血糖下降（能量偏差↑）→ 触发觅食行为中的<strong>环境探查</strong>（嗅觉搜索）→ 找到食物来源 → 进食恢复血糖 → 停止搜索。本项目的门控机制正是这一生物过程的计算模型。</p>
+    </div>
+  </section>
+
+  <!-- CH7: System Design -->
+  <section class="sec" id="system">
+    <div class="sec-head">
+      <div class="sec-num">Chapter 07</div>
+      <h2 class="sec-title">最小系统架构</h2>
+      <p class="sec-desc">代码结构与QUERY语义设计——可复现、可对照的最小实现</p>
+    </div>
+    <div class="flow-box">
+      <h3>🏗️ 系统架构图</h3>
+      <div class="flow">
+        <div class="fn g">Survival Env</div>
+        <div class="fa">→</div>
+        <div class="fn a">oₜ, Eₜ</div>
+        <div class="fa">→</div>
+        <div class="fn w">p(query|Eₜ)</div>
+        <div class="fa">→query=1→</div>
+        <div class="fn c">QUERY→hₜ</div>
+      </div>
+      <div class="flow">
+        <div class="fn c">hₜ</div>
+        <div class="fa">→</div>
+        <div class="fn a">memory mₜ</div>
+        <div class="fa">+</div>
+        <div class="fn a">oₜ,Eₜ</div>
+        <div class="fa">→</div>
+        <div class="fn a">πθ(a|o,E,m)</div>
+        <div class="fa">→</div>
+        <div class="fn g">aₜ → Env</div>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <div class="card-icon">📁</div>
+        <h3>代码结构</h3>
+        <p><code>env/</code> survival_wrapper.py + query_wrapper.py<br><code>retrieval/</code> hint_store.py
+          (JSON语料)<br><code>agents/</code> ppo_agent.py + gating.py<br><code>experiments/</code> train.py + eval.py +
+          configs/<br><code>analysis/</code> plots.py</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">💬</div>
+        <h3>QUERY语义（最小版本）</h3>
+        <p>QUERY<strong>无参数</strong>：调用固定信息通道，返回与"当前可见/当前任务相关"的hint。避免"问什么"的语言生成，降低工程复杂度。hint作为observation额外字段注入。</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📚</div>
+        <h3>Hint语料库</h3>
+        <p>10-50条JSON记录：<br><code>{"blue_fruit": ["蓝色果实可恢复能量"]}</code><br>含同义改写版本（用于语言shift测试）。训练用版本A，测试用版本B。</p>
+      </div>
+    </div>
+    <div class="hl">
+      <h4>🔑 设计原则：只改变信息流，不改RL算法</h4>
+      <p>所有5个baseline共享<strong>完全相同的PPO网络与超参</strong>，唯一区别是QUERY调度策略。这确保实验结果可以干净归因：性能差异 = 查询调度策略的差异。</p>
+    </div>
+  </section>
+
+  <!-- CH8: Experiment Plan -->
+  <section class="sec" id="experiment">
+    <div class="sec-head">
+      <div class="sec-num">Chapter 08</div>
+      <h2 class="sec-title">详细实验计划与安排</h2>
+      <p class="sec-desc">3个任务难度 × 5个Baseline × 消融实验 × 分布变化测试</p>
+    </div>
+
+    <h3 style="color:var(--accent);margin-bottom:1rem">📋 任务定义（3个难度梯度）</h3>
+    <div class="grid">
+      <div class="card" style="border-color:var(--green)">
+        <div class="card-icon">🟢</div>
+        <h3>S1: Survival-KeyRoom（最小可跑）</h3>
+        <p>
+          小房间+门/钥匙。每步掉能量。地图有两类食物：一类补能量、一类惩罚。<br><strong>目标：</strong>拿钥匙开门到达出口。<br><strong>知识需求：</strong>哪种食物安全？需要QUERY获取hint。
+        </p>
+      </div>
+      <div class="card" style="border-color:var(--warn)">
+        <div class="card-icon">🟡</div>
+        <h3>S2: Survival-Maze（中等）</h3>
+        <p>迷宫+多类可食物品(≥3种)+干扰项。出口更远。<br><strong>目标：</strong>能量耗尽前到达出口。<br><strong>知识需求：</strong>更多物品类型，QUERY的价值更高。</p>
+      </div>
+      <div class="card" style="border-color:var(--red)">
+        <div class="card-icon">🔴</div>
+        <h3>S3: Survival-Explore（可选）</h3>
+        <p>程序生成多布局。训练/测试分布可分开。<br><strong>目标：</strong>测试泛化能力。<br><strong>知识需求：</strong>物品-效果映射可能改变。</p>
+      </div>
+    </div>
+
+    <h3 style="color:var(--accent);margin:2rem 0 1rem">🆚 Baseline对照（5种条件）</h3>
+    <table>
+      <tr>
+        <th>#</th>
+        <th>方法</th>
+        <th>QUERY策略</th>
+        <th>测试目的</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td><strong>No-QUERY</strong></td>
+        <td>从不查询</td>
+        <td>纯RL能否解决知识匮乏问题？</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td><strong>Always-QUERY</strong></td>
+        <td>每步都查询</td>
+        <td>无节制查询的代价有多大？</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td><strong>Periodic-QUERY</strong></td>
+        <td>每k步查询(k∈{3,5,10})</td>
+        <td>固定频率是否足够好？</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td><strong>Random-QUERY</strong></td>
+        <td>随机(匹配查询次数)</td>
+        <td>门控是否优于随机？</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td><strong>Energy-Gated</strong>（本文）</td>
+        <td>p(query|Eₜ)门控</td>
+        <td>能量驱动的信息获取</td>
+      </tr>
+    </table>
+
+    <h3 style="color:var(--accent);margin:2rem 0 1rem">📊 评估指标</h3>
+    <div class="grid">
+      <div class="card">
+        <div class="card-icon">📈</div>
+        <h3>主指标</h3>
+        <p>• <strong>AUC</strong>：成功率 vs 环境步数曲线下面积<br>• <strong>Time-to-threshold</strong>：达到80%成功率所需步数<br>•
+          <strong>平均存活步数</strong></p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🎯</div>
+        <h3>信息效率</h3>
+        <p>• 成功率 / QUERY次数<br>• 低能量命中率：P(QUERY | Eₜ<θ) vs P(QUERY | Eₜ≥θ)（验证门控是否在低能量时触发）</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📐</div>
+        <h3>统计检验</h3>
+        <p>• 每条件 ≥10 seeds（推荐20）<br>• 95% CI（bootstrap over seeds）<br>• Mann–Whitney U 或 bootstrap 差值 CI</p>
+      </div>
+    </div>
+
+    <h3 style="color:var(--accent);margin:2rem 0 1rem">🔬 消融实验</h3>
+    <table>
+      <tr>
+        <th>消融变量</th>
+        <th>取值范围</th>
+        <th>目的</th>
+      </tr>
+      <tr>
+        <td>α（门控斜率）</td>
+        <td>0.5, 1, 5, 20</td>
+        <td>从软门控 → 硬阈值的效果</td>
+      </tr>
+      <tr>
+        <td>ε（偏移量）</td>
+        <td>0, 0.1E*, 0.3E*</td>
+        <td>门控触发点的灵敏度</td>
+      </tr>
+      <tr>
+        <td>c_query（查询代价）</td>
+        <td>0, 小, 中, 大</td>
+        <td>代价对查询频率的影响</td>
+      </tr>
+      <tr>
+        <td>B（查询预算）</td>
+        <td>0, 1, 3, 5 次/局</td>
+        <td>有限预算下的分配效率</td>
+      </tr>
+    </table>
+
+    <h3 style="color:var(--accent);margin:2rem 0 1rem">🔄 分布变化测试（至少做2类）</h3>
+    <div class="grid">
+      <div class="card">
+        <div class="card-icon">🗺️</div>
+        <h3>Layout Shift</h3>
+        <p>训练房间参数A → 测试参数B。考察空间泛化。</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔀</div>
+        <h3>Item-Effect Remap</h3>
+        <p>训练时blue_fruit正确 → 测试时green_fruit正确。检验是否过拟合外观。</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📝</div>
+        <h3>Language Shift</h3>
+        <p>同义改写hint文本。检验对提示表面形式的敏感性。</p>
+      </div>
+    </div>
+
+    <h3 style="color:var(--accent);margin:2rem 0 1rem">📅 12周执行时间线</h3>
+    <div class="tl">
+      <div class="tl-item">
+        <h4>Week 1-2：基建</h4>
+        <p>环境选型（MiniHack优先）；复现baseline PPO；搭建训练脚手架+日志系统（WandB/TensorBoard）</p>
+      </div>
+      <div class="tl-item">
+        <h4>Week 3-4：环境实现</h4>
+        <p>实现SurvivalWrapper（E_t + death条件）；实现QueryWrapper（QUERY→hint注入+代价）；Task S1落地；做2-seed冒烟测试</p>
+      </div>
+      <div class="tl-item">
+        <h4>Week 5：Hint语料</h4>
+        <p>建立JSON hint库（10-50条）；实现hint_store.py；验证QUERY→hint→观测通道可用</p>
+      </div>
+      <div class="tl-item">
+        <h4>Week 6-7：Baseline实现</h4>
+        <p>实现全部5种QUERY调度策略；gating.py实现能量门控；2-seed冒烟验证所有条件差异合理</p>
+      </div>
+      <div class="tl-item">
+        <h4>Week 8-9：全量训练</h4>
+        <p>≥10 seeds 全量训练；Task S1 + S2；收集学习曲线原始数据</p>
+      </div>
+      <div class="tl-item">
+        <h4>Week 10：消融 + Shift</h4>
+        <p>α/ε/c_query/B sweep；Layout shift + Item-effect remap / Language shift</p>
+      </div>
+      <div class="tl-item">
+        <h4>Week 11-12：写作</h4>
+        <p>论文初稿+主图（4张建议图）；终稿+复现实验补齐；公开代码与配置</p>
+      </div>
+    </div>
+
+    <h3 style="color:var(--accent);margin:2rem 0 1rem">✅ 成功判据（写进论文）</h3>
+    <div class="hl g">
+      <h4>H1 样本效率</h4>
+      <p>AUC 或 time-to-threshold 相对 periodic/random 提升 ≥20%，且 95% CI 不跨 0。</p>
+    </div>
+    <div class="hl g">
+      <h4>H2 信息效率</h4>
+      <p>在 c_query ≥ 中等时，energy-gated 的 "performance per query" 严格更高。</p>
+    </div>
+    <div class="hl g">
+      <h4>H3 鲁棒性</h4>
+      <p>至少一个 shift 下退化幅度更小（相对 drop 更低）。</p>
+    </div>
+
+    <h3 style="color:var(--accent);margin:2rem 0 1rem">📊 建议主图（至少4张）</h3>
+    <table>
+      <tr>
+        <th>#</th>
+        <th>图表类型</th>
+        <th>内容</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>Learning Curve</td>
+        <td>成功率 vs 环境步数 — 5条线 + 95% CI</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Survival Curve</td>
+        <td>存活步数 vs 环境步数</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>Efficiency Frontier</td>
+        <td>性能 vs 查询次数 — 信息效率对比</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>Gate Analysis</td>
+        <td>查询概率 vs 能量分位数 — 证明门控有效</td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- CH9: Knowledge Links -->
+  <section class="sec" id="links">
+    <div class="sec-head">
+      <div class="sec-num">Chapter 09</div>
+      <h2 class="sec-title">知识联动图谱</h2>
+      <p class="sec-desc">所有概念如何在项目中相互联结并协同工作</p>
+    </div>
+    <div class="flow-box" style="border-color:var(--accent)">
+      <h3>🌐 全景架构：概念流动</h3>
+      <div class="flow">
+        <div class="fn g">MiniHack (MDP实现)</div>
+        <div class="fa">→</div>
+        <div class="fn a">POMDP 观测 oₜ</div>
+        <div class="fa">+</div>
+        <div class="fn w">能量 Eₜ (内稳态)</div>
+      </div>
+      <div class="flow">
+        <div class="fn w">稳态偏差 Dₜ=E*−Eₜ</div>
+        <div class="fa">→</div>
+        <div class="fn w">门控 σ(α·Dₜ)</div>
+        <div class="fa">→ query=1 →</div>
+        <div class="fn c">QUERY → hint</div>
+      </div>
+      <div class="flow">
+        <div class="fn c">hint (功能接地)</div>
+        <div class="fa">+</div>
+        <div class="fn a">oₜ, Eₜ, mₜ</div>
+        <div class="fa">→</div>
+        <div class="fn a">PPO策略 πθ</div>
+        <div class="fa">→</div>
+        <div class="fn g">动作aₜ → 环境</div>
+      </div>
+    </div>
+    <table>
+      <tr>
+        <th>概念</th>
+        <th>独立含义</th>
+        <th>在项目中的角色</th>
+        <th>与其他概念的联动</th>
+      </tr>
+      <tr>
+        <td><strong>MiniHack</strong></td>
+        <td>可定制游戏环境</td>
+        <td>实验平台</td>
+        <td>实现MDP → 提供观测+能量信号</td>
+      </tr>
+      <tr>
+        <td><strong>MDP</strong></td>
+        <td>序列决策数学模型</td>
+        <td>形式化基础</td>
+        <td>扩展为POMDP → 加入能量维度</td>
+      </tr>
+      <tr>
+        <td><strong>POMDP</strong></td>
+        <td>部分可观测决策</td>
+        <td>核心建模框架</td>
+        <td>能量扩展 → 内稳态偏差 → 触发QUERY</td>
+      </tr>
+      <tr>
+        <td><strong>内稳态</strong></td>
+        <td>生物自调节机制</td>
+        <td>QUERY门控的理论基础</td>
+        <td>能量偏差 → 门控函数 → 调度QUERY</td>
+      </tr>
+      <tr>
+        <td><strong>QUERY</strong></td>
+        <td>信息获取动作</td>
+        <td>核心研究对象</td>
+        <td>由门控触发 → 返回hint → 注入策略</td>
+      </tr>
+      <tr>
+        <td><strong>PPO</strong></td>
+        <td>策略梯度RL算法</td>
+        <td>固定主干（控制变量）</td>
+        <td>接收观测+hint → 输出动作</td>
+      </tr>
+      <tr>
+        <td><strong>功能接地</strong></td>
+        <td>符号与环境对齐</td>
+        <td>辅助评估指标</td>
+        <td>hint是否因果性改善能量轨迹</td>
+      </tr>
+    </table>
+    <div class="hl" style="border-color:var(--accent2)">
+      <h4>🔮 未来扩展方向</h4>
+      <p>① <strong>学习型触发器</strong>：学习α或小网络gφ(Eₜ,oₜ) ② <strong>LLM/RAG集成</strong>：将hint_store换为文档检索（BM25/embedding） ③
+        <strong>RLang方向</strong>：将hint编译为结构化符号约束（课程后续/PhD方向）</p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>内稳态门控信息获取 · CS 2951X 重新整合人工智能 · 2026年2月</p>
+    <p style="margin-top:.4rem;font-size:.72rem">基于 deep-research-report.md 生成 · MiniHack优先 / AFK备选</p>
+  </footer>
+
+  <script>
+    document.querySelectorAll('a[href^="#"]').forEach(a => { a.addEventListener('click', e => { e.preventDefault(); document.querySelector(a.getAttribute('href')).scrollIntoView({ behavior: 'smooth' }) }) });
+    window.addEventListener('scroll', () => { let c = ''; document.querySelectorAll('.sec').forEach(s => { if (scrollY >= s.offsetTop - 200) c = s.id }); document.querySelectorAll('.nav-links a').forEach(a => { a.style.color = a.getAttribute('href') === '#' + c ? '#fff' : ''; }) });
+  </script>
+</body>
+
+</html>

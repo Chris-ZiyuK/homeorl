@@ -1,0 +1,54 @@
+# ============================================================
+# Homeostatic Grounding — Default Experiment Configuration
+# ============================================================
+
+# --- Environment ---
+env:
+  grid_size: 7
+  num_object_types: 3          # harmful, beneficial, neutral
+  objects_per_episode: 3
+  initial_energy: 100
+  energy_cap: 120
+  step_cost: 5
+  effects:
+    harmful: -40
+    beneficial: 30
+    neutral: 0
+  max_steps: 100
+
+# --- Agent ---
+agent:
+  type: "dqn"                  # dqn | ppo
+  hidden_dim: 128
+  lr: 0.001
+  gamma: 0.99
+  epsilon_start: 1.0
+  epsilon_end: 0.01
+  epsilon_decay: 0.995
+  buffer_size: 10000
+  batch_size: 64
+  target_update_freq: 10       # episodes
+
+# --- Training ---
+training:
+  num_episodes: 3000
+  eval_interval: 100           # evaluate every N episodes
+  eval_episodes: 50
+  num_seeds: 10
+  save_checkpoints: true
+  checkpoint_interval: 500
+
+# --- Experiment Group ---
+# Options: "terminal_only" | "energy_aware" | "energy_query"
+group: "energy_aware"
+
+# --- Query (Group C only) ---
+query:
+  cost: 10                     # energy cost per query
+  noise: 0.0                   # oracle noise probability
+
+# --- Logging ---
+logging:
+  save_dir: "results/"
+  log_interval: 50
+  plot_results: true

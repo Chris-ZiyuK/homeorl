@@ -1,0 +1,8 @@
+# Group A: Terminal-Only (Baseline)
+# Inherits from default.yaml, overrides group setting
+_base_: default.yaml
+
+group: "terminal_only"
+
+# Agent does NOT observe energy
+# Only terminal reward: +1 exit, -1 death

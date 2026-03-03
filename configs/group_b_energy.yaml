@@ -1,0 +1,8 @@
+# Group B: Energy-Aware (Homeostatic)
+# Inherits from default.yaml, overrides group setting
+_base_: default.yaml
+
+group: "energy_aware"
+
+# Agent observes internal energy as continuous signal [0, 1]
+# Energy change provides implicit grounding signal
