@@ -114,7 +114,7 @@ def train_policy(policy_name, n_episodes=3000, lr=5e-4, gamma=0.99,
     np.random.seed(seed)
     random.seed(seed)
 
-    env = PoisonFoodEnv()
+    env = PoisonFoodEnv(reward_type='hrrl')
     # DQN only controls 4 movement actions (QUERY is policy-controlled)
     q_net = QNetwork(obs_dim=11, n_actions=4, hidden=128)
     target_net = QNetwork(obs_dim=11, n_actions=4, hidden=128)
@@ -260,10 +260,10 @@ def plot_results(results, save_dir="."):
 
 def main():
     print("=" * 60)
-    print("Poison Food Experiment — Energy-Gated QUERY Validation")
+    print("Poison Food Experiment — Energy-Gated QUERY Validation (HRRL Driven)")
     print("=" * 60)
     print(f"Env: 7x7 grid, E_init=80, c_step=8, c_query=5")
-    print(f"Agent MUST eat safe food to survive (80 < 12*8=96)")
+    print(f"Agent MUST eat safe food to survive. Reward strictly internal drive reduction.")
     print(f"Poison food = instant death, QUERY reveals which is safe")
     print()
 

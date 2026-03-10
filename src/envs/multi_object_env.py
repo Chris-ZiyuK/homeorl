@@ -34,7 +34,7 @@ class MultiObjectEnv(gym.Env):
     def __init__(self, grid_size=7, max_steps=40,
                  E_init=100, c_step=5, c_query=8,
                  harmful_cost=40, beneficial_gain=30,
-                 obs_mode='energy'):
+                 obs_mode='energy', reward_type='terminal'):
         super().__init__()
 
         self.grid_size = grid_size
@@ -45,6 +45,8 @@ class MultiObjectEnv(gym.Env):
         self.harmful_cost = harmful_cost
         self.beneficial_gain = beneficial_gain
         self.obs_mode = obs_mode  # 'terminal', 'energy', 'full'
+        self.reward_type = reward_type
+        self.setpoint = float(E_init)
 
         # Actions: 0=up 1=down 2=left 3=right, 4=QUERY (only in 'full')
         n_act = 5 if obs_mode == 'full' else 4
@@ -107,6 +109,8 @@ class MultiObjectEnv(gym.Env):
         self.steps += 1
         reward = 0.0
         terminated = False
+        
+        old_drive = abs(self.setpoint - self.energy)
 
         if action == 4 and self.obs_mode == 'full':
             # QUERY: reveal all object effects
@@ -145,15 +149,24 @@ class MultiObjectEnv(gym.Env):
 
         # Reached exit?
         if self.agent_pos == self.exit_pos:
-            reward = 1.0
+            if self.reward_type != 'hrrl':
+                reward = 1.0
+            else:
+                reward = 1.0  # Keep external exit reward +1 for hybrid
             terminated = True
             self.stats["reached_exit"] = True
 
         # Energy depleted?
         if self.energy <= 0:
-            reward = -1.0
+            if self.reward_type != 'hrrl':
+                reward = -1.0
             terminated = True
             self.stats["energy_depleted"] = True
+            
+        if self.reward_type == 'hrrl':
+            new_drive = abs(self.setpoint - self.energy)
+            r_internal = old_drive - new_drive
+            reward += r_internal
 
         truncated = (self.steps >= self.max_steps) and not terminated
 

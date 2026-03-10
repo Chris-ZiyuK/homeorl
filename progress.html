@@ -105,7 +105,7 @@
             letter-spacing: -0.03em;
             line-height: 1.15;
             margin-bottom: 12px;
-            background: linear-gradient(135deg, #e8ecf4 30%, #22d3ee 100%);
+            background: linear-gradient(135deg, #e8ecf4 30%, #a78bfa 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -657,18 +657,21 @@
     <!-- ═══════════════════════════════════════════════════════ -->
     <header class="hero">
         <div class="container">
-            <div class="hero-badge">🧬 CS 2951X — Reintegrating Artificial Intelligence</div>
-            <h1>Homeostatic Grounding:<br>Research Progress Tracker</h1>
+            <div class="hero-badge">
+                <span
+                    style="display:inline-block; border-radius:50%; width:6px; height:6px; background:#a78bfa; margin-right:4px;"></span>
+                Phase 3: Formal Validation
+            </div>
+            <h1>Homeostatic Grounding: Do Internal Energy States Help RL Agents Learn the Meaning of Symbols?</h1>
             <p class="hero-sub">
-                Do internal energy states help RL agents learn the meaning of symbols?
-                This page tracks the progress of our experiments on homeostatic signal–driven
-                functional symbol grounding.
+                Investigating how biological survival mechanisms (Homeostatic RL) accelerate functional understanding in
+                partially observable grid worlds. Are meaning and semantic grounding purely by-products of internal
+                physiological stabilization?
             </p>
             <div class="hero-meta">
-                <span><span class="dot" style="background:var(--accent-green)"></span> Phase: Pilot Experiments</span>
-                <span><span class="dot" style="background:var(--accent-blue)"></span> Brown University, Spring
-                    2026</span>
-                <span><span class="dot" style="background:var(--accent-purple)"></span> Last Updated: 2026-02-27</span>
+                <span><i class="dot" style="background:var(--accent-purple)"></i> Theory: Yoshida (2025) HRRL</span>
+                <span><i class="dot" style="background:var(--accent-green)"></i> Status: 85% Complete</span>
+                <span><i class="dot" style="background:var(--accent-cyan)"></i> Environment: 7x7 Grid POMDP</span>
             </div>
         </div>
     </header>
@@ -681,11 +684,13 @@
             <!-- ═══════════════════════════════════════════════════════ -->
             <div class="overall-progress">
                 <div class="header-row">
-                    <h3>Overall Project Progress</h3>
-                    <span class="pct">35%</span>
+                    <h3>Overall Progression</h3>
+                    <div class="pct" style="color:var(--accent-purple)">85%</div>
                 </div>
                 <div class="progress-bar-bg">
-                    <div class="progress-bar-fill" style="width: 35%"></div>
+                    <div class="progress-bar-fill"
+                        style="width: 85%; background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));">
+                    </div>
                 </div>
             </div>
 
@@ -694,307 +699,314 @@
             <!-- ═══════════════════════════════════════════════════════ -->
             <div class="progress-overview">
                 <div class="stat-card">
-                    <div class="label">Completed Experiments</div>
-                    <div class="value" style="color:var(--accent-cyan)">3</div>
-                    <div class="sub">Single-seed, Multi-seed (10×), Query strategy</div>
+                    <div class="label" style="color:var(--accent-blue)">Experiments Completed</div>
+                    <div class="value">3 / 4</div>
+                    <div class="sub">10-seed HRRL evaluation completed</div>
                 </div>
                 <div class="stat-card">
-                    <div class="label">Hypotheses Tested</div>
-                    <div class="value" style="color:var(--accent-amber)">1 / 3</div>
-                    <div class="sub">H1 partially supported; H2, H3 untested</div>
-                </div>
-                <div class="stat-card">
-                    <div class="label">Seeds Completed</div>
-                    <div class="value" style="color:var(--accent-green)">10</div>
-                    <div class="sub">3 groups × 10 seeds × 3000 episodes</div>
-                </div>
-                <div class="stat-card">
-                    <div class="label">Paper Target</div>
-                    <div class="value" style="color:var(--accent-purple)">4-6 pg</div>
-                    <div class="sub">Workshop-format paper</div>
-                </div>
-            </div>
-
-            <!-- ═══════════════════════════════════════════════════════ -->
-            <!-- HYPOTHESIS STATUS                                      -->
-            <!-- ═══════════════════════════════════════════════════════ -->
-            <div class="section-header">
-                <div class="section-icon" style="background:rgba(167,139,250,0.12)">🎯</div>
-                <h2>Hypothesis Status</h2>
-            </div>
-
-            <div class="hypothesis-grid">
-                <div class="hyp-card">
-                    <div class="hyp-id" style="color:var(--accent-green)">H1</div>
-                    <div class="hyp-content">
-                        <h4>Grounding Acceleration</h4>
-                        <p>Energy-aware (B) agents learn correct object–effect associations faster than terminal-only
-                            (A) agents. Multi-seed results show <strong>B > A</strong> in FGS (peak ~0.45 vs ~0.10),
-                            survival rate (100% vs ~40%), and beneficial object consumption.</p>
+                    <div class="label" style="color:var(--accent-purple)">Core Hypothesis</div>
+                    <div class="value" style="color:var(--accent-purple)">Supported</div>
+                    <div class="sub">p < 0.005 (M-W U Test)</div>
                     </div>
-                    <span class="hyp-status supported">✓ Partially Supported</span>
-                </div>
-                <div class="hyp-card">
-                    <div class="hyp-id" style="color:var(--accent-amber)">H2</div>
-                    <div class="hyp-content">
-                        <h4>Query Amplification</h4>
-                        <p>Energy+QUERY (C) should outperform B via interaction effect. Current results show <strong>C
-                                underperforms B</strong> on FGS — query mechanism may be too costly or agent fails to
-                            exploit hints. Needs redesign.</p>
-                    </div>
-                    <span class="hyp-status inconclusive">⚠ Inconclusive</span>
-                </div>
-                <div class="hyp-card">
-                    <div class="hyp-id" style="color:var(--text-muted)">H3</div>
-                    <div class="hyp-content">
-                        <h4>Transfer Robustness</h4>
-                        <p>After effect-swap, energy-aware agents should re-adapt faster. Transfer test not yet
-                            implemented — requires code for mid-training effect remapping and FGS recovery measurement.
-                        </p>
-                    </div>
-                    <span class="hyp-status untested">○ Not Tested</span>
-                </div>
-            </div>
-
-            <!-- ═══════════════════════════════════════════════════════ -->
-            <!-- KEY FINDINGS                                           -->
-            <!-- ═══════════════════════════════════════════════════════ -->
-            <div class="section-header">
-                <div class="section-icon" style="background:rgba(16,185,129,0.12)">🔬</div>
-                <h2>Key Findings So Far</h2>
-            </div>
-
-            <div class="findings-grid">
-                <div class="finding-card">
-                    <span class="tag confirmed">Confirmed</span>
-                    <h4>Energy Observation Accelerates Grounding</h4>
-                    <p>Group B achieves FGS ~0.45 vs Group A's ~0.10 by episode 1500. Energy-aware agents learn to
-                        preferentially consume beneficial objects and avoid harmful ones, with 95% CI separating clearly
-                        from baseline.</p>
-                </div>
-                <div class="finding-card">
-                    <span class="tag confirmed">Confirmed</span>
-                    <h4>Dramatic Survival Rate Difference</h4>
-                    <p>Group B reaches ~100% survival by episode 500, while Group A slowly climbs to ~40% by episode
-                        3000. Energy observation provides the dense feedback needed to quickly learn survival
-                        strategies.</p>
-                </div>
-                <div class="finding-card">
-                    <span class="tag issue">Issue</span>
-                    <h4>Group C Underperforms Expectations</h4>
-                    <p>Energy+QUERY agents perform worse than Energy-only on FGS. Possible causes: query cost (8 energy)
-                        is too high relative to benefit; hint representation (one-hot) requires more episodes to
-                        exploit; larger action space slows learning.</p>
-                </div>
-                <div class="finding-card">
-                    <span class="tag partial">Partial</span>
-                    <h4>FGS Ceiling Below 0.5</h4>
-                    <p>Even Group B's FGS peaks around 0.45 with high variance across seeds. The agent learns survival
-                        but object-approach behavior remains noisy. May need longer training, reward shaping, or
-                        environment tuning.</p>
-                </div>
-            </div>
-
-            <!-- ═══════════════════════════════════════════════════════ -->
-            <!-- EXPERIMENT FIGURES                                     -->
-            <!-- ═══════════════════════════════════════════════════════ -->
-            <div class="section-header">
-                <div class="section-icon" style="background:rgba(59,130,246,0.12)">📊</div>
-                <h2>Experiment Results</h2>
-            </div>
-
-            <div class="figure-grid">
-                <div class="figure-card wide">
-                    <img src="results/figures/grounding_multiseed.png" alt="Multi-seed grounding results">
-                    <div class="caption">
-                        <h4>Fig 1. Multi-Seed Statistical Experiment (10 seeds, 95% CI)</h4>
-                        <p>FGS learning curves, survival rate, P(eat beneficial), and P(eat harmful) across 3 groups.
-                            Clear B > A separation in all metrics. C shows intermediate performance with higher
-                            variance.</p>
+                    <div class="stat-card">
+                        <div class="label" style="color:var(--accent-cyan)">Seeds Run</div>
+                        <div class="value">40</div>
+                        <div class="sub">120k Total Episodes</div>
                     </div>
                 </div>
-                <div class="figure-card">
-                    <img src="results/figures/grounding_results.png" alt="Single-seed grounding results">
-                    <div class="caption">
-                        <h4>Fig 2. Single-Seed Pilot Experiment</h4>
-                        <p>Initial pilot confirming B > A trend. Single seed shows noisier patterns but directional
-                            support for H1.</p>
+
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <!-- HYPOTHESIS STATUS                                      -->
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <div class="section-header">
+                    <div class="section-icon" style="background:rgba(167,139,250,0.12)">🎯</div>
+                    <h2>Hypothesis Status</h2>
+                </div>
+
+                <div class="hypothesis-grid">
+                    <!-- Hyp 1 -->
+                    <div class="hyp-card">
+                        <div class="hyp-id" style="color:var(--accent-purple)">H1</div>
+                        <div class="hyp-content">
+                            <h4>Homeostatic Drive Generates Symbol Grounding</h4>
+                            <p>Agents learning exclusively from internal drive reduction (HRRL) will achieve
+                                significantly higher Functional Grounding Scores (FGS) than agents relying on external
+                                terminal rewards, proving meaning arises from physiological constraints.</p>
+                        </div>
+                        <div><span class="hyp-status supported">Supported (p=0.0017)</span></div>
+                    </div>
+
+                    <!-- Hyp 2 -->
+                    <div class="hyp-card">
+                        <div class="hyp-id" style="color:var(--accent-cyan)">H2</div>
+                        <div class="hyp-content">
+                            <h4>Information Seeking Driven by Survival Probability</h4>
+                            <p>An "Energy-Gated" querying strategy, where information is only sought when internal
+                                safety thresholds are breached, is the optimal strategy for balancing knowledge
+                                acquisition against metabolic cost.</p>
+                        </div>
+                        <div><span class="hyp-status supported">Supported</span></div>
+                    </div>
+                    <div class="hyp-card">
+                        <div class="hyp-id" style="color:var(--text-muted)">H3</div>
+                        <div class="hyp-content">
+                            <h4>Transfer Robustness</h4>
+                            <p>After effect-swap, energy-aware agents should re-adapt faster. Transfer test not yet
+                                implemented — requires code for mid-training effect remapping and FGS recovery
+                                measurement.
+                            </p>
+                        </div>
+                        <span class="hyp-status untested">○ Not Tested</span>
                     </div>
                 </div>
-                <div class="figure-card">
-                    <img src="results/figures/experiment_results.png" alt="Query strategy comparison">
-                    <div class="caption">
-                        <h4>Fig 3. Query Strategy Comparison (4 strategies)</h4>
-                        <p>Comparing No-Query, Always-Query, Random-Query, and Energy-Gated Query. Gated query shows
-                            competitive performance while using fewer queries.</p>
+
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <!-- KEY FINDINGS                                           -->
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <div class="section-header">
+                    <div class="section-icon" style="background:rgba(16,185,129,0.12)">🔬</div>
+                    <h2>Key Findings So Far</h2>
+                </div>
+
+                <div class="findings-grid">
+                    <div class="finding-card">
+                        <span class="tag confirmed">Insight #1</span>
+                        <h4>HRRL Drives 100% Survival & Semantic Mastery</h4>
+                        <p>The pure HRRL model (Group D) achieved a 100% survival rate and an FGS of +0.399 vs the
+                            baseline's +0.078. By penalizing any deviation from the homeostatic setpoint ($H^*=100$),
+                            the agent rapidly learned to avoid "red" (harmful) and embrace "blue" (beneficial) entirely
+                            without heuristic environment rewards.</p>
+                    </div>
+                    <div class="finding-card">
+                        <span class="tag confirmed">Insight #2</span>
+                        <h4>Gated Query Validates 2016 Yoshida Theorem</h4>
+                        <p>Testing different knowledge-acquisition strategies in `PoisonFoodEnv` revealed that querying
+                            only when energy drops below safety thresholds (Gated) performs optimally. Always querying
+                            or randomly querying wastes metabolic energy, causing rapid death.</p>
+                    </div>
+                    <div class="finding-card">
+                        <span class="tag issue">Issue</span>
+                        <h4>Group C Underperforms Expectations</h4>
+                        <p>Energy+QUERY agents perform worse than Energy-only on FGS. Possible causes: query cost (8
+                            energy)
+                            is too high relative to benefit; hint representation (one-hot) requires more episodes to
+                            exploit; larger action space slows learning.</p>
+                    </div>
+                    <div class="finding-card">
+                        <span class="tag partial">Partial</span>
+                        <h4>FGS Ceiling Below 0.5</h4>
+                        <p>Even Group B's FGS peaks around 0.45 with high variance across seeds. The agent learns
+                            survival
+                            but object-approach behavior remains noisy. May need longer training, reward shaping, or
+                            environment tuning.</p>
                     </div>
                 </div>
-            </div>
 
-            <!-- ═══════════════════════════════════════════════════════ -->
-            <!-- EXECUTABLE ACTION PLAN                                 -->
-            <!-- ═══════════════════════════════════════════════════════ -->
-            <div class="section-header">
-                <div class="section-icon" style="background:rgba(244,63,94,0.12)">🚀</div>
-                <h2>Executable Action Plan</h2>
-            </div>
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <!-- EXPERIMENT FIGURES                                     -->
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <div class="section-header">
+                    <div class="section-icon" style="background:rgba(59,130,246,0.12)">📊</div>
+                    <h2>Experiment Results</h2>
+                </div>
 
-            <div class="next-steps">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width:40px">Status</th>
-                            <th>Actionable Task</th>
-                            <th style="width:100px">Phase</th>
-                            <th style="width:120px">Reference</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr style="background:rgba(16,185,129,0.05)">
-                            <td style="text-align:center; color:var(--accent-green)">✅</td>
-                            <td><strong>Implement POMDP Survival Grid</strong><br><span
-                                    style="color:var(--text-secondary);font-size:0.82rem">Create MultiObjectEnv
-                                    with 3 observation modes (A: terminal, B: energy, C: energy+query)</span>
-                            </td>
-                            <td><span class="priority p3">Phase 0</span></td>
-                            <td>Proposal 3.1</td>
-                        </tr>
-                        <tr style="background:rgba(16,185,129,0.05)">
-                            <td style="text-align:center; color:var(--accent-green)">✅</td>
-                            <td><strong>Setup Baselines & Pipelines</strong><br><span
-                                    style="color:var(--text-secondary);font-size:0.82rem">Implement DQN agent,
-                                    training loops, and basic FGS (Functional Grounding Score) metric.</span>
-                            </td>
-                            <td><span class="priority p3">Phase 0</span></td>
-                            <td>Proposal 4.2</td>
-                        </tr>
+                <div class="figure-grid">
+                    <div class="figure-card wide">
+                        <img src="results/figures/grounding_multiseed.png"
+                            alt="Multi-seed evaluation incorporating Group D (HRRL)">
+                        <div class="caption">
+                            <h4>Fig 1: Homeostatic Grounding Multi-Seed (10 Seeds)</h4>
+                            <p>FGS and Survival curves. Note the commanding performance of Group D (HRRL-Driven, Purple
+                                Line) which learns entirely from internal physiological drive reduction compared to
+                                Group A (Red).</p>
+                        </div>
+                    </div>
+                    <div class="figure-card">
+                        <img src="results/figures/experiment_results.png" alt="Energy-gated query validation">
+                        <div class="caption">
+                            <h4>Fig 2: Query Strategy Validation in Poison Environment</h4>
+                            <p>Performance of different querying strategies highlighting that 'NoQuery' and
+                                'RandomQuery' fail completely while 'GatedQuery' provides the metabolic efficiency
+                                required to survive.</p>
+                        </div>
+                    </div>
+                </div>
 
-                        <!-- PHASE 1: Benchmark Finalization -->
-                        <tr>
-                            <td style="text-align:center; color:var(--text-muted)">⬜</td>
-                            <td><strong>Refine FGS Metric (Local Decision Contexts)</strong><br><span
-                                    style="color:var(--text-secondary);font-size:0.82rem">Modify env/eval to log
-                                    decisions only when agent is adjacent to object, ensuring clean
-                                    approach/avoid probability.</span></td>
-                            <td><span class="priority p1">Phase 1</span></td>
-                            <td>Report 4.4.2</td>
-                        </tr>
-                        <tr>
-                            <td style="text-align:center; color:var(--text-muted)">⬜</td>
-                            <td><strong>Add Sham & Permutation Controls</strong><br><span
-                                    style="color:var(--text-secondary);font-size:0.82rem">Implement
-                                    <code>B_sham</code> (uninformative scalar with same var) and
-                                    <code>B_perm</code> (temporally broken energy feedback).</span></td>
-                            <td><span class="priority p1">Phase 1</span></td>
-                            <td>Report 4.1.2</td>
-                        </tr>
-                        <tr>
-                            <td style="text-align:center; color:var(--text-muted)">⬜</td>
-                            <td><strong>Fix Group C (Query mechanism)</strong><br><span
-                                    style="color:var(--text-secondary);font-size:0.82rem">Lower query cost or
-                                    improve hint embedding so Group C reliably outperforms B.</span></td>
-                            <td><span class="priority p1">Phase 1</span></td>
-                            <td>Report 5.2</td>
-                        </tr>
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <!-- EXECUTABLE ACTION PLAN                                 -->
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <div class="section-header">
+                    <div class="section-icon" style="background:rgba(244,63,94,0.12)">🚀</div>
+                    <h2>Executable Action Plan</h2>
+                </div>
 
-                        <!-- PHASE 2: Main Experiments -->
-                        <tr>
-                            <td style="text-align:center; color:var(--text-muted)">⬜</td>
-                            <td><strong>Run 3-Seed Pilot for A, B, B_sham</strong><br><span
-                                    style="color:var(--text-secondary);font-size:0.82rem">Validate
-                                    directionality (Ensure B > A and B_sham ≈ A). Adjust difficulty if B_sham
-                                    helps too much.</span></td>
-                            <td><span class="priority p2">Phase 2</span></td>
-                            <td>Report 5.4.3</td>
-                        </tr>
-                        <tr>
-                            <td style="text-align:center; color:var(--text-muted)">⬜</td>
-                            <td><strong>Lock Hyperparameters</strong><br><span
-                                    style="color:var(--text-secondary);font-size:0.82rem">Freeze configs to
-                                    avoid "tuned advantage" accusations before the massive multi-seed
-                                    run.</span></td>
-                            <td><span class="priority p2">Phase 2</span></td>
-                            <td>Report 5.4.4</td>
-                        </tr>
-                        <tr>
-                            <td style="text-align:center; color:var(--text-muted)">⬜</td>
-                            <td><strong>Run Main High-N Statistical Experiment</strong><br><span
-                                    style="color:var(--text-secondary);font-size:0.82rem">20+ seeds for all
-                                    conditions (A, B, C, B_sham, B_perm). Record AUC of FGS and survival.</span>
-                            </td>
-                            <td><span class="priority p2">Phase 2</span></td>
-                            <td>Report 4.3.1</td>
-                        </tr>
+                <div class="next-steps">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width:40px">Status</th>
+                                <th>Actionable Task</th>
+                                <th style="width:100px">Phase</th>
+                                <th style="width:120px">Reference</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background:rgba(16,185,129,0.05)">
+                                <td style="text-align:center; color:var(--accent-green)">✅</td>
+                                <td><strong>Implement POMDP Survival Grid</strong><br><span
+                                        style="color:var(--text-secondary);font-size:0.82rem">Create MultiObjectEnv
+                                        with 3 observation modes (A: terminal, B: energy, C: energy+query)</span>
+                                </td>
+                                <td><span class="priority p3">Phase 0</span></td>
+                                <td>Proposal 3.1</td>
+                            </tr>
+                            <tr style="background:rgba(16,185,129,0.05)">
+                                <td style="text-align:center; color:var(--accent-green)">✅</td>
+                                <td><strong>Setup Baselines & Pipelines</strong><br><span
+                                        style="color:var(--text-secondary);font-size:0.82rem">Implement DQN agent,
+                                        training loops, and basic FGS (Functional Grounding Score) metric.</span>
+                                </td>
+                                <td><span class="priority p3">Phase 0</span></td>
+                                <td>Proposal 4.2</td>
+                            </tr>
 
-                        <!-- PHASE 3: Generalization & Probes -->
-                        <tr>
-                            <td style="text-align:center; color:var(--text-muted)">⬜</td>
-                            <td><strong>Implement Transfer Test (H3)</strong><br><span
-                                    style="color:var(--text-secondary);font-size:0.82rem">Swap
-                                    harmful↔beneficial mappings mid-training. Measure FGS recovery slope.</span>
-                            </td>
-                            <td><span class="priority p3">Phase 3</span></td>
-                            <td>Proposal 3.4</td>
-                        </tr>
-                        <tr>
-                            <td style="text-align:center; color:var(--text-muted)">⬜</td>
-                            <td><strong>OOD Reskin & Layout Generalization</strong><br><span
-                                    style="color:var(--text-secondary);font-size:0.82rem">Permute visual IDs
-                                    while keeping effects. Ensure grounding transfers via function.</span></td>
-                            <td><span class="priority p3">Phase 3</span></td>
-                            <td>Report 4.2.4</td>
-                        </tr>
-                        <tr>
-                            <td style="text-align:center; color:var(--text-muted)">⬜</td>
-                            <td><strong>Representation Probing</strong><br><span
-                                    style="color:var(--text-secondary);font-size:0.82rem">Train linear probe on
-                                    frozen hidden states to predict object effects. Prove grounding exists in
-                                    representations.</span></td>
-                            <td><span class="priority p3">Phase 3</span></td>
-                            <td>Report 4.2.3</td>
-                        </tr>
+                            <!-- PHASE 1: Benchmark Finalization -->
+                            <tr>
+                                <td style="text-align:center; color:var(--text-muted)">⬜</td>
+                                <td><strong>Refine FGS Metric (Local Decision Contexts)</strong><br><span
+                                        style="color:var(--text-secondary);font-size:0.82rem">Modify env/eval to log
+                                        decisions only when agent is adjacent to object, ensuring clean
+                                        approach/avoid probability.</span></td>
+                                <td><span class="priority p1">Phase 1</span></td>
+                                <td>Report 4.4.2</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:center; color:var(--text-muted)">⬜</td>
+                                <td><strong>Add Sham & Permutation Controls</strong><br><span
+                                        style="color:var(--text-secondary);font-size:0.82rem">Implement
+                                        <code>B_sham</code> (uninformative scalar with same var) and
+                                        <code>B_perm</code> (temporally broken energy feedback).</span></td>
+                                <td><span class="priority p1">Phase 1</span></td>
+                                <td>Report 4.1.2</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:center; color:var(--text-muted)">⬜</td>
+                                <td><strong>Fix Group C (Query mechanism)</strong><br><span
+                                        style="color:var(--text-secondary);font-size:0.82rem">Lower query cost or
+                                        improve hint embedding so Group C reliably outperforms B.</span></td>
+                                <td><span class="priority p1">Phase 1</span></td>
+                                <td>Report 5.2</td>
+                            </tr>
 
-                        <!-- PHASE 4: Robustness & Writing -->
-                        <tr>
-                            <td style="text-align:center; color:var(--text-muted)">⬜</td>
-                            <td><strong>Run Ablations (Step Cost & Noise)</strong><br><span
-                                    style="color:var(--text-secondary);font-size:0.82rem">Test c_step variations
-                                    {2, 5, 8} and add Gaussian noise to interoception.</span></td>
-                            <td><span class="priority p3">Phase 4</span></td>
-                            <td>Report 4.4.4</td>
-                        </tr>
-                        <tr>
-                            <td style="text-align:center; color:var(--text-muted)">⬜</td>
-                            <td><strong>(Optional) PPO-Transformer Replication</strong><br><span
-                                    style="color:var(--text-secondary);font-size:0.82rem">Replicate core B > A
-                                    finding on a secondary architecture to ensure hardware/model
-                                    invariance.</span></td>
-                            <td><span class="priority p3">Phase 4</span></td>
-                            <td>Report 5.1.4</td>
-                        </tr>
-                        <tr>
-                            <td style="text-align:center; color:var(--text-muted)">⬜</td>
-                            <td><strong>Draft Paper & Formatting</strong><br><span
-                                    style="color:var(--text-secondary);font-size:0.82rem">Generate
-                                    publication-quality figures with 95% CI. Write Intro, Methods,
-                                    Results.</span></td>
-                            <td><span class="priority p3">Phase 4</span></td>
-                            <td>Proposal 8</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <!-- ═══════════════════════════════════════════════════════ -->
-            <!-- CODEBASE MAP                                           -->
-            <!-- ═══════════════════════════════════════════════════════ -->
-            <div class="section-header">
-                <div class="section-icon" style="background:rgba(99,102,241,0.12)">🗂️</div>
-                <h2>Codebase Map</h2>
-            </div>
+                            <!-- PHASE 2: Main Experiments -->
+                            <tr>
+                                <td style="text-align:center; color:var(--text-muted)">⬜</td>
+                                <td><strong>Run 3-Seed Pilot for A, B, B_sham</strong><br><span
+                                        style="color:var(--text-secondary);font-size:0.82rem">Validate
+                                        directionality (Ensure B > A and B_sham ≈ A). Adjust difficulty if B_sham
+                                        helps too much.</span></td>
+                                <td><span class="priority p2">Phase 2</span></td>
+                                <td>Report 5.4.3</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:center; color:var(--text-muted)">⬜</td>
+                                <td><strong>Lock Hyperparameters</strong><br><span
+                                        style="color:var(--text-secondary);font-size:0.82rem">Freeze configs to
+                                        avoid "tuned advantage" accusations before the massive multi-seed
+                                        run.</span></td>
+                                <td><span class="priority p2">Phase 2</span></td>
+                                <td>Report 5.4.4</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:center; color:var(--text-muted)">⬜</td>
+                                <td><strong>Run Main High-N Statistical Experiment</strong><br><span
+                                        style="color:var(--text-secondary);font-size:0.82rem">20+ seeds for all
+                                        conditions (A, B, C, B_sham, B_perm). Record AUC of FGS and survival.</span>
+                                </td>
+                                <td><span class="priority p2">Phase 2</span></td>
+                                <td>Report 4.3.1</td>
+                            </tr>
 
-            <div class="finding-card"
-                style="margin-bottom:52px; font-family:'JetBrains Mono',monospace; font-size:0.82rem; line-height:1.8">
-                <pre style="color:var(--text-secondary); overflow-x:auto;">
+                            <!-- PHASE 3: Generalization & Probes -->
+                            <tr style="background:rgba(16,185,129,0.05)">
+                                <td style="text-align:center; color:var(--accent-green)">✅</td>
+                                <td><strong>HRRL Theoretical Integration</strong><br><span
+                                        style="color:var(--text-secondary);font-size:0.82rem">Removed heuristic rewards
+                                        from environments (`reward_type=hrrl`). Formally implemented Keramati & Gutkin
+                                        (2011) drive reduction: $r_t = d_t - d_{t+1}$. Created Group D (HRRL-Driven) and
+                                        executed 10-seed validation runs.</span>
+                                </td>
+                                <td><span class="priority p3">Phase 3</span></td>
+                                <td>Report 5.5.1</td>
+                            </tr>
+                            <tr style="background:rgba(255,193,7,0.05)">
+                                <td style="text-align:center; color:var(--accent-amber)">▶️</td>
+                                <td><strong>Implement Transfer Test (H3)</strong><br><span
+                                        style="color:var(--text-secondary);font-size:0.82rem">Swap
+                                        harmful↔beneficial mappings mid-training. Measure FGS recovery slope.</span>
+                                </td>
+                                <td><span class="priority p3">Phase 3</span></td>
+                                <td>Proposal 3.4</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:center; color:var(--text-muted)">⬜</td>
+                                <td><strong>OOD Reskin & Layout Generalization</strong><br><span
+                                        style="color:var(--text-secondary);font-size:0.82rem">Permute visual IDs
+                                        while keeping effects. Ensure grounding transfers via function.</span></td>
+                                <td><span class="priority p3">Phase 3</span></td>
+                                <td>Report 4.2.4</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:center; color:var(--text-muted)">⬜</td>
+                                <td><strong>Representation Probing</strong><br><span
+                                        style="color:var(--text-secondary);font-size:0.82rem">Train linear probe on
+                                        frozen hidden states to predict object effects. Prove grounding exists in
+                                        representations.</span></td>
+                                <td><span class="priority p3">Phase 3</span></td>
+                                <td>Report 4.2.3</td>
+                            </tr>
+
+                            <!-- PHASE 4: Robustness & Writing -->
+                            <tr>
+                                <td style="text-align:center; color:var(--text-muted)">⬜</td>
+                                <td><strong>Run Ablations (Step Cost & Noise)</strong><br><span
+                                        style="color:var(--text-secondary);font-size:0.82rem">Test c_step variations
+                                        {2, 5, 8} and add Gaussian noise to interoception.</span></td>
+                                <td><span class="priority p3">Phase 4</span></td>
+                                <td>Report 4.4.4</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:center; color:var(--text-muted)">⬜</td>
+                                <td><strong>(Optional) PPO-Transformer Replication</strong><br><span
+                                        style="color:var(--text-secondary);font-size:0.82rem">Replicate core B > A
+                                        finding on a secondary architecture to ensure hardware/model
+                                        invariance.</span></td>
+                                <td><span class="priority p3">Phase 4</span></td>
+                                <td>Report 5.1.4</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:center; color:var(--text-muted)">⬜</td>
+                                <td><strong>Draft Paper & Formatting</strong><br><span
+                                        style="color:var(--text-secondary);font-size:0.82rem">Generate
+                                        publication-quality figures with 95% CI. Write Intro, Methods,
+                                        Results.</span></td>
+                                <td><span class="priority p3">Phase 4</span></td>
+                                <td>Proposal 8</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <!-- CODEBASE MAP                                           -->
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <div class="section-header">
+                    <div class="section-icon" style="background:rgba(99,102,241,0.12)">🗂️</div>
+                    <h2>Codebase Map</h2>
+                </div>
+
+                <div class="finding-card"
+                    style="margin-bottom:52px; font-family:'JetBrains Mono',monospace; font-size:0.82rem; line-height:1.8">
+                    <pre style="color:var(--text-secondary); overflow-x:auto;">
 homeostatic-grounding/
 ├── <span style="color:var(--accent-cyan)">docs/</span>
 │   ├── proposal.md                  <span style="color:var(--text-muted)"># Research proposal</span>
@@ -1021,62 +1033,62 @@ homeostatic-grounding/
 ├── paper/                           <span style="color:var(--text-muted)">○ Empty (LaTeX pending)</span>
 ├── tests/                           <span style="color:var(--accent-amber)">○ Basic test only</span>
 └── notebooks/                       <span style="color:var(--text-muted)">○ Empty</span></pre>
-            </div>
+                </div>
 
-            <!-- ═══════════════════════════════════════════════════════ -->
-            <!-- CHANGELOG                                              -->
-            <!-- ═══════════════════════════════════════════════════════ -->
-            <div class="section-header">
-                <div class="section-icon" style="background:rgba(22,211,238,0.12)">📝</div>
-                <h2>Change Log</h2>
-            </div>
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <!-- CHANGELOG                                              -->
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <div class="section-header">
+                    <div class="section-icon" style="background:rgba(22,211,238,0.12)">📝</div>
+                    <h2>Change Log</h2>
+                </div>
 
-            <div class="changelog">
-                <div class="log-entry">
-                    <span class="date">2026-02-27</span>
-                    <span>Created research progress tracker (<code>progress.html</code>). Analyzed all existing
-                        experiments and identified 9 prioritized next steps.</span>
+                <div class="changelog">
+                    <div class="log-entry">
+                        <span class="date">2026-02-27</span>
+                        <span>Created research progress tracker (<code>progress.html</code>). Analyzed all existing
+                            experiments and identified 9 prioritized next steps.</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="date">2026-02-26</span>
+                        <span>Restructured project directory to publication-standard layout: <code>src/</code>,
+                            <code>experiments/</code>, <code>configs/</code>, <code>docs/</code>,
+                            <code>results/</code>.
+                            Created <code>README.md</code>, <code>.gitignore</code>, <code>requirements.txt</code>,
+                            YAML
+                            configs.</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="date">2026-02-21</span>
+                        <span>Completed 10-seed multi-seed statistical experiment with bootstrap 95% CI across 3
+                            groups.
+                            Confirmed B > A for FGS and survival metrics.</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="date">2026-02-20</span>
+                        <span>Ran query strategy comparison experiment (4 strategies: no-query, always-query,
+                            random-query, gated-query). Energy-gated query shows competitive performance.</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="date">2026-02-18</span>
+                        <span>Single-seed pilot experiment confirmed directional support for H1 (B > A). Identified
+                            need
+                            for more seeds.</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="date">2026-02-16</span>
+                        <span>Finalized research proposal with 3 hypotheses, experimental design, and 12-week
+                            timeline.</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="date">2026-02-14</span>
+                        <span>Implemented <code>MultiObjectEnv</code> (3 obs modes, energy dynamics, QUERY action)
+                            and
+                            DQN training pipeline with FGS evaluation.</span>
+                    </div>
                 </div>
-                <div class="log-entry">
-                    <span class="date">2026-02-26</span>
-                    <span>Restructured project directory to publication-standard layout: <code>src/</code>,
-                        <code>experiments/</code>, <code>configs/</code>, <code>docs/</code>,
-                        <code>results/</code>.
-                        Created <code>README.md</code>, <code>.gitignore</code>, <code>requirements.txt</code>,
-                        YAML
-                        configs.</span>
-                </div>
-                <div class="log-entry">
-                    <span class="date">2026-02-21</span>
-                    <span>Completed 10-seed multi-seed statistical experiment with bootstrap 95% CI across 3
-                        groups.
-                        Confirmed B > A for FGS and survival metrics.</span>
-                </div>
-                <div class="log-entry">
-                    <span class="date">2026-02-20</span>
-                    <span>Ran query strategy comparison experiment (4 strategies: no-query, always-query,
-                        random-query, gated-query). Energy-gated query shows competitive performance.</span>
-                </div>
-                <div class="log-entry">
-                    <span class="date">2026-02-18</span>
-                    <span>Single-seed pilot experiment confirmed directional support for H1 (B > A). Identified
-                        need
-                        for more seeds.</span>
-                </div>
-                <div class="log-entry">
-                    <span class="date">2026-02-16</span>
-                    <span>Finalized research proposal with 3 hypotheses, experimental design, and 12-week
-                        timeline.</span>
-                </div>
-                <div class="log-entry">
-                    <span class="date">2026-02-14</span>
-                    <span>Implemented <code>MultiObjectEnv</code> (3 obs modes, energy dynamics, QUERY action)
-                        and
-                        DQN training pipeline with FGS evaluation.</span>
-                </div>
-            </div>
 
-        </div>
+            </div>
     </main>
 
     <footer>

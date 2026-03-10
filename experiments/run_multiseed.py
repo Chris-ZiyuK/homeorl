@@ -49,10 +49,10 @@ class ReplayBuffer:
 
 # ═══════════ FGS Evaluation ═══════════
 
-def evaluate(env_cls, obs_mode, q_net, n_eval=80, seed_base=99999):
+def evaluate(env_cls, obs_mode, reward_type, q_net, n_eval=80, seed_base=99999):
     ate_good = ate_bad = survived = exited = 0
     for i in range(n_eval):
-        env = env_cls(obs_mode=obs_mode)
+        env = env_cls(obs_mode=obs_mode, reward_type=reward_type)
         obs, _ = env.reset(seed=seed_base + i)
         done = False
         while not done:
@@ -72,7 +72,7 @@ def evaluate(env_cls, obs_mode, q_net, n_eval=80, seed_base=99999):
 
 # ═══════════ Single Seed Training ═══════════
 
-def train_one_seed(obs_mode, seed, n_episodes=3000, eval_interval=100,
+def train_one_seed(obs_mode, reward_type, seed, n_episodes=3000, eval_interval=100,
                    lr=5e-4, gamma=0.99, batch_size=64,
                    eps_start=1.0, eps_end=0.05, eps_decay=600,
                    target_update=25):
@@ -80,7 +80,7 @@ def train_one_seed(obs_mode, seed, n_episodes=3000, eval_interval=100,
     np.random.seed(seed)
     random.seed(seed)
 
-    env = MultiObjectEnv(obs_mode=obs_mode)
+    env = MultiObjectEnv(obs_mode=obs_mode, reward_type=reward_type)
     q = QNet(env.obs_dim, env.action_space.n)
     qt = QNet(env.obs_dim, env.action_space.n)
     qt.load_state_dict(q.state_dict())
@@ -114,7 +114,7 @@ def train_one_seed(obs_mode, seed, n_episodes=3000, eval_interval=100,
             qt.load_state_dict(q.state_dict())
 
         if (ep + 1) % eval_interval == 0:
-            m = evaluate(MultiObjectEnv, obs_mode, q)
+            m = evaluate(MultiObjectEnv, obs_mode, reward_type, q)
             for k in log:
                 log[k].append(m[k])
 
@@ -126,7 +126,7 @@ N_SEEDS = 10
 N_EPISODES = 3000
 EVAL_INTERVAL = 100
 
-def run_group(group_name, obs_mode):
+def run_group(group_name, obs_mode, reward_type):
     print(f"\n{'='*50}")
     print(f"  {group_name}  ({N_SEEDS} seeds × {N_EPISODES} episodes)")
     print(f"{'='*50}")
@@ -134,7 +134,7 @@ def run_group(group_name, obs_mode):
     all_logs = []
     for s in range(N_SEEDS):
         seed = 100 + s * 7
-        log = train_one_seed(obs_mode, seed, N_EPISODES, EVAL_INTERVAL)
+        log = train_one_seed(obs_mode, reward_type, seed, N_EPISODES, EVAL_INTERVAL)
         all_logs.append(log)
 
         # Final metrics for this seed
@@ -146,7 +146,7 @@ def run_group(group_name, obs_mode):
     print()
 
     # Stack into arrays: shape (n_seeds, n_evals)
-    result = {"name": group_name, "obs_mode": obs_mode}
+    result = {"name": group_name, "obs_mode": obs_mode, "reward_type": reward_type}
     for k in ["fgs", "surv", "exit", "eat+", "eat-"]:
         result[k] = np.array([l[k] for l in all_logs])  # (n_seeds, n_evals)
     result["eval_eps"] = list(range(EVAL_INTERVAL, N_EPISODES + 1, EVAL_INTERVAL))
@@ -175,6 +175,8 @@ def stat_tests(results):
         ("A: Terminal-Only", "B: Energy-Aware"),
         ("A: Terminal-Only", "C: Energy+QUERY"),
         ("B: Energy-Aware",  "C: Energy+QUERY"),
+        ("A: Terminal-Only", "D: HRRL-Driven"),
+        ("B: Energy-Aware",  "D: HRRL-Driven"),
     ]
 
     for a_name, b_name in pairs:
@@ -197,7 +199,8 @@ def stat_tests(results):
 def plot_with_ci(results, save_dir="."):
     colors = {"A: Terminal-Only": "#ef4444",
               "B: Energy-Aware":  "#f59e0b",
-              "C: Energy+QUERY":  "#10b981"}
+              "C: Energy+QUERY":  "#10b981",
+              "D: HRRL-Driven":   "#8b5cf6"}
 
     fig, axes = plt.subplots(2, 2, figsize=(14, 10))
     fig.suptitle(f"Homeostatic Grounding ({N_SEEDS} seeds, 95% CI)",
@@ -246,14 +249,15 @@ def main():
     print("=" * 60)
 
     groups = [
-        ("A: Terminal-Only", "terminal"),
-        ("B: Energy-Aware",  "energy"),
-        ("C: Energy+QUERY",  "full"),
+        ("A: Terminal-Only", "terminal", "terminal"),
+        ("B: Energy-Aware",  "energy", "terminal"),
+        ("C: Energy+QUERY",  "full", "terminal"),
+        ("D: HRRL-Driven",   "energy", "hrrl"),
     ]
 
     all_results = []
-    for name, mode in groups:
-        result = run_group(name, mode)
+    for name, mode, reward_type in groups:
+        result = run_group(name, mode, reward_type)
         all_results.append(result)
 
     # Final table
@@ -279,6 +283,27 @@ def main():
     # Plot with CI
     save_dir = os.path.dirname(os.path.abspath(__file__)) or "."
     plot_with_ci(all_results, save_dir)
+    
+    # Save raw data to JSON
+    import json
+    json_path = os.path.join(save_dir, "grounding_multiseed_data.json")
+    json_data = []
+    for r in all_results:
+        group_data = {
+            "name": r["name"],
+            "obs_mode": r["obs_mode"],
+            "reward_type": r["reward_type"],
+            "eval_eps": r["eval_eps"],
+            "fgs": r["fgs"].tolist(),
+            "surv": r["surv"].tolist(),
+            "exit": r["exit"].tolist(),
+            "eat+": r["eat+"].tolist(),
+            "eat-": r["eat-"].tolist()
+        }
+        json_data.append(group_data)
+    with open(json_path, 'w') as f:
+        json.dump(json_data, f)
+    print(f"Data saved to JSON: {json_path}")
 
     print("\n✅ Done!")
 

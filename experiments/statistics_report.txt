@@ -1,0 +1,38 @@
+============================================================
+Statistical Significance Tests (Mann-Whitney U) - 10 Seeds
+============================================================
+
+  A: Terminal-Only vs B: Energy-Aware
+    A: Terminal-Only: M=+0.078  95%CI=[+0.044, +0.113]
+    B: Energy-Aware: M=+0.287  95%CI=[+0.219, +0.372]
+    Diff=+0.209  U=0  p=0.0002  ***
+
+  A: Terminal-Only vs C: Energy+QUERY
+    A: Terminal-Only: M=+0.078  95%CI=[+0.044, +0.113]
+    C: Energy+QUERY: M=+0.213  95%CI=[+0.172, +0.254]
+    Diff=+0.135  U=5  p=0.0008  ***
+
+  B: Energy-Aware vs C: Energy+QUERY
+    B: Energy-Aware: M=+0.287  95%CI=[+0.219, +0.372]
+    C: Energy+QUERY: M=+0.213  95%CI=[+0.172, +0.254]
+    Diff=-0.073  U=69  p=0.1617  n.s.
+
+  A: Terminal-Only vs D: HRRL-Driven
+    A: Terminal-Only: M=+0.078  95%CI=[+0.044, +0.113]
+    D: HRRL-Driven: M=+0.399  95%CI=[+0.243, +0.564]
+    Diff=+0.321  U=8  p=0.0017  **
+
+  B: Energy-Aware vs D: HRRL-Driven
+    B: Energy-Aware: M=+0.287  95%CI=[+0.219, +0.372]
+    D: HRRL-Driven: M=+0.399  95%CI=[+0.243, +0.564]
+    Diff=+0.112  U=41  p=0.5204  n.s.
+
+============================================================
+Query Validation Final Results (last 300 episodes avg)
+============================================================
+Policy               Reward  Survive     Exit  Queries
+----------------------------------------------------
+B1_NoQuery          -80.040    0.0%    0.0%     0.00
+B2_AlwaysQuery      -82.517    0.3%    0.3%     1.00
+B3_RandomQuery      -79.120   16.3%   18.0%     0.99
+G1_GatedQuery       -82.887    0.0%    0.0%     1.00
