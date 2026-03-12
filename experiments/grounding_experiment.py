@@ -19,7 +19,9 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from multi_object_env import MultiObjectEnv
+# from multi_object_env import MultiObjectEnv
+from minihack_grounding_env import MiniHackGroundingEnv as MultiObjectEnv
+
 
 # ═══════════ DQN ═══════════
 
