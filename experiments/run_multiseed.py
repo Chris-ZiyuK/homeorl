@@ -18,7 +18,9 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from multi_object_env import MultiObjectEnv
+# from multi_object_env import MultiObjectEnv
+from minihack_grounding_env import MiniHackGroundingEnv as MultiObjectEnv
+
 
 # ═══════════ DQN ═══════════
 
@@ -74,7 +76,7 @@ def evaluate(env_cls, obs_mode, reward_type, q_net, n_eval=80, seed_base=99999):
 
 def train_one_seed(obs_mode, reward_type, seed, n_episodes=3000, eval_interval=100,
                    lr=5e-4, gamma=0.99, batch_size=64,
-                   eps_start=1.0, eps_end=0.05, eps_decay=600,
+                   eps_start=1.0, eps_end=0.05, eps_decay=1500,
                    target_update=25):
     torch.manual_seed(seed)
     np.random.seed(seed)
@@ -122,8 +124,8 @@ def train_one_seed(obs_mode, reward_type, seed, n_episodes=3000, eval_interval=1
 
 # ═══════════ Multi-Seed Runner ═══════════
 
-N_SEEDS = 10
-N_EPISODES = 3000
+N_SEEDS = 3
+N_EPISODES = 1000
 EVAL_INTERVAL = 100
 
 def run_group(group_name, obs_mode, reward_type):
