@@ -56,7 +56,21 @@ python experiments/run_experiment.py --config configs/default.yaml
 
 # Run multi-seed experiment
 python experiments/run_multiseed.py --config configs/default.yaml --seeds 10
+
+# Run sequential gridworld pilot (task-specific vs homeostatic)
+python experiments/run_sequential_tasks.py --config configs/sequential_gridworld.yaml
 ```
+
+## Sequential Homeostasis Pilot
+
+The repository also includes a minimal sequential-task gridworld pilot for the
+refocused homeostatic RL question.
+
+- `src/envs/sequential_homeostasis_env.py`: 5 shared-body tasks (`reach`,
+  `recharge`, `hazard_reach`, `detour`, `tight_detour`) with a common energy budget
+- `experiments/run_sequential_tasks.py`: sequential training for two agents
+  (`task` vs `homeostatic`)
+- `configs/sequential_gridworld.yaml`: default settings for the pilot
 
 ## Key Metrics
 

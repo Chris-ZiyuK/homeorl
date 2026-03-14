@@ -1,0 +1,28 @@
+tasks:
+  - reach
+  - recharge
+  - hazard_reach
+  - detour
+  - tight_detour
+
+episodes_per_task: 600
+eval_interval: 50
+eval_episodes: 40
+num_seeds: 10
+success_threshold: 0.7
+
+agent:
+  hidden_dim: 128
+  lr: 0.0005
+  gamma: 0.99
+  batch_size: 64
+  buffer_size: 20000
+  target_update: 25
+  eps_start: 1.0
+  eps_end: 0.05
+  eps_decay: 300
+
+logging:
+  save_dir: experiments/sequential_results
+  plot_name: sequential_homeostasis.png
+  json_name: sequential_homeostasis.json

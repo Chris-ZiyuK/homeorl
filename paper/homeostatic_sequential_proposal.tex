@@ -1,0 +1,145 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{amsmath}
+
+\title{Homeostatic Objectives for Sequential Reinforcement Learning}
+\author{
+    [Team Members Here] \\
+    [Course Name Here]
+}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This project studies whether a homeostatic objective can serve as a reusable control principle across a sequence of reinforcement learning tasks that share embodied resource constraints. Rather than treating homeostasis as a task-specific reward bonus, we evaluate whether maintaining internal energy near a target setpoint improves adaptation speed, transfer, and safety margins when tasks change over time. Our pilot gridworld results suggest a consistent tradeoff: task-specific shaping learns simple tasks faster, while homeostatic objectives appear to preserve more transferable strategies on later resource-constrained tasks.
+\end{abstract}
+
+\section{Research Goal}
+The goal of this project is to test whether homeostatic objectives provide a more reusable and flexible optimization principle than task-specific reward shaping in sequential reinforcement learning.
+
+Concretely, we want to move away from the question ``does an internal variable improve one task?'' and toward the question ``does a stable internal regulation objective help an agent adapt across multiple related tasks without redesigning the reward each time?''
+
+\section{Research Question}
+Our central research question is:
+
+\begin{quote}
+\textit{In sequential reinforcement learning tasks with shared embodied resource constraints, do homeostatic objectives improve adaptation efficiency, cross-task transfer, and safety margins relative to task-specific reward shaping?}
+\end{quote}
+
+\noindent We also study a more specific sub-question:
+
+\begin{quote}
+\textit{Does any homeostatic benefit appear mainly during task switches and later transfer, rather than in asymptotic single-task performance?}
+\end{quote}
+
+\section{Motivation}
+Task-specific reward shaping can be highly effective when the designer knows exactly what a single task requires. However, such rewards are often brittle and must be rewritten whenever the task changes. A homeostatic objective offers a different design principle: the agent always optimizes internal regulation, while the external task changes around it.
+
+If this works, homeostasis should not necessarily beat hand-designed rewards on the easiest single task. Instead, it should become valuable when tasks are presented sequentially and share the same bodily constraints, such as energy depletion, safe detours, and resource collection.
+
+\section{Hypotheses}
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{H1: Single-task speed advantage for task-specific shaping.} On the earliest and simplest task, an agent with task-specific shaping will learn faster than a homeostatic agent.
+    \item \textbf{H2: Better downstream adaptation under shared constraints.} When later tasks reuse the same underlying energy and safety structure, a homeostatic agent will adapt more quickly after a task switch.
+    \item \textbf{H3: Better safety margins.} On harder tasks, the homeostatic agent will finish successful episodes with higher remaining energy and fewer hazard contacts.
+    \item \textbf{H4: Better retention on resource-relevant prior tasks.} After training on later tasks, the homeostatic agent will retain higher performance on earlier tasks that rely on the same energy-management behavior.
+\end{itemize}
+
+\section{Experimental Design}
+\subsection{Environment Family}
+We use a sequential gridworld benchmark in which all tasks share:
+\begin{itemize}[leftmargin=1.5em]
+    \item the same action space,
+    \item the same embodied energy dynamics,
+    \item the same basic navigation mechanics,
+    \item the same failure condition (energy depletion),
+    \item and the same sparse completion event (reaching the exit).
+\end{itemize}
+
+The task sequence currently contains five levels:
+\begin{enumerate}[leftmargin=1.5em]
+    \item \textbf{Reach}: enough energy to reach the exit directly.
+    \item \textbf{Recharge}: the agent must collect food before finishing.
+    \item \textbf{Hazard Reach}: the agent must avoid harmful tiles on the way to the exit.
+    \item \textbf{Detour}: the agent must both recharge and avoid hazards.
+    \item \textbf{Tight Detour}: a stricter version with lower margins and a larger map.
+\end{enumerate}
+
+\subsection{Agents}
+We compare two agents with the same DQN architecture and training protocol:
+
+\paragraph{Task-specific agent.}
+This agent receives dense reward shaping that changes with the active task. Reward includes progress toward the current task target, bonuses for useful object interactions, and penalties for hazards.
+
+\paragraph{Homeostatic agent.}
+This agent receives a shared internal objective based on drive reduction:
+\[
+r_t^{\text{homeo}} = |E^\ast - E_t| - |E^\ast - E_{t+1}|
+\]
+where $E^\ast$ is the target energy setpoint. The agent also receives a sparse completion bonus and a death penalty, but no task-specific dense shaping.
+
+\subsection{Training Protocol}
+The same network is trained sequentially across the five tasks. We do not reset model parameters between tasks. This setting is meant to test adaptation and reuse rather than independent single-task learning.
+
+The current pilot uses:
+\begin{itemize}[leftmargin=1.5em]
+    \item DQN with replay buffer and target network,
+    \item 10 random seeds,
+    \item 600 training episodes per task,
+    \item periodic evaluation every 50 episodes.
+\end{itemize}
+
+\section{Evaluation Metrics}
+We will evaluate the following:
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Current-task success rate}: performance during each task phase.
+    \item \textbf{Adaptation speed}: episodes required to cross a fixed success threshold after a task switch.
+    \item \textbf{Retention}: phase-end evaluation on all previously seen tasks.
+    \item \textbf{Safety margin}: average remaining energy on successful evaluation rollouts.
+    \item \textbf{Risk sensitivity}: average number of hazard contacts.
+    \item \textbf{Switch-window efficiency}: area under the success curve in the first $K$ episodes after each task transition.
+\end{itemize}
+
+\section{Pilot Findings}
+Our current pilot results already show a useful pattern:
+\begin{itemize}[leftmargin=1.5em]
+    \item The task-specific agent learns the simplest task faster.
+    \item The homeostatic agent catches up on later tasks that depend more strongly on energy management and hazard avoidance.
+    \item On the hardest tasks, both agents can succeed, but the homeostatic agent often ends with higher remaining energy, suggesting safer or more conservative policies.
+    \item Retention remains imperfect for both agents, so the present evidence supports a transfer advantage more strongly than a full continual-learning advantage.
+\end{itemize}
+
+These findings motivate a refined claim: homeostatic objectives may trade off early single-task speed for better transfer and stronger safety margins on later tasks that share embodied constraints.
+
+\section{Planned Next Steps}
+Before finalizing the project conclusions, we plan to:
+\begin{itemize}[leftmargin=1.5em]
+    \item increase the number of seeds further if variance remains high,
+    \item add a control task sequence with weaker dependence on energy management,
+    \item report switch-window metrics explicitly rather than relying only on phase-end success,
+    \item and test whether small replay or rehearsal mechanisms change the relative advantage of homeostatic objectives.
+\end{itemize}
+
+\section{Expected Contribution}
+The intended contribution is not a new reward trick for a single benchmark. Instead, this project aims to provide evidence that homeostatic objectives can function as a reusable control prior across related tasks. If successful, the project will clarify where homeostatic design is useful: not necessarily in maximizing single-task performance, but in improving adaptability under repeated task changes with shared bodily constraints.
+
+\section{Open Risks}
+\begin{itemize}[leftmargin=1.5em]
+    \item The observed advantage may depend too strongly on the specific task family.
+    \item Strong task-specific shaping may remain competitive even on later tasks.
+    \item Sequential forgetting may dominate both agents unless the training protocol is strengthened.
+\end{itemize}
+
+These risks are acceptable for the proposal stage because they are directly testable within our experimental framework.
+
+\end{document}
