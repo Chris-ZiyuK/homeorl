@@ -19,30 +19,33 @@
 
 \title{Homeostatic Objectives for Sequential Reinforcement Learning}
 
-\newcommand{\browncsaffiliation}{%
-  \affiliation{%
-    \department{Department of Computer Science}
-    \institution{Brown University}
-    \city{Providence}
-    \state{RI}
-    \country{USA}}}
-
 \author{Ziyu Kong}
-\browncsaffiliation
+\affiliation{%
+  \department{Department of Computer Science}
+  \institution{Brown University}
+  \city{Providence} \state{RI} \country{USA}}
 \email{ziyu_kong@brown.edu}
 
 \author{Shihang Gui}
-\browncsaffiliation
-\email{shihang_gui@brown.edu}
+\affiliation{%
+  \department{Department of Computer Science}
+  \institution{Brown University}
+  \city{Providence} \state{RI} \country{USA}}
+\email{shihang\_gui@brown.edu}
 
 \author{Ruth Ukubay}
-\browncsaffiliation
-\email{ruth_ukubay@brown.edu}
+\affiliation{%
+  \department{Department of Computer Science}
+  \institution{Brown University}
+  \city{Providence} \state{RI} \country{USA}}
+\email{ruth\_ukubay@brown.edu}
 
 \author{Meiyi Song}
-\browncsaffiliation
-\email{meiyi_song1@brown.edu}
-
+\affiliation{%
+  \department{Department of Computer Science}
+  \institution{Brown University}
+  \city{Providence} \state{RI} \country{USA}}
+\email{meiyi\_song1@brown.edu}
 
 
 
@@ -52,7 +55,20 @@
 
 \begin{abstract}
 Task-specific reward shaping is effective but brittle. It must be
-redesigned whenever the task changes, and the agent cannot reuse what it learned. This project tests whether a homeostatic objective, one that never changes and requires no task-specific engineering, can serve as a reusable control principle across a multi-task sequence of related reinforcement learning tasks. We compare a homeostatic agent, which optimizes drive reduction from an internal energy setpoint, against a task-specific agent across a multi-task sequential gridworld benchmark where all tasks share the same embodied energy dynamics. Our pilot results suggest a consistent tradeoff where the task-specific agent learns earlier tasks faster, while the homeostatic agent transfers more effectively to later tasks that depend heavily on resource management and hazard avoidance, and ends successful episodes with higher remaining energy. We evaluate this tradeoff systematically using forward transfer, forgetting, and safety margin metrics across multiple seeds.
+redesigned whenever the task changes, and the agent cannot reuse what
+it learned. This project tests whether a homeostatic objective,
+one that never changes and requires no task-specific engineering,
+can serve as a reusable control principle across a sequence of related
+reinforcement learning tasks. We compare a homeostatic agent, which
+optimizes drive reduction from an internal energy setpoint, against a
+task-specific agent across a five-task sequential gridworld benchmark
+where all tasks share the same embodied energy dynamics. Our pilot
+results suggest a consistent tradeoff where the task-specific agent learns earlier tasks faster, while the homeostatic agent transfers more
+effectively to later tasks that depend heavily on resource management
+and hazard avoidance, and ends successful episodes with higher
+remaining energy. We evaluate this tradeoff systematically using
+forward transfer, forgetting, and safety margin metrics across
+multiple seeds.
 \end{abstract}
  
 \maketitle

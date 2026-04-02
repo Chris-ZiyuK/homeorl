@@ -1,3 +1,5 @@
+# E1 Formal Experiment - Reset Boundary Mode
+# 5 seeds, 600 episodes/task, full-scale agent architecture
 tasks:
   - reach
   - recharge
@@ -15,7 +17,7 @@ agents:
 episodes_per_task: 600
 eval_interval: 50
 eval_episodes: 40
-num_seeds: 10
+num_seeds: 5
 success_threshold: 0.7
 boundary_mode: reset
 carryover_min_energy: 1.0
@@ -36,6 +38,6 @@ environment:
   task_reward_coef: 1.0
 
 logging:
-  save_dir: experiments/sequential_results
-  plot_name: sequential_agent_suite.png
-  json_name: sequential_agent_suite.json
+  save_dir: experiments/sequential_results/e1_reset
+  plot_name: e1_reset.png
+  json_name: e1_reset.json

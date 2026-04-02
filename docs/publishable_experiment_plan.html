@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Publishable Experiment Plan - Homeostatic Sequential RL</title>
+  <style>
+    :root {
+      --bg: #f5efe2;
+      --bg-soft: #fbf7ef;
+      --paper: rgba(255, 252, 246, 0.86);
+      --ink: #18222f;
+      --muted: #586577;
+      --line: #d8ccb6;
+      --accent: #8a3b2f;
+      --accent-soft: #b45a46;
+      --olive: #6f7341;
+      --navy: #2f4964;
+      --gold: #c88b1e;
+      --ok: #245f46;
+      --warn: #8e5b16;
+      --danger: #8d2f2f;
+      --shadow: 0 14px 40px rgba(38, 28, 18, 0.08);
+      --radius: 18px;
+      --radius-sm: 12px;
+      --mono: "JetBrains Mono", "SFMono-Regular", "Menlo", monospace;
+      --serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", "Georgia", serif;
+      --sans: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(200, 139, 30, 0.12), transparent 28%),
+        radial-gradient(circle at top right, rgba(47, 73, 100, 0.1), transparent 24%),
+        linear-gradient(180deg, #f7f1e6 0%, #f3ecdf 100%);
+      font-family: var(--sans);
+      line-height: 1.7;
+    }
+
+    .page {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 32px 24px 80px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(138, 59, 47, 0.18);
+      border-radius: 28px;
+      padding: 40px 42px 34px;
+      background:
+        linear-gradient(135deg, rgba(255, 251, 244, 0.92), rgba(247, 239, 225, 0.86)),
+        linear-gradient(120deg, rgba(138, 59, 47, 0.08), transparent);
+      box-shadow: var(--shadow);
+      margin-bottom: 28px;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -120px -140px auto;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(138, 59, 47, 0.12), transparent 70%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(47, 73, 100, 0.18);
+      background: rgba(47, 73, 100, 0.08);
+      color: var(--navy);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: var(--serif);
+      letter-spacing: -0.02em;
+      margin: 0 0 10px;
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      line-height: 1.05;
+      max-width: 900px;
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      margin-bottom: 16px;
+    }
+
+    h3 {
+      font-size: 1.18rem;
+      margin-bottom: 10px;
+    }
+
+    .hero p {
+      max-width: 860px;
+      color: var(--muted);
+      font-size: 1.02rem;
+      margin: 0 0 18px;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .meta-chip {
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.66);
+      border: 1px solid rgba(24, 34, 47, 0.08);
+      font-size: 0.86rem;
+      color: var(--ink);
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .grid.two {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .grid.three {
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+
+    .card, .section {
+      background: var(--paper);
+      border: 1px solid rgba(24, 34, 47, 0.08);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(4px);
+    }
+
+    .section {
+      padding: 26px 28px;
+      margin-top: 20px;
+    }
+
+    .card {
+      padding: 22px 22px 20px;
+    }
+
+    .card p:last-child,
+    .section p:last-child,
+    .section ul:last-child,
+    .section ol:last-child {
+      margin-bottom: 0;
+    }
+
+    .label {
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .label.red { color: var(--accent); }
+    .label.blue { color: var(--navy); }
+    .label.olive { color: var(--olive); }
+    .label.gold { color: var(--gold); }
+
+    .thesis {
+      border-left: 5px solid var(--accent);
+      padding: 18px 18px 18px 20px;
+      background: rgba(138, 59, 47, 0.05);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin-top: 12px;
+      font-size: 1.02rem;
+    }
+
+    .quote-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .quote {
+      padding: 16px 18px;
+      background: linear-gradient(135deg, rgba(47, 73, 100, 0.06), rgba(255, 255, 255, 0.55));
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(47, 73, 100, 0.1);
+    }
+
+    .quote strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--navy);
+    }
+
+    code {
+      font-family: var(--mono);
+      font-size: 0.93em;
+      background: rgba(24, 34, 47, 0.06);
+      padding: 0.1rem 0.35rem;
+      border-radius: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 0.94rem;
+    }
+
+    th, td {
+      text-align: left;
+      vertical-align: top;
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      font-weight: 800;
+    }
+
+    ul, ol {
+      margin: 10px 0 0 20px;
+      padding: 0;
+    }
+
+    li + li {
+      margin-top: 8px;
+    }
+
+    .experiment {
+      padding: 20px;
+      border: 1px solid rgba(24, 34, 47, 0.08);
+      border-radius: 16px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.65), rgba(249, 245, 237, 0.9));
+      margin-top: 16px;
+    }
+
+    .experiment-header {
+      display: flex;
+      gap: 12px;
+      align-items: baseline;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .experiment-id {
+      font-family: var(--mono);
+      color: var(--accent);
+      font-size: 0.88rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: rgba(111, 115, 65, 0.12);
+      color: var(--olive);
+    }
+
+    .subgrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .mini {
+      padding: 14px 14px 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.58);
+      border: 1px solid rgba(24, 34, 47, 0.07);
+    }
+
+    .mini h4 {
+      font-size: 0.96rem;
+      margin-bottom: 6px;
+    }
+
+    .decision {
+      margin-top: 14px;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(24, 34, 47, 0.08);
+    }
+
+    .decision-row {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+    }
+
+    .decision-row > div {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(24, 34, 47, 0.08);
+    }
+
+    .decision-row:last-child > div {
+      border-bottom: none;
+    }
+
+    .decision-row .left {
+      font-weight: 800;
+      font-size: 0.84rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .decision-row.good .left {
+      background: rgba(36, 95, 70, 0.12);
+      color: var(--ok);
+    }
+
+    .decision-row.bad .left {
+      background: rgba(141, 47, 47, 0.12);
+      color: var(--danger);
+    }
+
+    .timeline {
+      display: grid;
+      gap: 14px;
+      margin-top: 10px;
+    }
+
+    .timeline-step {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 16px;
+      align-items: start;
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(24, 34, 47, 0.08);
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .timeline-step .week {
+      font-family: var(--mono);
+      color: var(--accent-soft);
+      font-size: 0.9rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+    }
+
+    .checklist {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .check {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.55);
+      border-radius: 12px;
+      border: 1px solid rgba(24, 34, 47, 0.07);
+    }
+
+    .check span:first-child {
+      color: var(--accent);
+      font-weight: 800;
+    }
+
+    .footer-note {
+      color: var(--muted);
+      font-size: 0.93rem;
+      margin-top: 18px;
+    }
+
+    @media (max-width: 720px) {
+      .hero, .section {
+        padding: 22px 18px;
+      }
+
+      .decision-row,
+      .timeline-step {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <div class="eyebrow">Comment-Driven Research Roadmap</div>
+      <h1>Operational Plan for Turning the Sequential Homeostatic RL Project into a Publishable Paper</h1>
+      <p>
+        This document converts advisor comments from the annotated PDF into a concrete, executable,
+        and falsifiable research program. The goal is not just to "run more experiments." The goal is
+        to sharpen the paper around a mechanism-level claim that can survive reviewer questions.
+      </p>
+      <div class="meta">
+        <div class="meta-chip">Target outcome: submission-quality empirical paper</div>
+        <div class="meta-chip">Core pivot: boundary-aware homeostatic regulation</div>
+        <div class="meta-chip">Status: operational design drafted on 2026-03-30</div>
+      </div>
+      <div class="thesis">
+        <strong>Recommended publishable claim:</strong>
+        Homeostatic reward is most useful not as a full replacement for task reward inside each task,
+        but as a task-general constraint signal that preserves safe, reusable state across task boundaries.
+        The cleanest paper tests exactly when that claim is true, when it is false, and why.
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="label red">Why This Pivot</div>
+      <h2>What the Comments Are Really Asking Us to Do</h2>
+      <div class="quote-list">
+        <div class="quote">
+          <strong>Comment theme 1: narrow the literature and the contribution.</strong>
+          "This is a vast literature..." means the paper should stop trying to cover everything about
+          grounding, survival, and general transfer, and instead anchor itself tightly in sequential transfer
+          under embodied constraints.
+        </div>
+        <div class="quote">
+          <strong>Comment theme 2: disambiguate reward design.</strong>
+          "Homeostatic on its own, or in addition to task-specific rewards?" means the paper needs an explicit
+          reward-factor experiment, not an implicit assumption.
+        </div>
+        <div class="quote">
+          <strong>Comment theme 3: make task boundaries causal.</strong>
+          Multiple comments about energy state across tasks imply that the real mechanism may live at the
+          boundary between tasks, not only inside tasks. This should become a first-class experimental variable.
+        </div>
+        <div class="quote">
+          <strong>Comment theme 4: speak the language of continual RL.</strong>
+          The note about "backwards transfer" means we should align the framing, metrics, and plots with the
+          continual RL literature so the contribution reads as recognizable and publishable.
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="label blue">Paper Positioning</div>
+      <h2>Minimal Publishable Scope</h2>
+      <div class="grid three">
+        <div class="card">
+          <div class="label red">Keep</div>
+          <p>A sequential gridworld benchmark with shared energy dynamics, fixed task order, and multiple seeds.</p>
+          <p>Transfer, forgetting, safety margin, and energy-state carryover as the core metrics.</p>
+        </div>
+        <div class="card">
+          <div class="label gold">De-emphasize</div>
+          <p>Broad "symbol grounding" language unless you can back it with separate representation analyses.</p>
+          <p>Any claim that homeostatic reward fully replaces task reward in general.</p>
+        </div>
+        <div class="card">
+          <div class="label olive">Center</div>
+          <p>The mechanism that a task-general homeostatic signal stabilizes cross-task state and preserves later solvability.</p>
+          <p>The interaction between <code>reward type</code> and <code>boundary condition</code>.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="label red">Core Variables</div>
+      <h2>The Factorial Design the Paper Should Revolve Around</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Axis</th>
+            <th>Condition</th>
+            <th>Why it matters</th>
+            <th>Interpretation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Reward regime</td>
+            <td><code>Task-only</code></td>
+            <td>Baseline that optimizes each task locally.</td>
+            <td>If this wins everywhere, the homeostatic story is weak.</td>
+          </tr>
+          <tr>
+            <td>Reward regime</td>
+            <td><code>Task + Homeostatic</code></td>
+            <td>Main candidate for publishable contribution.</td>
+            <td>If this wins specifically when boundary state matters, the paper has a sharp mechanism.</td>
+          </tr>
+          <tr>
+            <td>Reward regime</td>
+            <td><code>Pure Homeostatic</code></td>
+            <td>Important ablation for the advisor's question.</td>
+            <td>If it underperforms within tasks but helps with carryover, that supports the refined claim.</td>
+          </tr>
+          <tr>
+            <td>Boundary condition</td>
+            <td><code>Reset</code></td>
+            <td>All tasks begin from the same initial energy.</td>
+            <td>If the advantage disappears here, the mechanism is likely boundary-specific.</td>
+          </tr>
+          <tr>
+            <td>Boundary condition</td>
+            <td><code>Carryover</code></td>
+            <td>Task <code>t</code> begins from the terminal energy state of task <code>t-1</code>.</td>
+            <td>This is the key causal manipulation suggested by the comments.</td>
+          </tr>
+          <tr>
+            <td>Difficulty regime</td>
+            <td><code>Loose</code>, <code>Tight</code></td>
+            <td>Tests whether safety margin matters only when resources are truly scarce.</td>
+            <td>The claim is stronger if the effect scales with scarcity.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <div class="label olive">Hypotheses</div>
+      <h2>Operational Hypotheses and What We Do If They Fail</h2>
+
+      <div class="experiment">
+        <div class="experiment-header">
+          <div class="experiment-id">H1</div>
+          <h3>Boundary-specific utility hypothesis</h3>
+          <span class="pill">Primary</span>
+        </div>
+        <p>
+          The <code>Task + Homeostatic</code> agent will outperform <code>Task-only</code> on forward transfer,
+          survival, and final solvability <em>when energy is carried across tasks</em>, but not necessarily when
+          energy is reset between tasks.
+        </p>
+        <div class="decision">
+          <div class="decision-row good">
+            <div class="left">If supported</div>
+            <div>Write the paper around a mechanistic interaction: homeostatic reward is especially useful as a boundary stabilizer under shared embodied constraints.</div>
+          </div>
+          <div class="decision-row bad">
+            <div class="left">If not supported</div>
+            <div>Either the carryover manipulation is too weak, or the main claim should shift toward "homeostatic reward does not add value beyond task reward in this benchmark."</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="experiment">
+        <div class="experiment-header">
+          <div class="experiment-id">H2</div>
+          <h3>Pure homeostatic reward is not the best general solution</h3>
+          <span class="pill">Clarifying</span>
+        </div>
+        <p>
+          <code>Pure Homeostatic</code> will likely learn simple within-task objectives more slowly than
+          <code>Task-only</code> or <code>Task + Homeostatic</code>, even if it produces higher end-of-task energy.
+        </p>
+        <div class="decision">
+          <div class="decision-row good">
+            <div class="left">If supported</div>
+            <div>This strengthens the refined narrative: homeostatic reward should be auxiliary or cross-task, not a universal replacement for task reward.</div>
+          </div>
+          <div class="decision-row bad">
+            <div class="left">If not supported</div>
+            <div>If pure homeostatic dominates widely, the paper can claim a stronger result, but then it needs tighter controls to show the effect is not just a better shaping signal.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="experiment">
+        <div class="experiment-header">
+          <div class="experiment-id">H3</div>
+          <h3>Safety margin matters more in tight regimes</h3>
+          <span class="pill">Robustness</span>
+        </div>
+        <p>
+          The benefit of homeostatic regularization should be larger when tasks are tight enough that arriving at
+          the end of one task in a depleted state makes the next task materially harder.
+        </p>
+        <div class="decision">
+          <div class="decision-row good">
+            <div class="left">If supported</div>
+            <div>Add a figure showing the interaction between reward regime and scarcity. This becomes one of the strongest publishable results.</div>
+          </div>
+          <div class="decision-row bad">
+            <div class="left">If not supported</div>
+            <div>The benchmark may not be resource-sensitive enough, or the effect may be smaller than initially thought. Tighten margins or reduce the claim.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="label red">Experiment Ladder</div>
+      <h2>Executable Study Plan</h2>
+
+      <div class="experiment">
+        <div class="experiment-header">
+          <div class="experiment-id">E0</div>
+          <h3>Instrumentation and sanity checks</h3>
+          <span class="pill">Must do first</span>
+        </div>
+        <p>Before any claim, make sure the benchmark can actually express the mechanism we care about.</p>
+        <div class="subgrid">
+          <div class="mini">
+            <h4>Required implementation</h4>
+            <ul>
+              <li>Add a config flag for <code>boundary_mode = reset | carryover</code>.</li>
+              <li>Log terminal energy at the end of each task phase.</li>
+              <li>Log initial energy at the start of each next task.</li>
+              <li>Record per-task success, deaths, hazard hits, and remaining energy.</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h4>Verification</h4>
+            <ul>
+              <li>Run 3 seeds and inspect raw logs.</li>
+              <li>Confirm that reset mode truly overwrites the state.</li>
+              <li>Confirm that carryover mode truly propagates the previous terminal energy.</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h4>Failure signal</h4>
+            <ul>
+              <li>If distributions of initial energy are almost identical between modes, the manipulation is not active enough.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="experiment">
+        <div class="experiment-header">
+          <div class="experiment-id">E1</div>
+          <h3>Reproduce the current pilot under reset and carryover</h3>
+          <span class="pill">Establish baseline</span>
+        </div>
+        <p>
+          Compare the current sequential setup under two boundary modes while keeping the existing agents.
+          This tells us whether the boundary manipulation itself changes the story.
+        </p>
+        <div class="subgrid">
+          <div class="mini">
+            <h4>Conditions</h4>
+            <ul>
+              <li><code>Task-only + reset</code></li>
+              <li><code>Task-only + carryover</code></li>
+              <li><code>Pure Homeostatic + reset</code></li>
+              <li><code>Pure Homeostatic + carryover</code></li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h4>Metrics</h4>
+            <ul>
+              <li>Phase-end success matrix</li>
+              <li>Forgetting per task</li>
+              <li>Forward transfer against single-task baselines</li>
+              <li>Remaining energy and death rate</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h4>Decision rule</h4>
+            <ul>
+              <li>If carryover barely changes outcomes, the paper cannot center task-boundary energy.</li>
+              <li>If carryover hurts task-only much more than homeostatic, move immediately to E2.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="experiment">
+        <div class="experiment-header">
+          <div class="experiment-id">E2</div>
+          <h3>Main factorial study: reward regime x boundary mode</h3>
+          <span class="pill">Main figure candidate</span>
+        </div>
+        <p>
+          This is the central experiment for the paper. If this experiment is clean, the paper is viable.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Reward regime</th>
+              <th>Reset</th>
+              <th>Carryover</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>Task-only</code></td>
+              <td>baseline local optimization</td>
+              <td>tests collapse under poor boundary state</td>
+            </tr>
+            <tr>
+              <td><code>Task + Homeostatic</code></td>
+              <td>tests auxiliary effect without boundary pressure</td>
+              <td>main publishable condition</td>
+            </tr>
+            <tr>
+              <td><code>Pure Homeostatic</code></td>
+              <td>tests replacement strategy</td>
+              <td>tests whether pure homeostasis survives transitions</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="subgrid">
+          <div class="mini">
+            <h4>Recommended seeds</h4>
+            <ul>
+              <li>Pilot: 5 seeds per cell</li>
+              <li>Main run: 20 seeds per cell</li>
+              <li>Use matched seed sets across cells</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h4>Minimum evidence threshold</h4>
+            <ul>
+              <li><code>Task + Homeostatic</code> beats <code>Task-only</code> in carryover on at least 2 of: forward transfer, death rate, final success, boundary-start solvability.</li>
+              <li>The same advantage should shrink or disappear in reset mode.</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h4>Statistical plan</h4>
+            <ul>
+              <li>Bootstrap 95% CI for means</li>
+              <li>Mann-Whitney or permutation test for pairwise comparisons</li>
+              <li>Report effect sizes, not only p-values</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="experiment">
+        <div class="experiment-header">
+          <div class="experiment-id">E3</div>
+          <h3>Tightness sweep and failure-boundary stress test</h3>
+          <span class="pill">Mechanism confirmation</span>
+        </div>
+        <p>
+          Sweep task tightness so that cross-task safety margin becomes weak, medium, or strong.
+          This tests whether the homeostatic effect scales with actual embodied pressure.
+        </p>
+        <div class="subgrid">
+          <div class="mini">
+            <h4>Sweep dimensions</h4>
+            <ul>
+              <li>Initial energy</li>
+              <li>Step cost</li>
+              <li>Food gain</li>
+              <li>Hazard cost</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h4>Main readout</h4>
+            <ul>
+              <li>Does the mixed agent's advantage grow as the environment becomes tighter?</li>
+              <li>Does the task-only agent increasingly finish tasks in unrecoverable states?</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h4>Interpretation</h4>
+            <ul>
+              <li>If yes, the mechanism is plausibly real.</li>
+              <li>If no, the paper should avoid a strong safety-margin mechanism claim.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="experiment">
+        <div class="experiment-header">
+          <div class="experiment-id">E4</div>
+          <h3>Observation vs reward disambiguation</h3>
+          <span class="pill">Reviewer defense</span>
+        </div>
+        <p>
+          Add a control that sees energy but is not rewarded for homeostatic regulation.
+          This distinguishes the value of observing internal state from the value of optimizing it.
+        </p>
+        <div class="subgrid">
+          <div class="mini">
+            <h4>Needed conditions</h4>
+            <ul>
+              <li><code>Task-only + Energy Observation</code></li>
+              <li><code>Task + Homeostatic + Energy Observation</code></li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h4>Question answered</h4>
+            <ul>
+              <li>Is the benefit because the agent knows its state?</li>
+              <li>Or because the optimization objective changes?</li>
+            </ul>
+          </div>
+          <div class="mini">
+            <h4>Priority</h4>
+            <ul>
+              <li>Do this only after E2 works, unless a reviewer-like concern appears early.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="experiment">
+        <div class="experiment-header">
+          <div class="experiment-id">E5</div>
+          <h3>Single-task oracle comparison</h3>
+          <span class="pill">Scope boundary</span>
+        </div>
+        <p>
+          Train task-specific oracle agents independently on each task. The goal is not to beat them.
+          The goal is to show the cost of specialization and the value of reusability.
+        </p>
+        <div class="decision">
+          <div class="decision-row good">
+            <div class="left">If oracle wins within task</div>
+            <div>That is expected. The paper can still win by showing better cross-task efficiency, lower redesign cost, or stronger boundary robustness.</div>
+          </div>
+          <div class="decision-row bad">
+            <div class="left">If sequential agent also loses transfer</div>
+            <div>The benchmark may not support the central claim. Reduce the claim or redesign the tasks before writing the paper.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="label blue">Metrics</div>
+      <h2>What Must Be Logged for the Results to Be Verifiable</h2>
+      <div class="grid two">
+        <div class="card">
+          <h3>Per-episode logs</h3>
+          <ul>
+            <li>task id, seed, phase index</li>
+            <li>start energy and end energy</li>
+            <li>success or failure</li>
+            <li>death cause if failed</li>
+            <li>hazard hits</li>
+            <li>food collected or recharge events</li>
+            <li>episode length</li>
+            <li>reward decomposition if using mixed reward</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Derived metrics</h3>
+          <ul>
+            <li>current-task success curve</li>
+            <li>phase-end success matrix <code>r_i,j</code></li>
+            <li>forgetting per task</li>
+            <li>forward transfer against single-task baselines</li>
+            <li>backward transfer</li>
+            <li>mean remaining energy on successful episodes</li>
+            <li>boundary solvability: probability that task <code>t+1</code> is solvable from terminal state of task <code>t</code></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="checklist">
+        <div class="check"><span>01</span><div>Every published figure should be reproducible from a JSON or CSV artifact already saved by the experiment code.</div></div>
+        <div class="check"><span>02</span><div>Every claim about "carryover" should be backed by a plot of initial energy distributions at each task boundary.</div></div>
+        <div class="check"><span>03</span><div>Every claim about "safer behavior" should show both end energy and death rate, not only reward.</div></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="label gold">Figures</div>
+      <h2>Figure List for a Submission-Ready Paper</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Figure</th>
+            <th>Content</th>
+            <th>Why it matters</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Fig. 1</td>
+            <td>Task sequence schematic plus reset vs carryover boundary modes</td>
+            <td>Makes the causal manipulation visually obvious.</td>
+          </tr>
+          <tr>
+            <td>Fig. 2</td>
+            <td>Main factorial result: reward regime x boundary mode</td>
+            <td>This is the paper's central claim.</td>
+          </tr>
+          <tr>
+            <td>Fig. 3</td>
+            <td>Phase-end success matrix and forgetting heatmaps</td>
+            <td>Connects the work to continual RL conventions.</td>
+          </tr>
+          <tr>
+            <td>Fig. 4</td>
+            <td>Boundary-state histogram or violin plot of carryover energy</td>
+            <td>Verifies the mechanism under discussion actually occurs.</td>
+          </tr>
+          <tr>
+            <td>Fig. 5</td>
+            <td>Tightness sweep interaction plot</td>
+            <td>Shows the effect scales with scarcity rather than noise.</td>
+          </tr>
+          <tr>
+            <td>Appendix</td>
+            <td>Single-task oracle and extra ablations</td>
+            <td>Pre-empts reviewer objections without overloading the main text.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section">
+      <div class="label olive">Execution Order</div>
+      <h2>Concrete Week-by-Week Plan</h2>
+      <div class="timeline">
+        <div class="timeline-step">
+          <div class="week">Week 1</div>
+          <div>
+            Implement <code>boundary_mode</code>, per-task boundary logging, and mixed reward decomposition.
+            Finish E0 and a 3-seed sanity pass for E1. Do not move on until raw logs confirm the manipulation.
+          </div>
+        </div>
+        <div class="timeline-step">
+          <div class="week">Week 2</div>
+          <div>
+            Run E1 and small E2 pilot with 5 seeds per cell. Decide whether carryover is strong enough to justify the paper.
+            If not, adjust environment tightness before scaling.
+          </div>
+        </div>
+        <div class="timeline-step">
+          <div class="week">Week 3</div>
+          <div>
+            Lock the benchmark and run the main E2 experiment at 20 seeds per cell.
+            Produce preliminary plots and identify whether the main interaction exists.
+          </div>
+        </div>
+        <div class="timeline-step">
+          <div class="week">Week 4</div>
+          <div>
+            Run E3 tightness sweep and one disambiguation study from E4.
+            Start drafting figures and the methods section in parallel.
+          </div>
+        </div>
+        <div class="timeline-step">
+          <div class="week">Week 5</div>
+          <div>
+            Add oracle comparison if needed, finalize statistics, and write the paper around the strongest supported claim.
+            Only keep experiments that sharpen the final narrative.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="label red">Decision Tree</div>
+      <h2>How the Story Changes Depending on the Results</h2>
+      <div class="grid two">
+        <div class="card">
+          <div class="label olive">Best-case outcome</div>
+          <p>
+            <code>Task + Homeostatic</code> wins in carryover mode, the advantage shrinks in reset mode,
+            and the effect grows under tighter resource margins.
+          </p>
+          <p>
+            <strong>Paper title direction:</strong> homeostatic reward as a reusable cross-task stabilizer under embodied constraints.
+          </p>
+        </div>
+        <div class="card">
+          <div class="label gold">Mixed outcome</div>
+          <p>
+            Pure homeostatic helps safety but hurts within-task performance; mixed reward is only modestly better.
+          </p>
+          <p>
+            <strong>Paper title direction:</strong> when and where homeostatic reward helps sequential RL, with a bounded empirical claim.
+          </p>
+        </div>
+        <div class="card">
+          <div class="label red">Negative outcome</div>
+          <p>
+            Boundary carryover does not change much, or task-only remains best everywhere.
+          </p>
+          <p>
+            <strong>Fallback paper:</strong> negative evidence that homeostatic reward does not improve transfer in this benchmark, plus analysis of why the mechanism failed to emerge.
+          </p>
+        </div>
+        <div class="card">
+          <div class="label blue">Still publishable if careful</div>
+          <p>
+            Even a negative result can be useful if the benchmark is clean, the controls are clear, and the failure mode is informative about when homeostatic objectives are not enough.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="label blue">Writing Checklist</div>
+      <h2>What the Final Paper Must Explicitly Say</h2>
+      <div class="checklist">
+        <div class="check"><span>A</span><div>Why boundary carryover is the causal manipulation, not a side detail.</div></div>
+        <div class="check"><span>B</span><div>Why task reward and homeostatic reward should be compared both separately and jointly.</div></div>
+        <div class="check"><span>C</span><div>Why the benchmark is a transfer benchmark under shared embodied constraints, not a claim about all continual RL.</div></div>
+        <div class="check"><span>D</span><div>Why safety margin is measured behaviorally and mechanistically, not only through return.</div></div>
+        <div class="check"><span>E</span><div>What the strongest supported claim is, and which stronger claims are intentionally not made.</div></div>
+      </div>
+      <p class="footer-note">
+        A publishable paper is not the one with the most experiments. It is the one where the causal story, the controls,
+        and the final claim line up cleanly. The comments suggest that the cleanest story here is not "homeostatic reward
+        solves everything," but "homeostatic reward matters most when reusable internal-state regulation is needed across task boundaries."
+      </p>
+    </section>
+  </div>
+</body>
+</html>

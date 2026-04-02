@@ -8,6 +8,16 @@ class SequentialEnvTest(unittest.TestCase):
         env = SequentialHomeostasisEnv(task_name="reach", reward_mode="homeostatic")
         obs, _ = env.reset(seed=0)
         self.assertEqual(obs.shape, (13,))
+        self.assertGreaterEqual(obs[7], 0.0)
+
+    def test_masked_observation_hides_energy(self):
+        env = SequentialHomeostasisEnv(
+            task_name="reach",
+            reward_mode="task",
+            observation_mode="masked",
+        )
+        obs, _ = env.reset(seed=0)
+        self.assertEqual(obs[7], -1.0)
 
     def test_recharge_task_collects_food(self):
         env = SequentialHomeostasisEnv(task_name="recharge", reward_mode="eval")
@@ -42,6 +52,26 @@ class SequentialEnvTest(unittest.TestCase):
         self.assertEqual(env.grid_size, 6)
         self.assertTrue(env.food_available)
         self.assertEqual(len(env.hazards), 2)
+
+    def test_initial_energy_override_applies(self):
+        env = SequentialHomeostasisEnv(
+            task_name="tight_detour",
+            reward_mode="eval",
+            initial_energy_override=3.5,
+        )
+        env.reset(seed=0)
+        self.assertAlmostEqual(env.energy, 3.5)
+
+    def test_mixed_reward_combines_task_and_homeostatic_terms(self):
+        env = SequentialHomeostasisEnv(task_name="recharge", reward_mode="mixed")
+        env.reset(seed=0)
+        total_reward = 0.0
+        for action in [1, 1, 3]:
+            _, reward, terminated, truncated, _ = env.step(action)
+            total_reward += reward
+            self.assertFalse(terminated or truncated)
+        self.assertTrue(env.stats["food_collected"])
+        self.assertGreater(total_reward, 0.0)
 
 
 if __name__ == "__main__":

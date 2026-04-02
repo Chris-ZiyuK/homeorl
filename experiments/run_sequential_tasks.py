@@ -1,9 +1,12 @@
 """
 Sequential gridworld experiment for homeostatic RL.
 
-Compares two agents trained on the same task sequence:
-  - task:        dense task-specific shaping that changes with each task
-  - homeostatic: shared drive-reduction objective across all tasks
+This runner supports five agent families:
+  A_task_only        : task reward, energy masked
+  B_energy_aware     : task reward, energy observed
+  C_task_homeostatic : task + homeostatic reward, energy observed
+  D_pure_homeostatic : homeostatic reward, energy observed
+  E_task_oracle      : task reward, energy observed, but reinitialized per task
 """
 
 from __future__ import annotations
@@ -34,16 +37,53 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.envs.sequential_homeostasis_env import SequentialHomeostasisEnv
+from src.envs.sequential_homeostasis_env import SequentialHomeostasisEnv, TASK_SPECS
+
+
+AGENT_SPECS = {
+    "A_task_only": {
+        "reward_mode": "task",
+        "observation_mode": "masked",
+        "sequential": True,
+        "description": "Task reward only; energy hidden.",
+    },
+    "B_energy_aware": {
+        "reward_mode": "task",
+        "observation_mode": "full",
+        "sequential": True,
+        "description": "Task reward with energy observation.",
+    },
+    "C_task_homeostatic": {
+        "reward_mode": "mixed",
+        "observation_mode": "full",
+        "sequential": True,
+        "description": "Task reward plus homeostatic auxiliary reward.",
+    },
+    "D_pure_homeostatic": {
+        "reward_mode": "homeostatic",
+        "observation_mode": "full",
+        "sequential": True,
+        "description": "Pure homeostatic reward with sparse success/failure.",
+    },
+    "E_task_oracle": {
+        "reward_mode": "task",
+        "observation_mode": "full",
+        "sequential": False,
+        "description": "Task reward with energy observation; network reset per task.",
+    },
+}
 
 
 DEFAULT_CONFIG = {
     "tasks": ["reach", "recharge", "hazard_reach", "detour", "tight_detour"],
+    "agents": list(AGENT_SPECS.keys()),
     "episodes_per_task": 600,
     "eval_interval": 50,
     "eval_episodes": 40,
     "num_seeds": 10,
     "success_threshold": 0.7,
+    "boundary_mode": "reset",
+    "carryover_min_energy": 1.0,
     "agent": {
         "hidden_dim": 128,
         "lr": 5e-4,
@@ -55,10 +95,14 @@ DEFAULT_CONFIG = {
         "eps_end": 0.05,
         "eps_decay": 300,
     },
+    "environment": {
+        "internal_coef": 1.0,
+        "task_reward_coef": 1.0,
+    },
     "logging": {
         "save_dir": "experiments/sequential_results",
-        "plot_name": "sequential_homeostasis.png",
-        "json_name": "sequential_homeostasis.json",
+        "plot_name": "sequential_agent_suite.png",
+        "json_name": "sequential_agent_suite.json",
     },
 }
 
@@ -123,7 +167,34 @@ def load_config(config_path):
     return merge_dict(DEFAULT_CONFIG, loaded)
 
 
-def evaluate_policy(q_net, task_name, reward_mode, n_eval=40, seed_base=100000):
+def make_env(task_name, agent_spec, env_cfg, start_energy=None):
+    return SequentialHomeostasisEnv(
+        task_name=task_name,
+        reward_mode=agent_spec["reward_mode"],
+        observation_mode=agent_spec["observation_mode"],
+        internal_coef=env_cfg["internal_coef"],
+        task_reward_coef=env_cfg["task_reward_coef"],
+        initial_energy_override=start_energy,
+    )
+
+
+def init_training_stack(obs_dim, n_actions, agent_cfg):
+    q_net = QNet(obs_dim, n_actions, hidden_dim=agent_cfg["hidden_dim"])
+    target_net = QNet(obs_dim, n_actions, hidden_dim=agent_cfg["hidden_dim"])
+    target_net.load_state_dict(q_net.state_dict())
+    optimizer = optim.Adam(q_net.parameters(), lr=agent_cfg["lr"])
+    buffer = ReplayBuffer(capacity=agent_cfg["buffer_size"])
+    return q_net, target_net, optimizer, buffer
+
+
+def select_action(q_net, obs, eps, n_actions):
+    if random.random() < eps:
+        return random.randrange(n_actions)
+    with torch.no_grad():
+        return q_net(torch.FloatTensor(obs).unsqueeze(0)).argmax(1).item()
+
+
+def evaluate_policy(q_net, task_name, agent_spec, cfg, n_eval=40, seed_base=100000, start_energy=None):
     successes = 0
     deaths = 0
     energy_left = 0.0
@@ -131,7 +202,7 @@ def evaluate_policy(q_net, task_name, reward_mode, n_eval=40, seed_base=100000):
     food_collected = 0.0
 
     for i in range(n_eval):
-        env = SequentialHomeostasisEnv(task_name=task_name, reward_mode=reward_mode)
+        env = make_env(task_name, agent_spec, cfg["environment"], start_energy=start_energy)
         obs, _ = env.reset(seed=seed_base + i)
         done = False
         while not done:
@@ -155,7 +226,26 @@ def evaluate_policy(q_net, task_name, reward_mode, n_eval=40, seed_base=100000):
     }
 
 
+def resolve_phase_start_energy(task_name, cfg, previous_energy):
+    if cfg["boundary_mode"] != "carryover" or previous_energy is None:
+        return None
+    task_cap = TASK_SPECS[task_name]["energy_cap"]
+    return float(np.clip(previous_energy, cfg["carryover_min_energy"], task_cap))
+
+
+def optimize_step(q_net, target_net, optimizer, buffer, agent_cfg):
+    s, a, r, s2, d = buffer.sample(agent_cfg["batch_size"])
+    q_values = q_net(s).gather(1, a.unsqueeze(1)).squeeze(1)
+    with torch.no_grad():
+        targets = r + agent_cfg["gamma"] * target_net(s2).max(1)[0] * (1 - d)
+    loss = nn.MSELoss()(q_values, targets)
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+
+
 def train_agent(agent_name, cfg, seed):
+    agent_spec = AGENT_SPECS[agent_name]
     agent_cfg = cfg["agent"]
     tasks = cfg["tasks"]
     episodes_per_task = cfg["episodes_per_task"]
@@ -166,55 +256,55 @@ def train_agent(agent_name, cfg, seed):
     np.random.seed(seed)
     random.seed(seed)
 
-    reward_mode = "task" if agent_name == "task" else "homeostatic"
-    env = SequentialHomeostasisEnv(task_name=tasks[0], reward_mode=reward_mode)
-    q_net = QNet(env.obs_dim, env.action_space.n, hidden_dim=agent_cfg["hidden_dim"])
-    target_net = QNet(env.obs_dim, env.action_space.n, hidden_dim=agent_cfg["hidden_dim"])
-    target_net.load_state_dict(q_net.state_dict())
-    optimizer = optim.Adam(q_net.parameters(), lr=agent_cfg["lr"])
-    buffer = ReplayBuffer(capacity=agent_cfg["buffer_size"])
+    bootstrap_env = make_env(tasks[0], agent_spec, cfg["environment"])
+    q_net, target_net, optimizer, buffer = init_training_stack(
+        bootstrap_env.obs_dim, bootstrap_env.action_space.n, agent_cfg
+    )
 
     logs = {
         "agent": agent_name,
         "seed": seed,
         "tasks": tasks,
+        "boundary_mode": cfg["boundary_mode"],
+        "agent_description": agent_spec["description"],
         "current_task_eval": [],
         "phase_end_eval": [],
     }
 
     global_episode = 0
+    carryover_energy = None
+
     for task_idx, task_name in enumerate(tasks):
-        env = SequentialHomeostasisEnv(task_name=task_name, reward_mode=reward_mode)
+        if not agent_spec["sequential"]:
+            q_net, target_net, optimizer, buffer = init_training_stack(
+                bootstrap_env.obs_dim, bootstrap_env.action_space.n, agent_cfg
+            )
+
+        phase_start_energy = None if not agent_spec["sequential"] else resolve_phase_start_energy(
+            task_name, cfg, carryover_energy
+        )
+        env = make_env(task_name, agent_spec, cfg["environment"], start_energy=phase_start_energy)
         buffer.clear()
         threshold_hit = None
+        last_episode_energy = None
 
-        for local_episode in range(episodes_per_task):
+        for _ in range(episodes_per_task):
             obs, _ = env.reset(seed=seed * 100000 + global_episode)
             done = False
             while not done:
                 eps = agent_cfg["eps_end"] + (
                     agent_cfg["eps_start"] - agent_cfg["eps_end"]
                 ) * np.exp(-global_episode / agent_cfg["eps_decay"])
-                if random.random() < eps:
-                    action = env.action_space.sample()
-                else:
-                    with torch.no_grad():
-                        action = q_net(torch.FloatTensor(obs).unsqueeze(0)).argmax(1).item()
-
+                action = select_action(q_net, obs, eps, env.action_space.n)
                 next_obs, reward, terminated, truncated, _ = env.step(action)
                 done = terminated or truncated
                 buffer.push(obs, action, reward, next_obs, float(done))
                 obs = next_obs
 
                 if len(buffer) >= agent_cfg["batch_size"]:
-                    s, a, r, s2, d = buffer.sample(agent_cfg["batch_size"])
-                    q_values = q_net(s).gather(1, a.unsqueeze(1)).squeeze(1)
-                    with torch.no_grad():
-                        targets = r + agent_cfg["gamma"] * target_net(s2).max(1)[0] * (1 - d)
-                    loss = nn.MSELoss()(q_values, targets)
-                    optimizer.zero_grad()
-                    loss.backward()
-                    optimizer.step()
+                    optimize_step(q_net, target_net, optimizer, buffer, agent_cfg)
+
+            last_episode_energy = env.stats["energy_left"]
 
             if global_episode % agent_cfg["target_update"] == 0:
                 target_net.load_state_dict(q_net.state_dict())
@@ -224,15 +314,18 @@ def train_agent(agent_name, cfg, seed):
                 metrics = evaluate_policy(
                     q_net,
                     task_name=task_name,
-                    reward_mode=reward_mode,
+                    agent_spec=agent_spec,
+                    cfg=cfg,
                     n_eval=eval_episodes,
                     seed_base=seed * 1000 + global_episode,
+                    start_energy=phase_start_energy,
                 )
                 logs["current_task_eval"].append(
                     {
                         "global_episode": global_episode,
                         "task_index": task_idx,
                         "task_name": task_name,
+                        "phase_start_energy": phase_start_energy,
                         **metrics,
                     }
                 )
@@ -241,21 +334,60 @@ def train_agent(agent_name, cfg, seed):
 
         task_matrix = {}
         for eval_task in tasks:
+            eval_start_energy = phase_start_energy if eval_task == task_name else None
             task_matrix[eval_task] = evaluate_policy(
                 q_net,
                 task_name=eval_task,
-                reward_mode=reward_mode,
+                agent_spec=agent_spec,
+                cfg=cfg,
                 n_eval=eval_episodes,
                 seed_base=seed * 2000 + global_episode + task_idx * 17,
+                start_energy=eval_start_energy,
             )
+
+        # --- Boundary solvability: probe next task from current terminal energy ---
+        boundary_solvability = None
+        boundary_solvability_energy = None
+        if task_idx < len(tasks) - 1 and agent_spec["sequential"]:
+            next_task = tasks[task_idx + 1]
+            terminal_energy = task_matrix[task_name]["avg_energy_left"]
+            if terminal_energy is not None and terminal_energy > 0:
+                # Always compute probe energy as if carryover, to measure boundary safety
+                next_cap = TASK_SPECS[next_task]["energy_cap"]
+                probe_start = float(np.clip(
+                    terminal_energy, cfg["carryover_min_energy"], next_cap
+                ))
+                probe_metrics = evaluate_policy(
+                    q_net,
+                    task_name=next_task,
+                    agent_spec=agent_spec,
+                    cfg=cfg,
+                    n_eval=eval_episodes,
+                    seed_base=seed * 3000 + global_episode + task_idx * 31,
+                    start_energy=probe_start,
+                )
+                boundary_solvability = probe_metrics["success"]
+                boundary_solvability_energy = probe_start
+            else:
+                boundary_solvability = 0.0
+                boundary_solvability_energy = 0.0
+
         logs["phase_end_eval"].append(
             {
                 "phase_task": task_name,
                 "phase_index": task_idx,
                 "adaptation_episode": threshold_hit,
+                "phase_start_energy": phase_start_energy,
+                "phase_end_energy": last_episode_energy,
+                "policy_boundary_energy": task_matrix[task_name]["avg_energy_left"],
+                "boundary_solvability": boundary_solvability,
+                "boundary_solvability_energy": boundary_solvability_energy,
                 "task_metrics": task_matrix,
             }
         )
+
+        if agent_spec["sequential"]:
+            carryover_energy = task_matrix[task_name]["avg_energy_left"]
 
     return logs
 
@@ -296,11 +428,46 @@ def aggregate_runs(runs, tasks):
             row = {
                 "phase_task": phases[0][phase_idx]["phase_task"],
                 "phase_index": phase_idx,
+                "phase_start_energy_mean": float(
+                    np.nanmean([phase[phase_idx]["phase_start_energy"] for phase in phases])
+                )
+                if any(phase[phase_idx]["phase_start_energy"] is not None for phase in phases)
+                else None,
+                "phase_end_energy_mean": float(
+                    np.nanmean([phase[phase_idx]["phase_end_energy"] for phase in phases])
+                )
+                if any(phase[phase_idx]["phase_end_energy"] is not None for phase in phases)
+                else None,
+                "policy_boundary_energy_mean": float(
+                    np.nanmean([phase[phase_idx]["policy_boundary_energy"] for phase in phases])
+                )
+                if any(phase[phase_idx]["policy_boundary_energy"] is not None for phase in phases)
+                else None,
                 "adaptation_episode_mean": float(
-                    np.mean(
+                    np.nanmean(
                         [
                             phase[phase_idx]["adaptation_episode"]
                             if phase[phase_idx]["adaptation_episode"] is not None
+                            else np.nan
+                            for phase in phases
+                        ]
+                    )
+                ),
+                "boundary_solvability_mean": float(
+                    np.nanmean(
+                        [
+                            phase[phase_idx].get("boundary_solvability", np.nan)
+                            if phase[phase_idx].get("boundary_solvability") is not None
+                            else np.nan
+                            for phase in phases
+                        ]
+                    )
+                ),
+                "boundary_solvability_std": float(
+                    np.nanstd(
+                        [
+                            phase[phase_idx].get("boundary_solvability", np.nan)
+                            if phase[phase_idx].get("boundary_solvability") is not None
                             else np.nan
                             for phase in phases
                         ]
@@ -325,59 +492,58 @@ def plot_results(aggregated, cfg):
     save_dir.mkdir(parents=True, exist_ok=True)
     plot_path = save_dir / cfg["logging"]["plot_name"]
     tasks = cfg["tasks"]
-    colors = {"task": "#ef4444", "homeostatic": "#2563eb"}
+    agent_names = list(aggregated["current"].keys())
+    cmap = plt.get_cmap("tab10")
+    colors = {agent: cmap(idx % 10) for idx, agent in enumerate(agent_names)}
 
-    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+    fig, axes = plt.subplots(1, 2, figsize=(15, 5))
 
     for agent, series in aggregated["current"].items():
         x = [row["global_episode"] for row in series]
         y = [row["success_mean"] for row in series]
         std = [row["success_std"] for row in series]
-        axes[0].plot(x, y, label=agent, color=colors[agent], linewidth=2.5)
+        axes[0].plot(x, y, label=agent, color=colors[agent], linewidth=2.2)
         axes[0].fill_between(
             x,
             np.maximum(0.0, np.array(y) - np.array(std)),
             np.minimum(1.0, np.array(y) + np.array(std)),
             color=colors[agent],
-            alpha=0.18,
+            alpha=0.12,
         )
 
     for boundary in range(1, len(tasks)):
-        axes[0].axvline(boundary * cfg["episodes_per_task"], color="#9ca3af", linestyle="--")
-    axes[0].set_title("Current Task Success During Sequential Training")
+        axes[0].axvline(boundary * cfg["episodes_per_task"], color="#9ca3af", linestyle="--", linewidth=1.0)
+    axes[0].set_title(f"Current Task Success ({cfg['boundary_mode']})")
     axes[0].set_xlabel("Global Episode")
     axes[0].set_ylabel("Success Rate")
     axes[0].set_ylim(0.0, 1.05)
-    axes[0].legend()
+    axes[0].legend(fontsize=8)
     axes[0].grid(True, alpha=0.3)
 
     x_positions = np.arange(len(tasks))
-    width = 0.18
-    for offset, agent in zip([-0.18, 0.18], ["task", "homeostatic"]):
-        final_phase = aggregated["phase_end"][agent][-1]
-        means = [
-            final_phase["task_metrics"][task]["success_mean"]
-            for task in tasks
-        ]
-        stds = [
-            final_phase["task_metrics"][task]["success_std"]
-            for task in tasks
-        ]
+    width = 0.82 / max(len(agent_names), 1)
+    offsets = np.linspace(-0.41 + width / 2, 0.41 - width / 2, len(agent_names))
+    for offset, agent in zip(offsets, agent_names):
+        means = []
+        stds = []
+        for task_idx, task in enumerate(tasks):
+            phase = aggregated["phase_end"][agent][task_idx]
+            means.append(phase["task_metrics"][task]["success_mean"])
+            stds.append(phase["task_metrics"][task]["success_std"])
         axes[1].bar(
             x_positions + offset,
             means,
-            width=width * 2,
+            width=width,
             yerr=stds,
             label=agent,
             color=colors[agent],
             alpha=0.85,
         )
 
-    axes[1].set_title("Final Retention Across All Tasks")
+    axes[1].set_title("End-of-Phase Performance per Task")
     axes[1].set_xticks(x_positions, tasks)
     axes[1].set_ylim(0.0, 1.05)
     axes[1].set_ylabel("Success Rate")
-    axes[1].legend()
     axes[1].grid(True, axis="y", alpha=0.3)
 
     fig.tight_layout()
@@ -399,27 +565,52 @@ def save_results(raw_runs, aggregated, cfg):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, default="configs/sequential_gridworld.yaml")
+    parser.add_argument("--seed_index", type=int, default=None,
+                        help="Run only this seed index (0-based). For SLURM array dispatch.")
+    parser.add_argument("--boundary_mode", type=str, default=None,
+                        choices=["reset", "carryover"],
+                        help="Override boundary_mode from config.")
+    parser.add_argument("--output_dir", type=str, default=None,
+                        help="Override output directory.")
     args = parser.parse_args()
     cfg = load_config(args.config if os.path.exists(args.config) else None)
 
+    if args.boundary_mode:
+        cfg["boundary_mode"] = args.boundary_mode
+    if args.output_dir:
+        cfg["logging"]["save_dir"] = args.output_dir
+
+    # Determine which seeds to run
+    if args.seed_index is not None:
+        seed_indices = [args.seed_index]
+    else:
+        seed_indices = list(range(cfg["num_seeds"]))
+
     raw_runs = []
-    for seed_idx in range(cfg["num_seeds"]):
+    for seed_idx in seed_indices:
         seed = 100 + seed_idx * 17
-        for agent_name in ["task", "homeostatic"]:
-            print(f"Running {agent_name:12s} seed={seed}")
+        for agent_name in cfg["agents"]:
+            print(f"Running {agent_name:20s} seed={seed} boundary={cfg['boundary_mode']}")
             raw_runs.append(train_agent(agent_name, cfg, seed))
 
     aggregated = aggregate_runs(raw_runs, cfg["tasks"])
+
+    # For single-seed runs, use seed-specific filenames
+    if args.seed_index is not None:
+        base_name = Path(cfg["logging"]["json_name"]).stem
+        cfg["logging"]["json_name"] = f"{base_name}_seed{args.seed_index}.json"
+        cfg["logging"]["plot_name"] = f"{base_name}_seed{args.seed_index}.png"
+
     plot_path = plot_results(aggregated, cfg)
     json_path = save_results(raw_runs, aggregated, cfg)
 
-    print("\nPhase-end success means:")
-    for agent in ["task", "homeostatic"]:
+    print("\nFinal task-wise success means:")
+    for agent in cfg["agents"]:
         final_phase = aggregated["phase_end"][agent][-1]
         print(f"  {agent}")
         for task_name in cfg["tasks"]:
             success = final_phase["task_metrics"][task_name]["success_mean"]
-            print(f"    {task_name:<10s} success={success:.3f}")
+            print(f"    {task_name:<12s} success={success:.3f}")
 
     print(f"\nSaved plot: {plot_path}")
     print(f"Saved data: {json_path}")

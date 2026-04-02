@@ -1,3 +1,5 @@
+# E2 - Main factorial study: reset mode
+# 5 agents x 20 seeds, same env params as E1v2
 tasks:
   - reach
   - recharge
@@ -15,10 +17,10 @@ agents:
 episodes_per_task: 600
 eval_interval: 50
 eval_episodes: 40
-num_seeds: 10
+num_seeds: 20
 success_threshold: 0.7
 boundary_mode: reset
-carryover_min_energy: 1.0
+carryover_min_energy: 2.0
 
 agent:
   hidden_dim: 128
@@ -36,6 +38,6 @@ environment:
   task_reward_coef: 1.0
 
 logging:
-  save_dir: experiments/sequential_results
-  plot_name: sequential_agent_suite.png
-  json_name: sequential_agent_suite.json
+  save_dir: experiments/sequential_results/e2_reset
+  plot_name: e2_reset.png
+  json_name: e2_reset.json

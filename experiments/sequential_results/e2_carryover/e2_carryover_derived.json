@@ -1,0 +1,136 @@
+{
+  "A_task_only": {
+    "forgetting": {
+      "reach": 0.7,
+      "recharge": 0.7,
+      "hazard_reach": 0.2,
+      "detour": 0.0,
+      "tight_detour": 0.15
+    },
+    "boundary_solvability": [
+      {
+        "phase": "reach",
+        "solvability": 0.05,
+        "solvability_std": 0.2179
+      },
+      {
+        "phase": "recharge",
+        "solvability": 0.0,
+        "solvability_std": 0.0
+      },
+      {
+        "phase": "hazard_reach",
+        "solvability": 0.0,
+        "solvability_std": 0.0
+      },
+      {
+        "phase": "detour",
+        "solvability": 0.05,
+        "solvability_std": 0.2179
+      }
+    ]
+  },
+  "B_energy_aware": {
+    "forgetting": {
+      "reach": 0.7,
+      "recharge": 0.65,
+      "hazard_reach": 0.05,
+      "detour": 0.0,
+      "tight_detour": 0.15
+    },
+    "boundary_solvability": [
+      {
+        "phase": "reach",
+        "solvability": 0.0,
+        "solvability_std": 0.0
+      },
+      {
+        "phase": "recharge",
+        "solvability": 0.0,
+        "solvability_std": 0.0
+      },
+      {
+        "phase": "hazard_reach",
+        "solvability": 0.0,
+        "solvability_std": 0.0
+      },
+      {
+        "phase": "detour",
+        "solvability": 0.0,
+        "solvability_std": 0.0
+      }
+    ]
+  },
+  "C_task_homeostatic": {
+    "forgetting": {
+      "reach": 0.75,
+      "recharge": 0.55,
+      "hazard_reach": 0.8,
+      "detour": 0.0,
+      "tight_detour": 0.0
+    },
+    "boundary_solvability": [
+      {
+        "phase": "reach",
+        "solvability": 0.0,
+        "solvability_std": 0.0
+      },
+      {
+        "phase": "recharge",
+        "solvability": 0.0,
+        "solvability_std": 0.0
+      },
+      {
+        "phase": "hazard_reach",
+        "solvability": 0.0,
+        "solvability_std": 0.0
+      },
+      {
+        "phase": "detour",
+        "solvability": 0.6,
+        "solvability_std": 0.4899
+      }
+    ]
+  },
+  "D_pure_homeostatic": {
+    "forgetting": {
+      "reach": 0.5,
+      "recharge": 0.55,
+      "hazard_reach": 0.25,
+      "detour": 0.0,
+      "tight_detour": 0.15
+    },
+    "boundary_solvability": [
+      {
+        "phase": "reach",
+        "solvability": 0.2,
+        "solvability_std": 0.4
+      },
+      {
+        "phase": "recharge",
+        "solvability": 0.05,
+        "solvability_std": 0.2179
+      },
+      {
+        "phase": "hazard_reach",
+        "solvability": 0.0,
+        "solvability_std": 0.0
+      },
+      {
+        "phase": "detour",
+        "solvability": 0.3,
+        "solvability_std": 0.4583
+      }
+    ]
+  },
+  "E_task_oracle": {
+    "forgetting": {
+      "reach": 0.95,
+      "recharge": 0.8,
+      "hazard_reach": 1.0,
+      "detour": 0.2,
+      "tight_detour": 0.0
+    },
+    "boundary_solvability": []
+  }
+}
