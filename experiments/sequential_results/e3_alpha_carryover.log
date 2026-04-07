@@ -1,0 +1,290 @@
+Running A_task_only          seed=100 seq=alpha boundary=carryover
+Running B_energy_aware       seed=100 seq=alpha boundary=carryover
+Running C_hace               seed=100 seq=alpha boundary=carryover
+Running D_pure_homeostatic   seed=100 seq=alpha boundary=carryover
+Running E_task_oracle        seed=100 seq=alpha boundary=carryover
+Running F_ewc                seed=100 seq=alpha boundary=carryover
+Running G_l2                 seed=100 seq=alpha boundary=carryover
+Running H_er                 seed=100 seq=alpha boundary=carryover
+Running I_hace_ewc           seed=100 seq=alpha boundary=carryover
+Running A_task_only          seed=117 seq=alpha boundary=carryover
+Running B_energy_aware       seed=117 seq=alpha boundary=carryover
+Running C_hace               seed=117 seq=alpha boundary=carryover
+Running D_pure_homeostatic   seed=117 seq=alpha boundary=carryover
+Running E_task_oracle        seed=117 seq=alpha boundary=carryover
+Running F_ewc                seed=117 seq=alpha boundary=carryover
+Running G_l2                 seed=117 seq=alpha boundary=carryover
+Running H_er                 seed=117 seq=alpha boundary=carryover
+Running I_hace_ewc           seed=117 seq=alpha boundary=carryover
+Running A_task_only          seed=134 seq=alpha boundary=carryover
+Running B_energy_aware       seed=134 seq=alpha boundary=carryover
+Running C_hace               seed=134 seq=alpha boundary=carryover
+Running D_pure_homeostatic   seed=134 seq=alpha boundary=carryover
+Running E_task_oracle        seed=134 seq=alpha boundary=carryover
+Running F_ewc                seed=134 seq=alpha boundary=carryover
+Running G_l2                 seed=134 seq=alpha boundary=carryover
+Running H_er                 seed=134 seq=alpha boundary=carryover
+Running I_hace_ewc           seed=134 seq=alpha boundary=carryover
+Running A_task_only          seed=151 seq=alpha boundary=carryover
+Running B_energy_aware       seed=151 seq=alpha boundary=carryover
+Running C_hace               seed=151 seq=alpha boundary=carryover
+Running D_pure_homeostatic   seed=151 seq=alpha boundary=carryover
+Running E_task_oracle        seed=151 seq=alpha boundary=carryover
+Running F_ewc                seed=151 seq=alpha boundary=carryover
+Running G_l2                 seed=151 seq=alpha boundary=carryover
+Running H_er                 seed=151 seq=alpha boundary=carryover
+Running I_hace_ewc           seed=151 seq=alpha boundary=carryover
+Running A_task_only          seed=168 seq=alpha boundary=carryover
+Running B_energy_aware       seed=168 seq=alpha boundary=carryover
+Running C_hace               seed=168 seq=alpha boundary=carryover
+Running D_pure_homeostatic   seed=168 seq=alpha boundary=carryover
+Running E_task_oracle        seed=168 seq=alpha boundary=carryover
+Running F_ewc                seed=168 seq=alpha boundary=carryover
+Running G_l2                 seed=168 seq=alpha boundary=carryover
+Running H_er                 seed=168 seq=alpha boundary=carryover
+Running I_hace_ewc           seed=168 seq=alpha boundary=carryover
+Running A_task_only          seed=185 seq=alpha boundary=carryover
+Running B_energy_aware       seed=185 seq=alpha boundary=carryover
+Running C_hace               seed=185 seq=alpha boundary=carryover
+Running D_pure_homeostatic   seed=185 seq=alpha boundary=carryover
+Running E_task_oracle        seed=185 seq=alpha boundary=carryover
+Running F_ewc                seed=185 seq=alpha boundary=carryover
+Running G_l2                 seed=185 seq=alpha boundary=carryover
+Running H_er                 seed=185 seq=alpha boundary=carryover
+Running I_hace_ewc           seed=185 seq=alpha boundary=carryover
+Running A_task_only          seed=202 seq=alpha boundary=carryover
+Running B_energy_aware       seed=202 seq=alpha boundary=carryover
+Running C_hace               seed=202 seq=alpha boundary=carryover
+Running D_pure_homeostatic   seed=202 seq=alpha boundary=carryover
+Running E_task_oracle        seed=202 seq=alpha boundary=carryover
+Running F_ewc                seed=202 seq=alpha boundary=carryover
+Running G_l2                 seed=202 seq=alpha boundary=carryover
+Running H_er                 seed=202 seq=alpha boundary=carryover
+Running I_hace_ewc           seed=202 seq=alpha boundary=carryover
+Running A_task_only          seed=219 seq=alpha boundary=carryover
+Running B_energy_aware       seed=219 seq=alpha boundary=carryover
+Running C_hace               seed=219 seq=alpha boundary=carryover
+Running D_pure_homeostatic   seed=219 seq=alpha boundary=carryover
+Running E_task_oracle        seed=219 seq=alpha boundary=carryover
+Running F_ewc                seed=219 seq=alpha boundary=carryover
+Running G_l2                 seed=219 seq=alpha boundary=carryover
+Running H_er                 seed=219 seq=alpha boundary=carryover
+Running I_hace_ewc           seed=219 seq=alpha boundary=carryover
+Running A_task_only          seed=236 seq=alpha boundary=carryover
+Running B_energy_aware       seed=236 seq=alpha boundary=carryover
+Running C_hace               seed=236 seq=alpha boundary=carryover
+Running D_pure_homeostatic   seed=236 seq=alpha boundary=carryover
+Running E_task_oracle        seed=236 seq=alpha boundary=carryover
+Running F_ewc                seed=236 seq=alpha boundary=carryover
+Running G_l2                 seed=236 seq=alpha boundary=carryover
+Running H_er                 seed=236 seq=alpha boundary=carryover
+Running I_hace_ewc           seed=236 seq=alpha boundary=carryover
+Running A_task_only          seed=253 seq=alpha boundary=carryover
+Running B_energy_aware       seed=253 seq=alpha boundary=carryover
+Running C_hace               seed=253 seq=alpha boundary=carryover
+Running D_pure_homeostatic   seed=253 seq=alpha boundary=carryover
+Running E_task_oracle        seed=253 seq=alpha boundary=carryover
+Running F_ewc                seed=253 seq=alpha boundary=carryover
+Running G_l2                 seed=253 seq=alpha boundary=carryover
+Running H_er                 seed=253 seq=alpha boundary=carryover
+Running I_hace_ewc           seed=253 seq=alpha boundary=carryover
+Running A_task_only          seed=270 seq=alpha boundary=carryover
+Running B_energy_aware       seed=270 seq=alpha boundary=carryover
+Running C_hace               seed=270 seq=alpha boundary=carryover
+Running D_pure_homeostatic   seed=270 seq=alpha boundary=carryover
+Running E_task_oracle        seed=270 seq=alpha boundary=carryover
+Running F_ewc                seed=270 seq=alpha boundary=carryover
+Running G_l2                 seed=270 seq=alpha boundary=carryover
+Running H_er                 seed=270 seq=alpha boundary=carryover
+Running I_hace_ewc           seed=270 seq=alpha boundary=carryover
+Running A_task_only          seed=287 seq=alpha boundary=carryover
+Running B_energy_aware       seed=287 seq=alpha boundary=carryover
+Running C_hace               seed=287 seq=alpha boundary=carryover
+Running D_pure_homeostatic   seed=287 seq=alpha boundary=carryover
+Running E_task_oracle        seed=287 seq=alpha boundary=carryover
+Running F_ewc                seed=287 seq=alpha boundary=carryover
+Running G_l2                 seed=287 seq=alpha boundary=carryover
+Running H_er                 seed=287 seq=alpha boundary=carryover
+Running I_hace_ewc           seed=287 seq=alpha boundary=carryover
+Running A_task_only          seed=304 seq=alpha boundary=carryover
+Running B_energy_aware       seed=304 seq=alpha boundary=carryover
+Running C_hace               seed=304 seq=alpha boundary=carryover
+Running D_pure_homeostatic   seed=304 seq=alpha boundary=carryover
+Running E_task_oracle        seed=304 seq=alpha boundary=carryover
+Running F_ewc                seed=304 seq=alpha boundary=carryover
+Running G_l2                 seed=304 seq=alpha boundary=carryover
+Running H_er                 seed=304 seq=alpha boundary=carryover
+Running I_hace_ewc           seed=304 seq=alpha boundary=carryover
+Running A_task_only          seed=321 seq=alpha boundary=carryover
+Running B_energy_aware       seed=321 seq=alpha boundary=carryover
+Running C_hace               seed=321 seq=alpha boundary=carryover
+Running D_pure_homeostatic   seed=321 seq=alpha boundary=carryover
+Running E_task_oracle        seed=321 seq=alpha boundary=carryover
+Running F_ewc                seed=321 seq=alpha boundary=carryover
+Running G_l2                 seed=321 seq=alpha boundary=carryover
+Running H_er                 seed=321 seq=alpha boundary=carryover
+Running I_hace_ewc           seed=321 seq=alpha boundary=carryover
+Running A_task_only          seed=338 seq=alpha boundary=carryover
+Running B_energy_aware       seed=338 seq=alpha boundary=carryover
+Running C_hace               seed=338 seq=alpha boundary=carryover
+Running D_pure_homeostatic   seed=338 seq=alpha boundary=carryover
+Running E_task_oracle        seed=338 seq=alpha boundary=carryover
+Running F_ewc                seed=338 seq=alpha boundary=carryover
+Running G_l2                 seed=338 seq=alpha boundary=carryover
+Running H_er                 seed=338 seq=alpha boundary=carryover
+Running I_hace_ewc           seed=338 seq=alpha boundary=carryover
+Running A_task_only          seed=355 seq=alpha boundary=carryover
+Running B_energy_aware       seed=355 seq=alpha boundary=carryover
+Running C_hace               seed=355 seq=alpha boundary=carryover
+Running D_pure_homeostatic   seed=355 seq=alpha boundary=carryover
+Running E_task_oracle        seed=355 seq=alpha boundary=carryover
+Running F_ewc                seed=355 seq=alpha boundary=carryover
+Running G_l2                 seed=355 seq=alpha boundary=carryover
+Running H_er                 seed=355 seq=alpha boundary=carryover
+Running I_hace_ewc           seed=355 seq=alpha boundary=carryover
+Running A_task_only          seed=372 seq=alpha boundary=carryover
+Running B_energy_aware       seed=372 seq=alpha boundary=carryover
+Running C_hace               seed=372 seq=alpha boundary=carryover
+Running D_pure_homeostatic   seed=372 seq=alpha boundary=carryover
+Running E_task_oracle        seed=372 seq=alpha boundary=carryover
+Running F_ewc                seed=372 seq=alpha boundary=carryover
+Running G_l2                 seed=372 seq=alpha boundary=carryover
+Running H_er                 seed=372 seq=alpha boundary=carryover
+Running I_hace_ewc           seed=372 seq=alpha boundary=carryover
+Running A_task_only          seed=389 seq=alpha boundary=carryover
+Running B_energy_aware       seed=389 seq=alpha boundary=carryover
+Running C_hace               seed=389 seq=alpha boundary=carryover
+Running D_pure_homeostatic   seed=389 seq=alpha boundary=carryover
+Running E_task_oracle        seed=389 seq=alpha boundary=carryover
+Running F_ewc                seed=389 seq=alpha boundary=carryover
+Running G_l2                 seed=389 seq=alpha boundary=carryover
+Running H_er                 seed=389 seq=alpha boundary=carryover
+Running I_hace_ewc           seed=389 seq=alpha boundary=carryover
+Running A_task_only          seed=406 seq=alpha boundary=carryover
+Running B_energy_aware       seed=406 seq=alpha boundary=carryover
+Running C_hace               seed=406 seq=alpha boundary=carryover
+Running D_pure_homeostatic   seed=406 seq=alpha boundary=carryover
+Running E_task_oracle        seed=406 seq=alpha boundary=carryover
+Running F_ewc                seed=406 seq=alpha boundary=carryover
+Running G_l2                 seed=406 seq=alpha boundary=carryover
+Running H_er                 seed=406 seq=alpha boundary=carryover
+Running I_hace_ewc           seed=406 seq=alpha boundary=carryover
+Running A_task_only          seed=423 seq=alpha boundary=carryover
+Running B_energy_aware       seed=423 seq=alpha boundary=carryover
+Running C_hace               seed=423 seq=alpha boundary=carryover
+Running D_pure_homeostatic   seed=423 seq=alpha boundary=carryover
+Running E_task_oracle        seed=423 seq=alpha boundary=carryover
+Running F_ewc                seed=423 seq=alpha boundary=carryover
+Running G_l2                 seed=423 seq=alpha boundary=carryover
+Running H_er                 seed=423 seq=alpha boundary=carryover
+Running I_hace_ewc           seed=423 seq=alpha boundary=carryover
+/Users/ziyukong/codebase/BRN/CS2951X/homeorl/experiments/run_sequential_tasks.py:478: RuntimeWarning: Mean of empty slice
+  "adaptation_episode_mean": float(np.nanmean([
+/Users/ziyukong/codebase/BRN/CS2951X/homeorl/experiments/run_sequential_tasks.py:483: RuntimeWarning: Mean of empty slice
+  "boundary_solvability_mean": float(np.nanmean([
+/opt/anaconda3/envs/minihack/lib/python3.10/site-packages/numpy/lib/_nanfunctions_impl.py:2019: RuntimeWarning: Degrees of freedom <= 0 for slice.
+  var = nanvar(a, axis=axis, dtype=dtype, out=out, ddof=ddof,
+
+Final task-wise success means:
+  A_task_only
+    reach                success=0.001
+    recharge             success=0.003
+    dual_food            success=0.004
+    conservation         success=0.100
+    endurance            success=0.089
+    collect_exit         success=0.000
+    detour               success=0.001
+    wall_maze            success=0.003
+    sprint               success=0.001
+    gauntlet_refuel      success=0.000
+  B_energy_aware
+    reach                success=0.194
+    recharge             success=0.100
+    dual_food            success=0.007
+    conservation         success=0.138
+    endurance            success=0.099
+    collect_exit         success=0.003
+    detour               success=0.154
+    wall_maze            success=0.056
+    sprint               success=0.098
+    gauntlet_refuel      success=0.000
+  C_hace
+    reach                success=0.054
+    recharge             success=0.193
+    dual_food            success=0.114
+    conservation         success=0.154
+    endurance            success=0.166
+    collect_exit         success=0.010
+    detour               success=0.156
+    wall_maze            success=0.055
+    sprint               success=0.151
+    gauntlet_refuel      success=0.647
+  D_pure_homeostatic
+    reach                success=0.212
+    recharge             success=0.297
+    dual_food            success=0.061
+    conservation         success=0.099
+    endurance            success=0.056
+    collect_exit         success=0.054
+    detour               success=0.240
+    wall_maze            success=0.099
+    sprint               success=0.104
+    gauntlet_refuel      success=0.345
+  E_task_oracle
+    reach                success=0.395
+    recharge             success=0.202
+    dual_food            success=0.242
+    conservation         success=0.199
+    endurance            success=0.177
+    collect_exit         success=0.107
+    detour               success=0.241
+    wall_maze            success=0.048
+    sprint               success=0.050
+    gauntlet_refuel      success=0.946
+  F_ewc
+    reach                success=0.400
+    recharge             success=0.344
+    dual_food            success=0.152
+    conservation         success=0.438
+    endurance            success=0.356
+    collect_exit         success=0.134
+    detour               success=0.389
+    wall_maze            success=0.251
+    sprint               success=0.149
+    gauntlet_refuel      success=0.000
+  G_l2
+    reach                success=0.512
+    recharge             success=0.055
+    dual_food            success=0.499
+    conservation         success=0.049
+    endurance            success=0.055
+    collect_exit         success=0.099
+    detour               success=0.098
+    wall_maze            success=0.000
+    sprint               success=0.001
+    gauntlet_refuel      success=0.000
+  H_er
+    reach                success=0.530
+    recharge             success=0.351
+    dual_food            success=0.234
+    conservation         success=0.335
+    endurance            success=0.197
+    collect_exit         success=0.006
+    detour               success=0.595
+    wall_maze            success=0.199
+    sprint               success=0.045
+    gauntlet_refuel      success=0.000
+  I_hace_ewc
+    reach                success=0.644
+    recharge             success=0.456
+    dual_food            success=0.201
+    conservation         success=0.453
+    endurance            success=0.296
+    collect_exit         success=0.007
+    detour               success=0.355
+    wall_maze            success=0.253
+    sprint               success=0.432
+    gauntlet_refuel      success=0.249
+
+Saved plot: experiments/sequential_results/e3_alpha_carryover/e3_alpha.png
+Saved data: experiments/sequential_results/e3_alpha_carryover/e3_alpha.json

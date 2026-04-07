@@ -1,0 +1,29 @@
+# ── E3 Alpha: Energy-Transfer Sequence ──────────────────────
+# Tasks ordered so energy management skills build cumulatively.
+# Homeostatic agents (C_hace, D_pure_homeostatic) should show
+# the strongest forward transfer here.
+
+task_sequence: alpha
+boundary_mode: carryover
+carryover_min_energy: 3.0
+num_seeds: 20
+episodes_per_task: 600
+eval_interval: 50
+eval_episodes: 40
+save_checkpoints: true
+
+agents:
+  - A_task_only
+  - B_energy_aware
+  - C_hace
+  - D_pure_homeostatic
+  - E_task_oracle
+  - F_ewc
+  - G_l2
+  - H_er
+  - I_hace_ewc
+
+logging:
+  save_dir: experiments/sequential_results/e3_alpha
+  plot_name: e3_alpha.png
+  json_name: e3_alpha.json
