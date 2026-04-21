@@ -3,11 +3,11 @@
 #SBATCH --output=experiments/crafter/logs/smoke_%A_%a.out
 #SBATCH --error=experiments/crafter/logs/smoke_%A_%a.err
 #SBATCH --time=00:20:00
-#SBATCH --mem=8G
-#SBATCH --gres=gpu:1
-#SBATCH --partition=gpu
+#SBATCH --mem=4G
+#SBATCH --cpus-per-task=2
 #SBATCH --array=0-1
 # Smoke test: only 2 jobs (vanilla + hace), 1 seed each
+# NOTE: CPU-only — GPU utilization was <7%, workload is CPU-bound
 
 # ============================================================
 # Crafter HACE — Smoke Test (10K steps)
@@ -50,7 +50,6 @@ cd "$PROJECT_DIR"
 
 # Load modules (|| true: venv provides Python; don't fail if module unavailable)
 module load python/3.11.0 2>/dev/null || module load python/3.10.12 2>/dev/null || true
-module load cuda/12.1 2>/dev/null || module load cuda/11.8 2>/dev/null || true
 
 # Activate venv
 if [ -d ".venv" ]; then

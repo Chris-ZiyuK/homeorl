@@ -2,12 +2,12 @@
 #SBATCH --job-name=crafter_hace
 #SBATCH --output=experiments/crafter/logs/%x_%A_%a.out
 #SBATCH --error=experiments/crafter/logs/%x_%A_%a.err
-#SBATCH --time=06:00:00
-#SBATCH --mem=16G
-#SBATCH --gres=gpu:1
-#SBATCH --partition=gpu
+#SBATCH --time=08:00:00
+#SBATCH --mem=4G
+#SBATCH --cpus-per-task=2
 #SBATCH --array=0-49
 # 5 agents × 10 seeds = 50 jobs
+# NOTE: CPU-only — GPU utilization was <7%, workload is CPU-bound
 
 # ============================================================
 # Crafter HACE — Full Experiment
@@ -57,7 +57,6 @@ echo "============================================"
 # ── Environment setup ──────────────────────────────────────────
 cd "$PROJECT_DIR"
 module load python/3.11.0 2>/dev/null || module load python/3.10.12 2>/dev/null || true
-module load cuda/12.1 2>/dev/null || module load cuda/11.8 2>/dev/null || true
 
 # Activate virtual environment
 if [ -d ".venv" ]; then
