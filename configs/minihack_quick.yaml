@@ -1,0 +1,11 @@
+episodes_per_task: 1500
+boundary_mode: carryover
+task_sequence: alpha
+agents:
+  - C_hace
+  - A_task_only
+  - F_ewc
+logging:
+  save_dir: experiments/sequential_results_minihack
+  plot_name: minihack_results.png
+  json_name: minihack_results.json

@@ -45,6 +45,13 @@ from src.envs.sequential_homeostasis_env import (
     TASK_SPECS,
     TASK_SEQUENCES,
 )
+
+from src.envs.minihack_homeostasis_env import (
+    MiniHackHomeostasisEnv,
+    MH_TASK_SPECS,
+    MH_TASK_SEQUENCE,
+)
+
 from src.agents.dqn_agent import DQNAgent
 from src.agents.ewc_agent import EWCAgent
 from src.agents.l2_agent import L2Agent
@@ -197,8 +204,10 @@ def resolve_tasks(cfg):
     raise ValueError(f"Unknown task_sequence: {seq_name}. Options: {list(TASK_SEQUENCES.keys())}")
 
 
-def make_env(task_name, agent_spec, env_cfg, start_energy=None):
-    return SequentialHomeostasisEnv(
+def make_env(task_name, agent_spec, env_cfg, start_energy=None, env_class=None):
+    if env_class is None:
+        env_class = SequentialHomeostasisEnv
+    return env_class(
         task_name=task_name,
         reward_mode=agent_spec["reward_mode"],
         observation_mode=agent_spec["observation_mode"],
@@ -246,7 +255,7 @@ def evaluate_policy(agent, task_name, agent_spec, cfg, n_eval=40,
     food_collected = 0
 
     for i in range(n_eval):
-        env = make_env(task_name, agent_spec, cfg["environment"], start_energy=start_energy)
+        env = make_env(task_name, agent_spec, cfg["environment"], start_energy=start_energy, env_class=cfg.get("env_class", SequentialHomeostasisEnv))
         obs, _ = env.reset(seed=seed_base + i)
         done = False
         while not done:
@@ -285,7 +294,7 @@ def train_agent(agent_name, cfg, seed):
     random.seed(seed)
 
     # Bootstrap env to get dimensions
-    bootstrap_env = make_env(tasks[0], agent_spec, cfg["environment"])
+    bootstrap_env = make_env(tasks[0], agent_spec, cfg["environment"],env_class=cfg.get("env_class", SequentialHomeostasisEnv))
     agent = create_agent(agent_spec, bootstrap_env.obs_dim,
                          bootstrap_env.action_space.n, agent_cfg)
 
@@ -320,7 +329,7 @@ def train_agent(agent_name, cfg, seed):
         phase_start_energy = None if not agent_spec["sequential"] else resolve_phase_start_energy(
             task_name, cfg, carryover_energy
         )
-        env = make_env(task_name, agent_spec, cfg["environment"], start_energy=phase_start_energy)
+        env = make_env(task_name, agent_spec, cfg["environment"], start_energy=phase_start_energy, env_class=cfg.get("env_class", SequentialHomeostasisEnv))
         agent.clear_buffer()
         threshold_hit = None
         last_episode_energy = None
@@ -596,6 +605,8 @@ def main():
     parser.add_argument("--output_dir", type=str, default=None)
     parser.add_argument("--agents", type=str, nargs="+", default=None,
                         help="Override which agents to run.")
+    parser.add_argument( "--env", type=str, default="gridworld",
+        choices=["gridworld", "minihack"], help="Environment backend to use.")
     args = parser.parse_args()
     cfg = load_config(args.config if os.path.exists(args.config) else None)
 
@@ -609,6 +620,15 @@ def main():
         cfg["agents"] = args.agents
 
     cfg["tasks"] = resolve_tasks(cfg)
+    # Resolve environment class
+    if args.env == "minihack":
+        cfg["env_class"] = MiniHackHomeostasisEnv
+        cfg["tasks"] = MH_TASK_SEQUENCE
+        cfg["logging"]["save_dir"] = cfg["logging"]["save_dir"] + "_minihack"
+        cfg["logging"]["json_name"] = "minihack_" + cfg["logging"]["json_name"]
+        cfg["logging"]["plot_name"] = "minihack_" + cfg["logging"]["plot_name"]
+    else:
+        cfg["env_class"] = SequentialHomeostasisEnv
 
     # Determine which seeds to run
     if args.seed_index is not None:
