@@ -48,9 +48,9 @@ echo "============================================"
 # ── Environment setup ──────────────────────────────────────────
 cd "$PROJECT_DIR"
 
-# Load modules
-module load python/3.11.0 2>/dev/null || module load python/3.10.12 2>/dev/null
-module load cuda/12.1 2>/dev/null || module load cuda/11.8 2>/dev/null
+# Load modules (|| true: venv provides Python; don't fail if module unavailable)
+module load python/3.11.0 2>/dev/null || module load python/3.10.12 2>/dev/null || true
+module load cuda/12.1 2>/dev/null || module load cuda/11.8 2>/dev/null || true
 
 # Activate venv
 if [ -d ".venv" ]; then

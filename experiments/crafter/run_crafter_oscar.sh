@@ -56,8 +56,8 @@ echo "============================================"
 
 # ── Environment setup ──────────────────────────────────────────
 cd "$PROJECT_DIR"
-module load python/3.11.0 2>/dev/null || module load python/3.10.12 2>/dev/null
-module load cuda/12.1 2>/dev/null || module load cuda/11.8 2>/dev/null
+module load python/3.11.0 2>/dev/null || module load python/3.10.12 2>/dev/null || true
+module load cuda/12.1 2>/dev/null || module load cuda/11.8 2>/dev/null || true
 
 # Activate virtual environment
 if [ -d ".venv" ]; then
