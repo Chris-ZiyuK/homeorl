@@ -67,10 +67,10 @@ mkdir -p "$OUTDIR"
 # ── Pre-flight checks ─────────────────────────────────────────
 echo ""
 echo "Pre-flight checks:"
-python -c "import crafter; print(f'  ✓ crafter {crafter.__version__}')" || {
+python -c "import crafter; print('  ✓ crafter installed')" || {
     echo "  ✗ crafter not installed"; exit 1
 }
-python -c "import stable_baselines3; print(f'  ✓ SB3 {stable_baselines3.__version__}')" || {
+python -c "import stable_baselines3 as sb3; print(f'  ✓ SB3 {sb3.__version__}')" || {
     echo "  ✗ stable-baselines3 not installed"; exit 1
 }
 python -c "import torch; print(f'  ✓ torch {torch.__version__}, CUDA={torch.cuda.is_available()}')" || {

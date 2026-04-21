@@ -72,7 +72,16 @@ FAIL=0
 
 # Check each critical package
 for pkg in crafter gymnasium numpy torch matplotlib stable_baselines3; do
-    if python -c "import $pkg; print(f'  ✓ {\"$pkg\":20s} {$pkg.__version__}')" 2>/dev/null; then
+    # Try __version__ first, fall back to importlib.metadata
+    if python -c "
+import $pkg
+try:
+    v = $pkg.__version__
+except AttributeError:
+    from importlib.metadata import version
+    v = version('$pkg'.replace('_', '-'))
+print(f'  ✓ {\"$pkg\":20s} {v}')
+" 2>/dev/null; then
         :
     else
         echo "  ✗ $pkg — NOT INSTALLED"
