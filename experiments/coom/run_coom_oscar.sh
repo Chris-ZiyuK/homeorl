@@ -9,6 +9,9 @@
 #SBATCH --partition=gpu
 #SBATCH --array=0-0
 # One task per seed_index; each job runs all agents in CONFIG for that seed (edit array to num_seeds-1).
+#
+# COOM (once on login node, venv on): bash scripts/install_coom_editable.sh /path/to/COOM
+#   (creates <clone>/COOM/__init__.py if missing, then pip install -e)
 
 set -eo pipefail
 
