@@ -1,0 +1,17 @@
+{
+  "training_time_s": 1381.0382928848267,
+  "total_steps": 100000,
+  "sequence": null,
+  "eval": {
+    "single": {
+      "n_episodes": 5,
+      "return_mean": 21.35524155671545,
+      "return_std": 0.24168859281046934,
+      "length_mean": 640.0,
+      "length_std": 0.0,
+      "success_mean": 0.0,
+      "success_std": 0.0,
+      "success_key_detected": true
+    }
+  }
+}
