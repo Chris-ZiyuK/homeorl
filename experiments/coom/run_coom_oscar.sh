@@ -17,8 +17,15 @@ CONFIG="${CONFIG:-configs/coom_experiment.yaml}"
 SEED_INDEX="${SLURM_ARRAY_TASK_ID:-0}"
 
 cd "$PROJECT_DIR"
-module load python/3.10.12
-module load cuda/12.1
+
+# Oscar Lmod names change over time; failed loads must not abort (set -e).
+# If everything 404s, use CCV system Python + your .venv (see docs.ccv.brown.edu/oscar/software/python-on-oscar).
+# Pick exact names with: module spider python   and   module spider cuda
+if command -v module >/dev/null 2>&1; then
+  module load python/3.11.0 2>/dev/null || module load python/3.10.12 2>/dev/null || true
+  module load cuda/12.1 2>/dev/null || module load cuda/11.8 2>/dev/null || true
+fi
+
 if [ -d ".venv" ]; then
   source .venv/bin/activate
 else
