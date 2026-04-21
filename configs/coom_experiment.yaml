@@ -1,0 +1,68 @@
+# ── COOM HACE Experiment ─────────────────────────────────────
+# Train PPO from scratch on a COOM env with homeostatic shaping.
+
+experiment: coom_hace
+total_steps: 1_000_000
+num_seeds: 1
+
+# Choose ONE of the following (single env) OR set `sequence:` below:
+env:
+  # env_id: raise_the_roof-default-v0
+  scenario: RAISE_THE_ROOF
+
+# Optional: continual learning task sequence (e.g., CO8, CD8).
+# If set, training will run sequentially over the tasks in the sequence.
+# sequence: CO8
+
+# Agent configurations (reward mixing)
+# - vanilla: task reward only (alpha=1, beta=0)
+# - hace: task + homeostatic (alpha=1, beta>0)
+# - pure_homeo: homeostatic only (alpha=0, beta>0)
+agents:
+  - name: vanilla
+    alpha: 1.0
+    beta: 0.0
+  - name: hace
+    alpha: 1.0
+    beta: 1.0
+  - name: pure_homeo
+    alpha: 0.0
+    beta: 1.0
+
+# Homeostatic reward parameters (HACE)
+hace_config:
+  # alpha/beta are overridden per-agent above; these are defaults.
+  alpha: 1.0          # weight for COOM task reward
+  beta: 1.0           # weight for homeostatic drive reduction reward
+  health_setpoint: 100.0
+  stamina_setpoint: 100.0
+  stamina_source: stamina   # stamina|armor|ammo
+
+# PPO hyperparameters (SB3)
+ppo_config:
+  policy: CnnPolicy
+  n_steps: 256
+  batch_size: 64
+  n_epochs: 4
+  learning_rate: 3.0e-4
+  ent_coef: 0.01
+  clip_range: 0.2
+  gamma: 0.99
+  gae_lambda: 0.95
+
+# Evaluation
+eval:
+  eval_episodes: 10
+
+# Logging
+logging:
+  save_dir: experiments/coom/results
+  tensorboard: true
+
+# Pilot mode (quick validation)
+pilot:
+  total_steps: 100_000
+  eval_episodes: 5
+  num_seeds: 1
+
+
