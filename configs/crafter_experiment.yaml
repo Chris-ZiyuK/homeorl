@@ -1,0 +1,58 @@
+# ── Crafter HACE Generalization Experiment ───────────────────
+# Compare multi-dimensional HACE reward vs baselines on Crafter
+
+experiment: crafter_generalization
+total_steps: 1_000_000
+num_seeds: 10
+
+# Agent configurations
+agents:
+  - vanilla          # Original Crafter reward only
+  - hace             # Crafter + multi-dim HACE (food+drink+energy)
+  - pure_homeo       # Multi-dim HACE only (no Crafter reward)
+  - health_only      # Crafter + health-only HACE (ablation)
+  - naive_survival   # Crafter + raw vital bonus (sham control)
+
+# HACE reward parameters
+hace_config:
+  setpoints:
+    food: 9
+    drink: 9
+    energy: 9
+  alpha: 1.0       # weight for Crafter reward (overridden for pure_homeo)
+  beta: 1.0        # weight for HACE reward
+
+# Naive survival sham control
+naive_config:
+  bonus_coef: 0.1   # raw bonus coefficient
+
+# PPO hyperparameters (following Crafter community baselines)
+ppo_config:
+  policy: CnnPolicy
+  n_steps: 256
+  batch_size: 64
+  n_epochs: 4
+  learning_rate: 3.0e-4
+  ent_coef: 0.01
+  clip_range: 0.2
+  gamma: 0.99
+  gae_lambda: 0.95
+  max_grad_norm: 0.5
+
+# Evaluation
+eval:
+  eval_freq: 50_000
+  eval_episodes: 20
+
+# Logging
+logging:
+  save_dir: experiments/crafter/results
+  tensorboard: true
+  save_video: false
+  save_crafter_stats: true
+
+# Pilot mode (for quick validation)
+pilot:
+  total_steps: 100_000
+  eval_freq: 10_000
+  eval_episodes: 5
