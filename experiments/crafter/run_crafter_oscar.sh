@@ -9,39 +9,81 @@
 #SBATCH --array=0-49
 # 5 agents × 10 seeds = 50 jobs
 
+# ============================================================
+# Crafter HACE — Full Experiment
+#
+# Usage:
+#   Full run (1M steps, 5 agents × 10 seeds = 50 jobs):
+#     sbatch experiments/crafter/run_crafter_oscar.sh
+#
+#   Pilot run (100K steps, 5 agents × 3 seeds = 15 jobs):
+#     sbatch --array=0-14 experiments/crafter/run_crafter_oscar.sh pilot
+# ============================================================
+
+set -euo pipefail
+
 # ── Configuration ──────────────────────────────────────────────
 AGENTS=(vanilla hace pure_homeo health_only naive_survival)
-NUM_SEEDS=10
-TOTAL_STEPS=1000000
-PROJECT_DIR="/users/$USER/homeorl"  # Update this to your Oscar path
+PROJECT_DIR="/users/zkong10/codebase/homeorl"
+
+# Pilot mode: fewer seeds, fewer steps
+MODE="${1:-full}"
+if [ "$MODE" = "pilot" ]; then
+    NUM_SEEDS=3
+    TOTAL_STEPS=100000
+    PREFIX="pilot"
+else
+    NUM_SEEDS=10
+    TOTAL_STEPS=1000000
+    PREFIX="full"
+fi
 
 # ── Compute agent and seed from SLURM array task ID ────────────
 AGENT_IDX=$((SLURM_ARRAY_TASK_ID / NUM_SEEDS))
 SEED=$((SLURM_ARRAY_TASK_ID % NUM_SEEDS))
 AGENT=${AGENTS[$AGENT_IDX]}
+OUTDIR="experiments/crafter/results/${PREFIX}_${AGENT}_s${SEED}"
 
 echo "============================================"
-echo "Job: ${SLURM_JOB_ID}, Task: ${SLURM_ARRAY_TASK_ID}"
-echo "Agent: ${AGENT}, Seed: ${SEED}"
-echo "Steps: ${TOTAL_STEPS}"
+echo "  Crafter HACE — ${MODE^^} RUN"
+echo "  Job:   ${SLURM_JOB_ID} (task ${SLURM_ARRAY_TASK_ID})"
+echo "  Agent: ${AGENT}"
+echo "  Seed:  ${SEED}"
+echo "  Steps: ${TOTAL_STEPS}"
+echo "  Out:   ${OUTDIR}"
+echo "  Time:  $(date)"
 echo "============================================"
 
 # ── Environment setup ──────────────────────────────────────────
-cd $PROJECT_DIR
-module load python/3.10.12
-module load cuda/12.1
+cd "$PROJECT_DIR"
+module load python/3.11.0 2>/dev/null || module load python/3.10.12 2>/dev/null
+module load cuda/12.1 2>/dev/null || module load cuda/11.8 2>/dev/null
 
-# Activate virtual environment (update path as needed)
-source .venv/bin/activate
+# Activate virtual environment
+if [ -d ".venv" ]; then
+    source .venv/bin/activate
+else
+    echo "ERROR: .venv not found! Run setup_oscar_env.sh first."
+    exit 1
+fi
 
-# Create log directory
+# Create directories
 mkdir -p experiments/crafter/logs
+mkdir -p "$OUTDIR"
+
+# ── Pre-flight checks ─────────────────────────────────────────
+python -c "import crafter, stable_baselines3, torch" || {
+    echo "ERROR: Missing dependencies. Run setup_oscar_env.sh first."
+    exit 1
+}
 
 # ── Run training ───────────────────────────────────────────────
 python experiments/crafter/train_crafter.py \
-    --agent $AGENT \
-    --seed $SEED \
-    --steps $TOTAL_STEPS \
-    --outdir "experiments/crafter/results/${AGENT}_s${SEED}"
+    --agent "$AGENT" \
+    --seed "$SEED" \
+    --steps "$TOTAL_STEPS" \
+    --outdir "$OUTDIR" \
+    --no-record
 
-echo "Job complete: ${AGENT} seed ${SEED}"
+echo ""
+echo "Job complete: ${AGENT} seed ${SEED} — $(date)"
