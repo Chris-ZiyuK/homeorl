@@ -5,6 +5,7 @@
 #SBATCH --time=24:00:00
 #SBATCH --mem=32G
 #SBATCH --cpus-per-task=8
+# If ppo_config.n_envs>1, use cpus >= n_envs + a few (ViZDoom is CPU-heavy per env).
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu
 #SBATCH --array=0-0
@@ -15,11 +16,16 @@
 
 set -eo pipefail
 
-PROJECT_DIR="/users/$USER/homeorl"  # Update to your Oscar clone path
+# Oscar homes are often /oscar/home/$USER — not /users/$USER. Submit from repo root
+# (cd .../homeorl && sbatch ...) so SLURM_SUBMIT_DIR is correct, or: export PROJECT_DIR=/oscar/home/$USER/homeorl
+PROJECT_DIR="${PROJECT_DIR:-${SLURM_SUBMIT_DIR:-.}}"
 CONFIG="${CONFIG:-configs/coom_experiment.yaml}"
 SEED_INDEX="${SLURM_ARRAY_TASK_ID:-0}"
 
-cd "$PROJECT_DIR"
+cd "$PROJECT_DIR" || {
+  echo "ERROR: cannot cd to PROJECT_DIR=$PROJECT_DIR" >&2
+  exit 1
+}
 
 # Oscar Lmod names change over time; failed loads must not abort (set -e).
 # If everything 404s, use CCV system Python + your .venv (see docs.ccv.brown.edu/oscar/software/python-on-oscar).

@@ -6,7 +6,7 @@ import json
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 import numpy as np
 
@@ -119,6 +119,49 @@ def evaluate_sb3(model, env, episodes: int, seed: int) -> Dict[str, Any]:
         payload["success_std"] = None
         payload["success_key_detected"] = False
     return payload
+
+
+def _make_vec_coom_env(
+    *,
+    n_envs: int,
+    use_subproc: bool,
+    env_id: Optional[str],
+    scenario: Optional[str],
+    base_seed: int,
+    hace_alpha: float,
+    hace_beta: float,
+    health_setpoint: float,
+    stamina_setpoint: float,
+    stamina_source: str,
+):
+    """Return a Gymnasium Env, or a VecEnv when n_envs > 1 (higher rollout throughput)."""
+    from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv  # type: ignore
+
+    def _factory(rank: int) -> Callable[[], Any]:
+        def _init() -> Any:
+            return make_coom_env(
+                env_id=env_id,
+                scenario=scenario,
+                seed=int(base_seed) + int(rank) * 10_000,
+                hace=True,
+                hace_alpha=hace_alpha,
+                hace_beta=hace_beta,
+                health_setpoint=health_setpoint,
+                stamina_setpoint=stamina_setpoint,
+                stamina_source=stamina_source,
+            )
+
+        return _init
+
+    if n_envs < 1:
+        raise ValueError("ppo_config.n_envs must be >= 1")
+    if n_envs == 1:
+        return _factory(0)()
+
+    factories: List[Callable[[], Any]] = [_factory(i) for i in range(n_envs)]
+    if use_subproc:
+        return SubprocVecEnv(factories)
+    return DummyVecEnv(factories)
 
 
 def _wrap_task_env_with_hace(task_env, *, alpha: float, beta: float, health_setpoint: float,
@@ -254,11 +297,15 @@ def main():
             start = time.time()
 
             if sequence_name is None:
-                env = make_coom_env(
+                n_envs = int(ppo.get("n_envs", 1))
+                use_subproc = bool(ppo.get("vec_env_subproc", True))
+
+                env = _make_vec_coom_env(
+                    n_envs=n_envs,
+                    use_subproc=use_subproc,
                     env_id=env_id,
                     scenario=scenario,
-                    seed=seed,
-                    hace=True,
+                    base_seed=seed,
                     hace_alpha=alpha,
                     hace_beta=beta,
                     health_setpoint=health_setpoint,
@@ -283,7 +330,23 @@ def main():
                 )
 
                 model.learn(total_timesteps=int(total_steps), progress_bar=True)
-                eval_payload = {"single": evaluate_sb3(model, env, episodes=int(eval_episodes), seed=seed + 1_000_000)}
+                eval_env = make_coom_env(
+                    env_id=env_id,
+                    scenario=scenario,
+                    seed=seed + 1_000_000,
+                    hace=True,
+                    hace_alpha=alpha,
+                    hace_beta=beta,
+                    health_setpoint=health_setpoint,
+                    stamina_setpoint=stamina_setpoint,
+                    stamina_source=stamina_source,
+                )
+                eval_payload = {
+                    "single": evaluate_sb3(
+                        model, eval_env, episodes=int(eval_episodes), seed=seed + 2_000_000
+                    )
+                }
+                eval_env.close()
                 env.close()
             else:
                 assert tasks is not None
