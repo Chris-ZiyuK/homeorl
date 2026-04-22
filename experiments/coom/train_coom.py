@@ -193,6 +193,7 @@ def _make_vec_coom_env(
     *,
     n_envs: int,
     use_subproc: bool,
+    start_method: Optional[str],
     env_id: Optional[str],
     scenario: Optional[str],
     base_seed: int,
@@ -231,7 +232,12 @@ def _make_vec_coom_env(
 
     factories: List[Callable[[], Any]] = [_factory(i) for i in range(n_envs)]
     if use_subproc:
-        venv = SubprocVecEnv(factories)
+        # IMPORTANT: when using CUDA, prefer spawn to avoid CUDA illegal memory access
+        # caused by forking after CUDA context initialization.
+        kwargs = {}
+        if start_method is not None:
+            kwargs["start_method"] = str(start_method)
+        venv = SubprocVecEnv(factories, **kwargs)
     else:
         venv = DummyVecEnv(factories)
     return VecMonitor(venv)
@@ -413,10 +419,20 @@ def main():
             if sequence_name is None:
                 n_envs = int(ppo.get("n_envs", 1))
                 use_subproc = bool(ppo.get("vec_env_subproc", True))
+                vec_start_method = ppo.get("vec_start_method", None)
+                if vec_start_method is None:
+                    # Safer default on GPU nodes.
+                    try:
+                        import torch
+
+                        vec_start_method = "spawn" if torch.cuda.is_available() else None
+                    except Exception:
+                        vec_start_method = None
 
                 env = _make_vec_coom_env(
                     n_envs=n_envs,
                     use_subproc=use_subproc,
+                    start_method=None if vec_start_method in (None, "null") else str(vec_start_method),
                     env_id=env_id,
                     scenario=scenario,
                     base_seed=seed,
