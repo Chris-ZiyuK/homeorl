@@ -43,7 +43,7 @@ ppo_config:
   policy: CnnPolicy
   # Parallel envs → higher rollout fps (CPU-bound ViZDoom). Oscar norm-gpu QoS is often cpu=12/user:
   # use --cpus-per-task=12 and n_envs<=6 so workers + trainer fit. Lower if QOS/OOM.
-  n_envs: 6
+  n_envs: 1
   vec_env_subproc: true
   n_steps: 256
   batch_size: 64
@@ -65,8 +65,8 @@ logging:
 
 # Pilot mode (quick validation)
 pilot:
-  total_steps: 100_000
-  eval_episodes: 5
-  num_seeds: 1
+  total_steps: 10_000
+  eval_episodes: 1
+
 
 

@@ -94,7 +94,12 @@ def evaluate_sb3(model, env, episodes: int, seed: int) -> Dict[str, Any]:
             ep_len += 1
             final_info = dict(info or {})
             done = bool(terminated) or bool(truncated)
-
+        
+        if ep==0:
+            stats = env.get_statistics() if hasattr(env, "get_statistics") else None
+            print("final_info keys:", list(final_info.keys()))
+            print("stats:", stats)
+            
         returns.append(ep_ret)
         lengths.append(ep_len)
         s = _extract_success(final_info)
@@ -135,11 +140,12 @@ def _make_vec_coom_env(
     stamina_source: str,
 ):
     """Return a Gymnasium Env, or a VecEnv when n_envs > 1 (higher rollout throughput)."""
-    from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv  # type: ignore
+    from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecMonitor  # type: ignore
+    from stable_baselines3.common.monitor import Monitor  # type: ignore
 
     def _factory(rank: int) -> Callable[[], Any]:
         def _init() -> Any:
-            return make_coom_env(
+            env = make_coom_env(
                 env_id=env_id,
                 scenario=scenario,
                 seed=int(base_seed) + int(rank) * 10_000,
@@ -150,6 +156,8 @@ def _make_vec_coom_env(
                 stamina_setpoint=stamina_setpoint,
                 stamina_source=stamina_source,
             )
+            # Ensure SB3 can compute episode stats (rollout/ep_rew_mean, ep_len_mean).
+            return Monitor(env)
 
         return _init
 
@@ -160,8 +168,10 @@ def _make_vec_coom_env(
 
     factories: List[Callable[[], Any]] = [_factory(i) for i in range(n_envs)]
     if use_subproc:
-        return SubprocVecEnv(factories)
-    return DummyVecEnv(factories)
+        venv = SubprocVecEnv(factories)
+    else:
+        venv = DummyVecEnv(factories)
+    return VecMonitor(venv)
 
 
 def _wrap_task_env_with_hace(task_env, *, alpha: float, beta: float, health_setpoint: float,
