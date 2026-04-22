@@ -68,7 +68,6 @@ class COOMGymnasiumAdapter(gym.Env):
         self._env = env
         self._max_episode_steps = max_episode_steps
         self._step_count = 0
-        self._episode_max_success: Optional[float] = None
 
         # Best-effort space passthrough (COOM envs should have these).
         self.observation_space = getattr(env, "observation_space", None)
@@ -78,7 +77,6 @@ class COOMGymnasiumAdapter(gym.Env):
         self, *, seed: Optional[int] = None, options: Optional[dict] = None
     ) -> Tuple[Any, Dict[str, Any]]:
         self._step_count = 0
-        self._episode_max_success = None
 
         if hasattr(self._env, "reset"):
             if seed is not None:
@@ -115,22 +113,16 @@ class COOMGymnasiumAdapter(gym.Env):
         if self._max_episode_steps is not None and self._step_count >= self._max_episode_steps:
             truncated = True
 
-        # Episode-level "any success" tracking: COOM success is often a per-step normalized metric.
-        # We track whether it was ever > 0 within the episode.
-        if hasattr(self._env, "get_success"):
-            try:
-                s = float(self._env.get_success())
-            except Exception:
-                s = None
-            if s is not None:
-                if self._episode_max_success is None or s > self._episode_max_success:
-                    self._episode_max_success = s
-
         info = dict(info or {})
         done = bool(terminated) or bool(truncated)
-        if done and self._episode_max_success is not None:
-            info["coom_success_max"] = float(self._episode_max_success)
-            info["coom_any_success"] = bool(self._episode_max_success > 0.0)
+        # COOM success is a normalized metric in [0, 1]. For RaiseTheRoof it is
+        # proportional to frames survived, so the episode-end value is the most
+        # meaningful summary.
+        if done and "coom_success" not in info and hasattr(self._env, "get_success"):
+            try:
+                info["coom_success"] = float(self._env.get_success())
+            except Exception:
+                pass
         if done and "coom_stats" not in info and hasattr(self._env, "get_statistics"):
             try:
                 stats = self._env.get_statistics()

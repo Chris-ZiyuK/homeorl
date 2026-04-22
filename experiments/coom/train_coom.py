@@ -89,21 +89,37 @@ def _binarize_success(s: Optional[float], *, threshold: float = 0.0) -> Optional
         return None
 
 
-def _episode_any_success(final_info: Dict[str, Any], fallback_success_value: Optional[float]) -> Optional[float]:
-    """Binary success for an episode: 1 iff agent succeeded at least once in episode."""
-    if "coom_any_success" in final_info:
+def _episode_success_norm(final_info: Dict[str, Any], stats: Optional[Dict[str, Any]], fallback: Optional[float]) -> Optional[float]:
+    """Continuous success signal in [0,1] for the episode."""
+    if "coom_success" in final_info:
         try:
-            return 1.0 if bool(final_info["coom_any_success"]) else 0.0
+            return float(final_info["coom_success"])
         except Exception:
             pass
-    # Fall back to stats/info-derived success value (may be normalized progress).
-    return _binarize_success(fallback_success_value, threshold=0.0)
+    if isinstance(stats, dict):
+        # COOM often stores keys with leading slashes.
+        for k in ("success", "/success"):
+            v = _safe_get(stats, k)
+            if v is not None:
+                return v
+        for k, v in stats.items():
+            if isinstance(k, str) and k.endswith("/success"):
+                try:
+                    return float(v)
+                except Exception:
+                    return None
+    if fallback is not None:
+        try:
+            return float(fallback)
+        except Exception:
+            return None
+    return None
 
 
 def evaluate_sb3(model, env, episodes: int, seed: int) -> Dict[str, Any]:
     returns = []
     lengths = []
-    succs = []
+    succ_norms = []
     movement = []
     switches = []
 
@@ -147,9 +163,9 @@ def evaluate_sb3(model, env, episodes: int, seed: int) -> Dict[str, Any]:
         s_raw = _extract_success(final_info)
         if s_raw is None:
             s_raw = _extract_success_from_stats(env)
-        s = _episode_any_success(final_info, s_raw)
-        if s is not None:
-            succs.append(s)
+        s_norm = _episode_success_norm(final_info, stats if isinstance(stats, dict) else None, s_raw)
+        if s_norm is not None:
+            succ_norms.append(s_norm)
 
     payload: Dict[str, Any] = {
         "n_episodes": int(episodes),
@@ -164,13 +180,15 @@ def evaluate_sb3(model, env, episodes: int, seed: int) -> Dict[str, Any]:
     if switches:
         payload["switches_pressed_mean"] = float(np.mean(switches))
         payload["switches_pressed_std"] = float(np.std(switches))
-    if succs:
-        payload["success_mean"] = float(np.mean(succs))
-        payload["success_std"] = float(np.std(succs))
+    if succ_norms:
+        payload["success_norm_mean"] = float(np.mean(succ_norms))
+        payload["success_norm_std"] = float(np.std(succ_norms))
+        payload["solved_rate"] = float(np.mean([1.0 if s >= 0.99 else 0.0 for s in succ_norms]))
         payload["success_key_detected"] = True
     else:
-        payload["success_mean"] = None
-        payload["success_std"] = None
+        payload["success_norm_mean"] = None
+        payload["success_norm_std"] = None
+        payload["solved_rate"] = None
         payload["success_key_detected"] = False
     return payload
 
@@ -268,15 +286,13 @@ def _make_episode_stats_callback(print_every: int = 1):
 
                 stats = _safe_get_stats(info)
                 # Prefer our episode-level definition from COOMGymnasiumAdapter:
-                # success=1 iff success occurred at least once in the episode.
-                suc_any = _episode_any_success(info, None)
-                suc_max = _safe_get(info, "coom_success_max")
+                suc_norm = _episode_success_norm(info, stats, None)
 
                 mov = _safe_get(stats, "/movement")
                 sw = _safe_get(stats, "/switches_pressed")
                 print(
                     f"[episode {self._ep_count}] "
-                    f"success={suc_any} (success_max={suc_max}) movement={mov} switches={sw} "
+                    f"success_norm={suc_norm} movement={mov} switches={sw} "
                     f"timesteps={self.num_timesteps}"
                 )
             return True
