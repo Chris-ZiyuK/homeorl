@@ -41,9 +41,9 @@ hace_config:
 # PPO hyperparameters (SB3)
 ppo_config:
   policy: CnnPolicy
-  # Parallel envs → higher rollout fps (CPU-bound ViZDoom). 2 ≈ ~2× steps/s vs 1 on multi-core.
-  # Use SubprocVecEnv (vec_env_subproc: true). Request enough Slurm CPUs (e.g. >= n_envs + 4).
-  n_envs: 2
+  # Parallel envs → higher rollout fps (CPU-bound ViZDoom). Oscar norm-gpu QoS is often cpu=12/user:
+  # use --cpus-per-task=12 and n_envs<=6 so workers + trainer fit. Lower if QOS/OOM.
+  n_envs: 6
   vec_env_subproc: true
   n_steps: 256
   batch_size: 64

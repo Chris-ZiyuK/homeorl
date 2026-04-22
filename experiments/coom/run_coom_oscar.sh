@@ -4,12 +4,16 @@
 #SBATCH --error=experiments/coom/logs/%x_%A_%a.err
 #SBATCH --time=24:00:00
 #SBATCH --mem=32G
-#SBATCH --cpus-per-task=8
-# If ppo_config.n_envs>1, use cpus >= n_envs + a few (ViZDoom is CPU-heavy per env).
+# If you get QOSMaxCpuPerUserLimit: norm-gpu QoS is often cpu=12 *per user* (see `myaccount`).
+# Concurrent GPU jobs share that cap—e.g. two jobs cannot each use 12 CPUs at once.
+#SBATCH --cpus-per-task=12
+# ViZDoom: keep ppo_config.n_envs below ~cpus-per-task (see coom_experiment.yaml).
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpu
 #SBATCH --array=0-0
 # One task per seed_index; each job runs all agents in CONFIG for that seed (edit array to num_seeds-1).
+#
+# CPU-only / many cores (normal QoS, no GPU): experiments/coom/run_coom_oscar_batch.sh
 #
 # COOM (once on login node, venv on): bash scripts/install_coom_editable.sh /path/to/COOM
 #   (creates <clone>/COOM/__init__.py if missing, then pip install -e)
