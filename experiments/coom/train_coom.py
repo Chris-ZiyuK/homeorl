@@ -75,6 +75,31 @@ def _extract_success_from_stats(env) -> Optional[float]:
     return None
 
 
+def _binarize_success(s: Optional[float], *, threshold: float = 0.0) -> Optional[float]:
+    """Convert success/progress signals to a 0/1 success indicator.
+
+    COOM sometimes reports success as a fractional progress value (e.g. 0.1075).
+    For our metrics, treat any progress > threshold as success=1.
+    """
+    if s is None:
+        return None
+    try:
+        return 1.0 if float(s) > float(threshold) else 0.0
+    except Exception:
+        return None
+
+
+def _episode_any_success(final_info: Dict[str, Any], fallback_success_value: Optional[float]) -> Optional[float]:
+    """Binary success for an episode: 1 iff agent succeeded at least once in episode."""
+    if "coom_any_success" in final_info:
+        try:
+            return 1.0 if bool(final_info["coom_any_success"]) else 0.0
+        except Exception:
+            pass
+    # Fall back to stats/info-derived success value (may be normalized progress).
+    return _binarize_success(fallback_success_value, threshold=0.0)
+
+
 def evaluate_sb3(model, env, episodes: int, seed: int) -> Dict[str, Any]:
     returns = []
     lengths = []
@@ -119,9 +144,10 @@ def evaluate_sb3(model, env, episodes: int, seed: int) -> Dict[str, Any]:
 
         returns.append(ep_ret)
         lengths.append(ep_len)
-        s = _extract_success(final_info)
-        if s is None:
-            s = _extract_success_from_stats(env)
+        s_raw = _extract_success(final_info)
+        if s_raw is None:
+            s_raw = _extract_success_from_stats(env)
+        s = _episode_any_success(final_info, s_raw)
         if s is not None:
             succs.append(s)
 
@@ -235,26 +261,16 @@ def _make_episode_stats_callback(print_every: int = 1):
                     continue
 
                 stats = _safe_get_stats(info)
-                suc = None
-                for k in ("success", "/success"):
-                    suc = _safe_get(stats, k)
-                    if suc is not None:
-                        break
-                if suc is None:
-                    # Fall back to any */success key.
-                    for k, v in stats.items():
-                        if isinstance(k, str) and k.endswith("/success"):
-                            try:
-                                suc = float(v)
-                            except Exception:
-                                suc = None
-                            break
+                # Prefer our episode-level definition from COOMGymnasiumAdapter:
+                # success=1 iff success occurred at least once in the episode.
+                suc_any = _episode_any_success(info, None)
+                suc_max = _safe_get(info, "coom_success_max")
 
                 mov = _safe_get(stats, "/movement")
                 sw = _safe_get(stats, "/switches_pressed")
                 print(
                     f"[episode {self._ep_count}] "
-                    f"success={suc} movement={mov} switches={sw} "
+                    f"success={suc_any} (success_max={suc_max}) movement={mov} switches={sw} "
                     f"timesteps={self.num_timesteps}"
                 )
             return True

@@ -24,7 +24,7 @@ agents:
     beta: 0.0
   - name: hace
     alpha: 1.0
-    beta: 1.0
+    beta: 0.5
   - name: pure_homeo
     alpha: 0.0
     beta: 1.0
@@ -43,7 +43,7 @@ ppo_config:
   policy: CnnPolicy
   # Parallel envs → higher rollout fps (CPU-bound ViZDoom). Oscar norm-gpu QoS is often cpu=12/user:
   # use --cpus-per-task=12 and n_envs<=6 so workers + trainer fit. Lower if QOS/OOM.
-  n_envs: 1
+  n_envs: 4
   vec_env_subproc: true
   # Logging control (stdout spam)
   log_interval: 50              # PPO stdout table every N iterations
@@ -52,7 +52,7 @@ ppo_config:
   batch_size: 64
   n_epochs: 4
   learning_rate: 3.0e-4
-  ent_coef: 0.01
+  ent_coef: 0.03
   clip_range: 0.2
   gamma: 0.99
   gae_lambda: 0.95
