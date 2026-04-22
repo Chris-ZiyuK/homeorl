@@ -79,6 +79,8 @@ def evaluate_sb3(model, env, episodes: int, seed: int) -> Dict[str, Any]:
     returns = []
     lengths = []
     succs = []
+    movement = []
+    switches = []
 
     for ep in range(episodes):
         obs, info = env.reset(seed=seed + ep)
@@ -94,12 +96,27 @@ def evaluate_sb3(model, env, episodes: int, seed: int) -> Dict[str, Any]:
             ep_len += 1
             final_info = dict(info or {})
             done = bool(terminated) or bool(truncated)
-        
-        if ep==0:
-            stats = env.get_statistics() if hasattr(env, "get_statistics") else None
-            print("final_info keys:", list(final_info.keys()))
-            print("stats:", stats)
-            
+
+        stats = None
+        if hasattr(env, "get_statistics"):
+            try:
+                stats = env.get_statistics()
+            except Exception:
+                stats = None
+
+        if isinstance(stats, dict):
+            # COOM commonly reports stats with leading slashes, e.g. "/success".
+            if "/movement" in stats:
+                try:
+                    movement.append(float(stats["/movement"]))
+                except Exception:
+                    pass
+            if "/switches_pressed" in stats:
+                try:
+                    switches.append(float(stats["/switches_pressed"]))
+                except Exception:
+                    pass
+
         returns.append(ep_ret)
         lengths.append(ep_len)
         s = _extract_success(final_info)
@@ -115,6 +132,12 @@ def evaluate_sb3(model, env, episodes: int, seed: int) -> Dict[str, Any]:
         "length_mean": float(np.mean(lengths)) if lengths else None,
         "length_std": float(np.std(lengths)) if lengths else None,
     }
+    if movement:
+        payload["movement_mean"] = float(np.mean(movement))
+        payload["movement_std"] = float(np.std(movement))
+    if switches:
+        payload["switches_pressed_mean"] = float(np.mean(switches))
+        payload["switches_pressed_std"] = float(np.std(switches))
     if succs:
         payload["success_mean"] = float(np.mean(succs))
         payload["success_std"] = float(np.std(succs))
@@ -124,6 +147,20 @@ def evaluate_sb3(model, env, episodes: int, seed: int) -> Dict[str, Any]:
         payload["success_std"] = None
         payload["success_key_detected"] = False
     return payload
+
+
+def _safe_get(d: Dict[str, Any], key: str) -> Optional[float]:
+    if key not in d:
+        return None
+    try:
+        return float(d[key])
+    except Exception:
+        return None
+
+
+def _safe_get_stats(info: Dict[str, Any]) -> Dict[str, Any]:
+    stats = info.get("coom_stats", None)
+    return stats if isinstance(stats, dict) else {}
 
 
 def _make_vec_coom_env(
@@ -172,6 +209,57 @@ def _make_vec_coom_env(
     else:
         venv = DummyVecEnv(factories)
     return VecMonitor(venv)
+
+
+def _make_episode_stats_callback(print_every: int = 1):
+    """Print COOM episode stats when Monitor reports an episode end."""
+    from stable_baselines3.common.callbacks import BaseCallback  # type: ignore
+
+    class _Cb(BaseCallback):
+        def __init__(self):
+            super().__init__()
+            self._ep_count = 0
+
+        def _on_step(self) -> bool:
+            infos = self.locals.get("infos", [])
+            if not isinstance(infos, list):
+                return True
+            for info in infos:
+                if not isinstance(info, dict):
+                    continue
+                if "episode" not in info:
+                    continue
+
+                self._ep_count += 1
+                if print_every > 1 and (self._ep_count % print_every) != 0:
+                    continue
+
+                stats = _safe_get_stats(info)
+                suc = None
+                for k in ("success", "/success"):
+                    suc = _safe_get(stats, k)
+                    if suc is not None:
+                        break
+                if suc is None:
+                    # Fall back to any */success key.
+                    for k, v in stats.items():
+                        if isinstance(k, str) and k.endswith("/success"):
+                            try:
+                                suc = float(v)
+                            except Exception:
+                                suc = None
+                            break
+
+                mov = _safe_get(stats, "/movement")
+                sw = _safe_get(stats, "/switches_pressed")
+                print(
+                    f"[episode {self._ep_count}] "
+                    f"success={suc} movement={mov} switches={sw} "
+                    f"timesteps={self.num_timesteps}"
+                )
+            return True
+
+    return _Cb()
 
 
 def _wrap_task_env_with_hace(task_env, *, alpha: float, beta: float, health_setpoint: float,
@@ -339,7 +427,13 @@ def main():
                     tensorboard_log=tb_log,
                 )
 
-                model.learn(total_timesteps=int(total_steps), progress_bar=True)
+                cb = _make_episode_stats_callback(print_every=int(ppo.get("print_episode_every", 10)))
+                model.learn(
+                    total_timesteps=int(total_steps),
+                    progress_bar=True,
+                    log_interval=int(ppo.get("log_interval", 50)),
+                    callback=cb,
+                )
                 eval_env = make_coom_env(
                     env_id=env_id,
                     scenario=scenario,
@@ -396,10 +490,13 @@ def main():
                         stamina_source=stamina_source,
                     )
                     model.set_env(env_t)
+                    cb = _make_episode_stats_callback(print_every=int(ppo.get("print_episode_every", 10)))
                     model.learn(
                         total_timesteps=int(steps_per_task),
                         reset_num_timesteps=False,
                         progress_bar=True,
+                        log_interval=int(ppo.get("log_interval", 50)),
+                        callback=cb,
                     )
                     env_t.close()
 

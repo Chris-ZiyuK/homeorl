@@ -45,6 +45,9 @@ ppo_config:
   # use --cpus-per-task=12 and n_envs<=6 so workers + trainer fit. Lower if QOS/OOM.
   n_envs: 1
   vec_env_subproc: true
+  # Logging control (stdout spam)
+  log_interval: 50              # PPO stdout table every N iterations
+  print_episode_every: 10       # print COOM movement/switches/success every N episodes
   n_steps: 256
   batch_size: 64
   n_epochs: 4

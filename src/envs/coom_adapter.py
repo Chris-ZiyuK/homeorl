@@ -113,7 +113,17 @@ class COOMGymnasiumAdapter(gym.Env):
         if self._max_episode_steps is not None and self._step_count >= self._max_episode_steps:
             truncated = True
 
-        return obs, float(reward), bool(terminated), bool(truncated), dict(info or {})
+        info = dict(info or {})
+        done = bool(terminated) or bool(truncated)
+        if done and "coom_stats" not in info and hasattr(self._env, "get_statistics"):
+            try:
+                stats = self._env.get_statistics()
+            except Exception:
+                stats = None
+            if isinstance(stats, dict):
+                info["coom_stats"] = stats
+
+        return obs, float(reward), bool(terminated), bool(truncated), info
 
     def render(self):
         if hasattr(self._env, "render"):
