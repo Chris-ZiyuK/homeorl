@@ -2,7 +2,7 @@
 #SBATCH --job-name=crafter_hace
 #SBATCH --output=experiments/crafter/logs/%x_%A_%a.out
 #SBATCH --error=experiments/crafter/logs/%x_%A_%a.err
-#SBATCH --time=04:00:00
+#SBATCH --time=05:00:00
 #SBATCH --mem=6G
 #SBATCH --cpus-per-task=4
 
@@ -10,8 +10,8 @@
 # Crafter HACE — Optimized Full Experiment
 #
 # Packs 3 experiments per SLURM job (parallel via background
-# processes). CPU utilization per experiment is ~32%, so 3
-# concurrent runs saturate ~96% of allocated CPUs.
+# processes). Each process is pinned to 1 thread to avoid
+# CPU contention (PyTorch/BLAS default to multi-threaded).
 #
 # Full run: 5 agents × 5 seeds = 25 experiments
 #   25 ÷ 3 = 9 jobs → sbatch --array=0-8
@@ -20,8 +20,7 @@
 #   sbatch --array=0-8 experiments/crafter/run_crafter_packed.sh
 #
 # Monitor:
-#   squeue -u $USER
-#   tail -f experiments/crafter/logs/crafter_hace_*_0.out
+#   bash scripts/check_crafter_status.sh
 # ============================================================
 
 set -euo pipefail
@@ -70,6 +69,15 @@ python -c "import crafter, stable_baselines3, torch" || {
 }
 
 # ── Launch parallel experiments ────────────────────────────────
+# CRITICAL: Pin each process to 1 thread to avoid CPU contention.
+# Without this, PyTorch/BLAS spawns N threads per process,
+# causing 12 threads on 4 CPUs → FPS drops from 130 to 3.
+export OMP_NUM_THREADS=1
+export MKL_NUM_THREADS=1
+export OPENBLAS_NUM_THREADS=1
+export VECLIB_MAXIMUM_THREADS=1
+export NUMEXPR_NUM_THREADS=1
+
 PIDS=()
 FAILED=0
 
