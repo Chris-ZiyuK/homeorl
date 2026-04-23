@@ -3,10 +3,14 @@
 # train_coom.py trains one SB3 model across tasks sequentially (shared replay buffer for DQN).
 
 experiment: coom_co8_dqn
-total_steps: 1_000_000
+# NOTE: In sequence mode, `train_coom.py` defaults to `steps_per_task = total_steps // num_tasks`.
+# If you want **1M env steps per CO8 task**, set `steps_per_task` explicitly (below) and set
+# `total_steps` to the *overall* budget you want recorded in metrics (here: 8 * 1M).
+total_steps: 8_000_000
 num_seeds: 1
 
 sequence: CO8
+steps_per_task: 1_000_000
 
 agents:
   - name: vanilla
@@ -54,4 +58,6 @@ logging:
 
 pilot:
   total_steps: 10_000
+  # CO8 has 8 tasks; keep pilot per-task budget small unless overridden here.
+  steps_per_task: 1_250
   eval_episodes: 1
