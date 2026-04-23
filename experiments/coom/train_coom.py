@@ -30,6 +30,15 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--pilot", action="store_true", help="Use the config's pilot overrides")
     p.add_argument("--seed-index", type=int, default=None, help="Run only this seed index (0-based)")
     p.add_argument("--output-dir", type=str, default=None, help="Override logging.save_dir")
+    p.add_argument(
+        "--agent",
+        type=str,
+        default=None,
+        help=(
+            "Run only a single agent from config.agents by name "
+            "(e.g. vanilla|hace|pure_homeo). Overrides config.run_agents."
+        ),
+    )
     return p.parse_args()
 
 
@@ -367,6 +376,23 @@ def main():
     if not agents:
         # Back-compat: single implicit agent
         agents = [{"name": "hace", "alpha": default_alpha, "beta": default_beta}]
+
+    # Optional agent selection (decouple vanilla/hace/pure_homeo runs).
+    selected = args.agent
+    if selected is None:
+        ra = cfg.get("run_agents", None)
+        if isinstance(ra, str) and ra.strip():
+            selected = ra.strip()
+        elif isinstance(ra, list) and len(ra) == 1 and isinstance(ra[0], str):
+            selected = str(ra[0])
+    if selected is not None:
+        agents = [a for a in agents if str(a.get("name", "")) == str(selected)]
+        if not agents:
+            raise ValueError(
+                f"No agent named '{selected}' found in config.agents. "
+                "Valid names are: "
+                + ", ".join(sorted({str(a.get('name', '')) for a in (cfg.get('agents', []) or [])}))
+            )
 
     # Resolve PPO settings
     ppo = cfg.get("ppo_config", {}) or {}

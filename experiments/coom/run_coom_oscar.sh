@@ -25,6 +25,7 @@ set -eo pipefail
 PROJECT_DIR="${PROJECT_DIR:-${SLURM_SUBMIT_DIR:-.}}"
 CONFIG="${CONFIG:-configs/coom_experiment.yaml}"
 SEED_INDEX="${SLURM_ARRAY_TASK_ID:-0}"
+AGENT="${AGENT:-}"
 
 cd "$PROJECT_DIR" || {
   echo "ERROR: cannot cd to PROJECT_DIR=$PROJECT_DIR" >&2
@@ -51,6 +52,7 @@ echo "Job ${SLURM_JOB_ID:-local} task ${SLURM_ARRAY_TASK_ID:-$SEED_INDEX} | conf
 EXTRA=(--config "${CONFIG}" --seed-index "${SEED_INDEX}")
 [ "${PILOT:-0}" = "1" ] || [ "${PILOT:-}" = "true" ] && EXTRA+=(--pilot)
 [ -n "${OUTPUT_DIR:-}" ] && EXTRA+=(--output-dir "${OUTPUT_DIR}")
+[ -n "${AGENT}" ] && EXTRA+=(--agent "${AGENT}")
 
 python experiments/coom/train_coom.py "${EXTRA[@]}"
 echo "Job complete seed_index ${SEED_INDEX}"
