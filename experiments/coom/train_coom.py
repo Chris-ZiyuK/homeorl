@@ -51,7 +51,7 @@ def load_config(path: str) -> Dict[str, Any]:
 
 
 def _extract_success(info: Dict[str, Any]) -> Optional[float]:
-    for k in ("success", "is_success", "episode_success", "task_success"):
+    for k in ("coom_success", "success", "is_success", "episode_success", "task_success"):
         if k in info:
             try:
                 return float(info[k])
@@ -125,7 +125,17 @@ def _episode_success_norm(final_info: Dict[str, Any], stats: Optional[Dict[str, 
     return None
 
 
-def evaluate_sb3(model, env, episodes: int, seed: int) -> Dict[str, Any]:
+def _predict_action(model, obs, *, deterministic: bool, state=None, episode_start=None):
+    """Call model.predict() with optional recurrent state."""
+    try:
+        # RecurrentPPO (sb3-contrib) supports (obs, state, episode_start, deterministic)
+        return model.predict(obs, state=state, episode_start=episode_start, deterministic=deterministic)
+    except TypeError:
+        # Classic SB3 algorithms
+        return model.predict(obs, deterministic=deterministic)
+
+
+def evaluate_sb3(model, env, episodes: int, seed: int, *, deterministic: bool = False) -> Dict[str, Any]:
     returns = []
     lengths = []
     succ_norms = []
@@ -138,14 +148,23 @@ def evaluate_sb3(model, env, episodes: int, seed: int) -> Dict[str, Any]:
         ep_ret = 0.0
         ep_len = 0
         final_info = dict(info or {})
+        state = None
+        episode_start = True
 
         while not done:
-            action, _ = model.predict(obs, deterministic=True)
+            action, state = _predict_action(
+                model,
+                obs,
+                deterministic=deterministic,
+                state=state,
+                episode_start=episode_start,
+            )
             obs, reward, terminated, truncated, info = env.step(action)
             ep_ret += float(reward)
             ep_len += 1
             final_info = dict(info or {})
             done = bool(terminated) or bool(truncated)
+            episode_start = False
 
         stats = None
         if hasattr(env, "get_statistics"):
@@ -310,7 +329,7 @@ def _make_episode_stats_callback(print_every: int = 1):
 
 
 def _wrap_task_env_with_hace(task_env, *, alpha: float, beta: float, health_setpoint: float,
-                            stamina_setpoint: float, stamina_source: str):
+                            stamina_setpoint: float, stamina_source: str, flatten_action_space: bool = False):
     """Wrap a COOM task env (from ContinualLearningEnv.tasks) with HACE shaping + gymnasium adapter."""
     wrapped = COOMHACEWrapper(
         task_env,
@@ -323,7 +342,17 @@ def _wrap_task_env_with_hace(task_env, *, alpha: float, beta: float, health_setp
         ),
     )
     wrapped = FlattenFrameStackToChannels(wrapped)
-    return COOMGymnasiumAdapter(wrapped)
+    wrapped = COOMGymnasiumAdapter(wrapped)
+    if flatten_action_space:
+        try:
+            import gymnasium as gymnasium
+        except Exception:
+            gymnasium = None
+        if gymnasium is not None and isinstance(getattr(wrapped, "action_space", None), gymnasium.spaces.MultiDiscrete):
+            from src.envs.action_space_wrappers import MultiDiscreteToDiscrete
+
+            wrapped = MultiDiscreteToDiscrete(wrapped)
+    return wrapped
 
 
 def main():
@@ -337,13 +366,23 @@ def main():
             "stable-baselines3 is required for train_coom.py. "
             "Install with: pip install 'stable-baselines3[extra]'"
         ) from e
+    try:
+        from stable_baselines3 import DQN  # type: ignore
+    except Exception:
+        DQN = None  # type: ignore
+    try:
+        from sb3_contrib import RecurrentPPO  # type: ignore
+    except Exception:
+        RecurrentPPO = None  # type: ignore
 
     # Apply pilot overrides
     total_steps = int(cfg.get("total_steps", 1_000_000))
     eval_episodes = int(cfg.get("eval", {}).get("eval_episodes", 10))
+    eval_deterministic = bool(cfg.get("eval", {}).get("deterministic", False))
     if args.pilot and "pilot" in cfg:
         total_steps = int(cfg["pilot"].get("total_steps", total_steps))
         eval_episodes = int(cfg["pilot"].get("eval_episodes", eval_episodes))
+        eval_deterministic = bool(cfg["pilot"].get("eval_deterministic", eval_deterministic))
 
     num_seeds = int(cfg.get("num_seeds", 1))
     if args.seed_index is not None:
@@ -396,7 +435,24 @@ def main():
 
     # Resolve PPO settings
     ppo = cfg.get("ppo_config", {}) or {}
+    algo = str(ppo.get("algo", "ppo")).lower()
     policy = str(ppo.get("policy", "CnnPolicy"))
+
+    if algo in ("recurrentppo", "recurrent_ppo", "rppo"):
+        if RecurrentPPO is None:
+            raise RuntimeError(
+                "You selected ppo_config.algo=recurrent_ppo but sb3-contrib is not installed. "
+                "Install with: pip install sb3-contrib"
+            )
+        if policy == "CnnPolicy":
+            # Sensible default for pixels + recurrence
+            policy = "CnnLstmPolicy"
+    if algo in ("dqn",):
+        if DQN is None:
+            raise RuntimeError(
+                "You selected ppo_config.algo=dqn but stable-baselines3 DQN is unavailable. "
+                "Install with: pip install 'stable-baselines3[extra]'"
+            )
 
     # Resolve output directory
     base_out = Path(cfg.get("logging", {}).get("save_dir", "experiments/coom/results"))
@@ -471,6 +527,9 @@ def main():
                     except Exception:
                         vec_start_method = None
 
+                if algo in ("dqn",) and n_envs != 1:
+                    raise ValueError("SB3 DQN only supports n_envs=1 in this script (off-policy). Set ppo_config.n_envs: 1")
+
                 env = _make_vec_coom_env(
                     n_envs=n_envs,
                     use_subproc=use_subproc,
@@ -485,7 +544,18 @@ def main():
                     stamina_source=stamina_source,
                 )
 
-                model = PPO(
+                if algo in ("dqn",):
+                    # DQN requires a Discrete action space. Convert COOM MultiDiscrete -> Discrete.
+                    try:
+                        import gymnasium as gymnasium
+                    except Exception:
+                        gymnasium = None
+                    if gymnasium is not None and isinstance(getattr(env, "action_space", None), gymnasium.spaces.MultiDiscrete):
+                        from src.envs.action_space_wrappers import MultiDiscreteToDiscrete
+
+                        env = MultiDiscreteToDiscrete(env)
+
+                algo_kwargs = dict(
                     policy=policy,
                     env=env,
                     verbose=1,
@@ -500,6 +570,28 @@ def main():
                     gae_lambda=float(ppo.get("gae_lambda", 0.95)),
                     tensorboard_log=tb_log,
                 )
+                if algo in ("dqn",):
+                    # Off-policy hyperparameters (defaults are SB3 defaults)
+                    model = DQN(
+                        policy=policy,
+                        env=env,
+                        verbose=1,
+                        seed=seed,
+                        learning_rate=float(ppo.get("learning_rate", 1e-4)),
+                        buffer_size=int(ppo.get("buffer_size", 1_000_000)),
+                        learning_starts=int(ppo.get("learning_starts", 50_000)),
+                        batch_size=int(ppo.get("batch_size", 32)),
+                        tau=float(ppo.get("tau", 1.0)),
+                        gamma=float(ppo.get("gamma", 0.99)),
+                        train_freq=ppo.get("train_freq", 4),
+                        gradient_steps=int(ppo.get("gradient_steps", 1)),
+                        target_update_interval=int(ppo.get("target_update_interval", 10_000)),
+                        exploration_fraction=float(ppo.get("exploration_fraction", 0.1)),
+                        exploration_final_eps=float(ppo.get("exploration_final_eps", 0.05)),
+                        tensorboard_log=tb_log,
+                    )
+                else:
+                    model = (RecurrentPPO if algo in ("recurrentppo", "recurrent_ppo", "rppo") else PPO)(**algo_kwargs)
 
                 cb = _make_episode_stats_callback(print_every=int(ppo.get("print_episode_every", 10)))
                 model.learn(
@@ -518,10 +610,15 @@ def main():
                     health_setpoint=health_setpoint,
                     stamina_setpoint=stamina_setpoint,
                     stamina_source=stamina_source,
+                    flatten_action_space=bool(algo in ("dqn",)),
                 )
                 eval_payload = {
                     "single": evaluate_sb3(
-                        model, eval_env, episodes=int(eval_episodes), seed=seed + 2_000_000
+                        model,
+                        eval_env,
+                        episodes=int(eval_episodes),
+                        seed=seed + 2_000_000,
+                        deterministic=eval_deterministic,
                     )
                 }
                 eval_env.close()
@@ -536,8 +633,9 @@ def main():
                     health_setpoint=health_setpoint,
                     stamina_setpoint=stamina_setpoint,
                     stamina_source=stamina_source,
+                    flatten_action_space=bool(algo in ("dqn",)),
                 )
-                model = PPO(
+                algo_kwargs = dict(
                     policy=policy,
                     env=env0,
                     verbose=1,
@@ -552,6 +650,27 @@ def main():
                     gae_lambda=float(ppo.get("gae_lambda", 0.95)),
                     tensorboard_log=tb_log,
                 )
+                if algo in ("dqn",):
+                    model = DQN(
+                        policy=policy,
+                        env=env0,
+                        verbose=1,
+                        seed=seed,
+                        learning_rate=float(ppo.get("learning_rate", 1e-4)),
+                        buffer_size=int(ppo.get("buffer_size", 1_000_000)),
+                        learning_starts=int(ppo.get("learning_starts", 50_000)),
+                        batch_size=int(ppo.get("batch_size", 32)),
+                        tau=float(ppo.get("tau", 1.0)),
+                        gamma=float(ppo.get("gamma", 0.99)),
+                        train_freq=ppo.get("train_freq", 4),
+                        gradient_steps=int(ppo.get("gradient_steps", 1)),
+                        target_update_interval=int(ppo.get("target_update_interval", 10_000)),
+                        exploration_fraction=float(ppo.get("exploration_fraction", 0.1)),
+                        exploration_final_eps=float(ppo.get("exploration_final_eps", 0.05)),
+                        tensorboard_log=tb_log,
+                    )
+                else:
+                    model = (RecurrentPPO if algo in ("recurrentppo", "recurrent_ppo", "rppo") else PPO)(**algo_kwargs)
 
                 # Sequential training across tasks
                 for task_idx, task_env in enumerate(tasks):
@@ -562,6 +681,7 @@ def main():
                         health_setpoint=health_setpoint,
                         stamina_setpoint=stamina_setpoint,
                         stamina_source=stamina_source,
+                        flatten_action_space=bool(algo in ("dqn",)),
                     )
                     model.set_env(env_t)
                     cb = _make_episode_stats_callback(print_every=int(ppo.get("print_episode_every", 10)))
@@ -584,9 +704,14 @@ def main():
                         health_setpoint=health_setpoint,
                         stamina_setpoint=stamina_setpoint,
                         stamina_source=stamina_source,
+                        flatten_action_space=bool(algo in ("dqn",)),
                     )
                     eval_payload["sequence"]["tasks"][f"task_{task_idx}"] = evaluate_sb3(
-                        model, env_t, episodes=int(eval_episodes), seed=seed + 2_000_000 + task_idx * 10_000
+                        model,
+                        env_t,
+                        episodes=int(eval_episodes),
+                        seed=seed + 2_000_000 + task_idx * 10_000,
+                        deterministic=eval_deterministic,
                     )
                     env_t.close()
 

@@ -1,0 +1,57 @@
+# CO8 continual-learning sequence for Oscar GPU jobs (experiments/coom/run_coom_oscar.sh)
+#
+# train_coom.py trains one SB3 model across tasks sequentially (shared replay buffer for DQN).
+
+experiment: coom_co8_dqn
+total_steps: 1_000_000
+num_seeds: 1
+
+sequence: CO8
+
+agents:
+  - name: vanilla
+    alpha: 1.0
+    beta: 0.0
+  - name: hace
+    alpha: 1.0
+    beta: 0.2
+  - name: pure_homeo
+    alpha: 0.0
+    beta: 1.0
+
+hace_config:
+  alpha: 1.0
+  beta: 1.0
+  health_setpoint: 100.0
+  stamina_setpoint: 100.0
+  stamina_source: stamina
+
+ppo_config:
+  algo: dqn
+  policy: CnnPolicy
+  n_envs: 1
+  vec_env_subproc: false
+  log_interval: 50
+  print_episode_every: 10
+  learning_rate: 1.0e-4
+  buffer_size: 1000000
+  learning_starts: 50000
+  batch_size: 32
+  train_freq: 4
+  gradient_steps: 1
+  target_update_interval: 10000
+  exploration_fraction: 0.1
+  exploration_final_eps: 0.05
+  gamma: 0.99
+
+eval:
+  eval_episodes: 10
+  deterministic: false
+
+logging:
+  save_dir: experiments/coom/results
+  tensorboard: true
+
+pilot:
+  total_steps: 10_000
+  eval_episodes: 1
