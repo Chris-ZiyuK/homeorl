@@ -1,0 +1,124 @@
+{
+  "hace": {
+    "n_episodes": 28771,
+    "avg_length": 174.15300128601717,
+    "median_length": 170.0,
+    "std_length": 70.27183336938546,
+    "max_length": 694.0,
+    "death_distribution": {
+      "combat_death": 25683,
+      "multiple_depletion": 524,
+      "starved": 1290,
+      "dehydrated": 1274
+    },
+    "death_rates": {
+      "combat_death": 0.8926697021306176,
+      "multiple_depletion": 0.018212783705814882,
+      "starved": 0.04483681484828473,
+      "dehydrated": 0.04428069931528275
+    },
+    "mean_avg_food": 6.494715512599525,
+    "std_avg_food": 1.0941237091561524,
+    "mean_avg_drink": 7.355537911855177,
+    "std_avg_drink": 1.4908583228490981,
+    "mean_avg_energy": 8.670458830498356,
+    "std_avg_energy": 0.1660808041390077,
+    "avg_achievements": 3.9348302109763305
+  },
+  "health_only": {
+    "n_episodes": 27402,
+    "avg_length": 182.48186263776367,
+    "median_length": 176.0,
+    "std_length": 63.22583334912016,
+    "max_length": 518.0,
+    "death_distribution": {
+      "combat_death": 21658,
+      "dehydrated": 3080,
+      "multiple_depletion": 1588,
+      "starved": 1075,
+      "exhausted": 1
+    },
+    "death_rates": {
+      "combat_death": 0.790380264214291,
+      "dehydrated": 0.1124005547040362,
+      "multiple_depletion": 0.05795197430844464,
+      "starved": 0.03923071308663601,
+      "exhausted": 3.6493686592219546e-05
+    },
+    "avg_achievements": 3.7317349098605943
+  },
+  "naive_survival": {
+    "n_episodes": 27741,
+    "avg_length": 180.26066111531668,
+    "median_length": 177.0,
+    "std_length": 58.77106369598666,
+    "max_length": 623.0,
+    "death_distribution": {
+      "combat_death": 23074,
+      "multiple_depletion": 954,
+      "dehydrated": 2542,
+      "starved": 1168,
+      "exhausted": 3
+    },
+    "death_rates": {
+      "combat_death": 0.8317652572005335,
+      "multiple_depletion": 0.03438953174002379,
+      "dehydrated": 0.09163332251901518,
+      "starved": 0.042103745358855124,
+      "exhausted": 0.00010814318157240186
+    },
+    "avg_achievements": 4.271367290292347
+  },
+  "pure_homeo": {
+    "n_episodes": 28827,
+    "avg_length": 173.81118395948243,
+    "median_length": 171.0,
+    "std_length": 78.2438182477345,
+    "max_length": 783.0,
+    "death_distribution": {
+      "combat_death": 25279,
+      "dehydrated": 1385,
+      "multiple_depletion": 688,
+      "starved": 1475
+    },
+    "death_rates": {
+      "combat_death": 0.876920942172269,
+      "dehydrated": 0.04804523536961876,
+      "multiple_depletion": 0.023866514031983904,
+      "starved": 0.05116730842612828
+    },
+    "mean_avg_food": 6.473631680680264,
+    "std_avg_food": 1.2071848568921222,
+    "mean_avg_drink": 7.564273908732483,
+    "std_avg_drink": 1.580966946344118,
+    "mean_avg_energy": 8.67822262773634,
+    "std_avg_energy": 0.1584974091713451,
+    "avg_achievements": 2.4606098449370384
+  },
+  "vanilla": {
+    "n_episodes": 27929,
+    "avg_length": 179.40269970281787,
+    "median_length": 176.0,
+    "std_length": 62.98491653787991,
+    "max_length": 695.0,
+    "death_distribution": {
+      "combat_death": 22550,
+      "dehydrated": 3097,
+      "starved": 1176,
+      "multiple_depletion": 1106
+    },
+    "death_rates": {
+      "combat_death": 0.8074044899566759,
+      "dehydrated": 0.11088832396433815,
+      "starved": 0.04210677074009094,
+      "multiple_depletion": 0.03960041533889506
+    },
+    "mean_avg_food": 6.44470623242037,
+    "std_avg_food": 1.110240001064194,
+    "mean_avg_drink": 6.371594497709073,
+    "std_avg_drink": 1.4150724479523282,
+    "mean_avg_energy": 7.99029891582075,
+    "std_avg_energy": 0.7101267949811125,
+    "avg_achievements": 5.166314583407927
+  }
+}

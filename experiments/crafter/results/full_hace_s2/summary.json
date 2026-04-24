@@ -1,0 +1,17 @@
+{
+  "agent": "hace",
+  "seed": 2,
+  "total_steps": 1000000,
+  "training_time_s": 11867.267045021057,
+  "n_episodes": 5774,
+  "alpha": 1.0,
+  "beta": 1.0,
+  "avg_episode_length": 173.18825770696225,
+  "median_episode_length": 170.0,
+  "death_causes": {
+    "combat_death": 5198,
+    "multiple_depletion": 91,
+    "starved": 251,
+    "dehydrated": 234
+  }
+}

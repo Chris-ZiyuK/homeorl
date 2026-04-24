@@ -1,0 +1,17 @@
+{
+  "agent": "health_only",
+  "seed": 0,
+  "total_steps": 1000000,
+  "training_time_s": 11157.892966985703,
+  "n_episodes": 5461,
+  "alpha": 1.0,
+  "beta": 1.0,
+  "avg_episode_length": 183.13514008423365,
+  "median_episode_length": 177.0,
+  "death_causes": {
+    "combat_death": 4233,
+    "dehydrated": 683,
+    "multiple_depletion": 338,
+    "starved": 207
+  }
+}

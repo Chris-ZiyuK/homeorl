@@ -1,0 +1,13 @@
+{
+  "agent": "hace",
+  "seed": 2,
+  "steps": 1000000,
+  "alpha": 1.0,
+  "beta": 1.0,
+  "pilot": false,
+  "outdir": "experiments/crafter/results/full_hace_s2",
+  "eval_freq": 50000,
+  "eval_episodes": 20,
+  "no_record": true,
+  "timestamp": "2026-04-21 21:25:07"
+}

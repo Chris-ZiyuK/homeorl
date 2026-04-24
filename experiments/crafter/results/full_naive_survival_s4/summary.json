@@ -1,0 +1,18 @@
+{
+  "agent": "naive_survival",
+  "seed": 4,
+  "total_steps": 1000000,
+  "training_time_s": 11169.725469350815,
+  "n_episodes": 5586,
+  "alpha": 1.0,
+  "beta": 1.0,
+  "avg_episode_length": 179.04189044038668,
+  "median_episode_length": 175.0,
+  "death_causes": {
+    "combat_death": 4679,
+    "dehydrated": 511,
+    "multiple_depletion": 170,
+    "starved": 225,
+    "exhausted": 1
+  }
+}

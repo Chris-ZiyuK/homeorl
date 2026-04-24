@@ -1,0 +1,17 @@
+{
+  "agent": "vanilla",
+  "seed": 2,
+  "total_steps": 1000000,
+  "training_time_s": 11008.241004705429,
+  "n_episodes": 5589,
+  "alpha": 1.0,
+  "beta": 1.0,
+  "avg_episode_length": 178.93630345321168,
+  "median_episode_length": 177.0,
+  "death_causes": {
+    "combat_death": 4465,
+    "dehydrated": 679,
+    "starved": 225,
+    "multiple_depletion": 220
+  }
+}

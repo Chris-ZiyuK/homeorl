@@ -1,0 +1,17 @@
+{
+  "agent": "pure_homeo",
+  "seed": 4,
+  "total_steps": 1000000,
+  "training_time_s": 11468.3813290596,
+  "n_episodes": 5725,
+  "alpha": 1.0,
+  "beta": 1.0,
+  "avg_episode_length": 174.6791266375546,
+  "median_episode_length": 172.0,
+  "death_causes": {
+    "combat_death": 5007,
+    "multiple_depletion": 137,
+    "dehydrated": 272,
+    "starved": 309
+  }
+}
