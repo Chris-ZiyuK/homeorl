@@ -38,7 +38,8 @@ ppo_config:
   log_interval: 50
   print_episode_every: 10
   learning_rate: 1.0e-4
-  buffer_size: 1000000
+  # Replay buffer stores obs + next_obs; pixel obs make large buffers OOM on 32–64GB nodes.
+  buffer_size: 100000
   learning_starts: 50000
   batch_size: 32
   train_freq: 4

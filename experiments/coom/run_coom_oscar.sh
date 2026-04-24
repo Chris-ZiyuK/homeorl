@@ -2,7 +2,10 @@
 #SBATCH --job-name=coom_hace
 #SBATCH --output=experiments/coom/logs/%x_%A_%a.out
 #SBATCH --error=experiments/coom/logs/%x_%A_%a.err
-#SBATCH --mem=32G
+#SBATCH --time=24:00:00
+# norm-gpu example limits: cpu=12, gres/gpu=2, mem=192G (per user).
+# To run 2 jobs in parallel, keep each job at ~cpu=6, gpu=1, mem<=96G.
+#SBATCH --mem=96G
 # If you get QOSMaxCpuPerUserLimit: norm-gpu QoS is often cpu=12 *per user* (see `myaccount`).
 # Concurrent GPU jobs share that cap—e.g. two jobs cannot each use 12 CPUs at once.
 #SBATCH --cpus-per-task=6
