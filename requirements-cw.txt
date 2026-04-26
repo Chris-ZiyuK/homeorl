@@ -1,0 +1,12 @@
+# Optional Continual World stack — mirrors install_requires from
+# https://github.com/awarelab/continual_world (setup.py).
+# Install after base deps:
+#   pip install -r requirements.txt -r requirements-cw.txt
+
+tensorflow>=2.0
+# NOTE: `mujoco-py` is installed separately in scripts/setup_cw_env.sh
+# with a legacy-compatible build flow.
+metaworld @ git+https://github.com/rlworkgroup/metaworld.git@0875192baaa91c43523708f55866d98eaf3facaf#egg=metaworld
+pandas
+matplotlib
+seaborn
