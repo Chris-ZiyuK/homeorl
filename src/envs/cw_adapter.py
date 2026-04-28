@@ -20,6 +20,34 @@ def _import_metaworld():
         ) from e
     return metaworld
 
+def _to_gymnasium_space(space):
+    """Convert old gym spaces from MetaWorld into gymnasium spaces for SB3 2.x."""
+    if space is None:
+        return None
+
+    if isinstance(space, gym.Space):
+        return space
+
+    cls_name = space.__class__.__name__
+
+    if cls_name == "Box" and hasattr(space, "low") and hasattr(space, "high"):
+        return gym.spaces.Box(
+            low=np.asarray(space.low, dtype=space.dtype),
+            high=np.asarray(space.high, dtype=space.dtype),
+            shape=getattr(space, "shape", None),
+            dtype=space.dtype,
+        )
+
+    if cls_name == "Discrete" and hasattr(space, "n"):
+        return gym.spaces.Discrete(int(space.n))
+
+    if cls_name == "MultiDiscrete" and hasattr(space, "nvec"):
+        return gym.spaces.MultiDiscrete(np.asarray(space.nvec))
+
+    if cls_name == "MultiBinary" and hasattr(space, "n"):
+        return gym.spaces.MultiBinary(space.n)
+
+    raise TypeError(f"Unsupported space type for Gymnasium conversion: {type(space)}")
 
 @dataclass(frozen=True)
 class CWSequenceSpec:
@@ -27,17 +55,19 @@ class CWSequenceSpec:
     tasks: Tuple[str, ...]
     steps_per_task: int = 1_000_000
 
-
+    
 class CWGymnasiumAdapter(gym.Env):
     metadata = {"render_modes": ["human", "rgb_array"]}
 
     def __init__(self, env, max_episode_steps: Optional[int] = None):
         super().__init__()
         self._env = env
+        if max_episode_steps is None:
+            max_episode_steps = int(getattr(env, "max_path_length", 200))
         self._max_episode_steps = max_episode_steps
         self._step_count = 0
-        self.observation_space = getattr(env, "observation_space", None)
-        self.action_space = getattr(env, "action_space", None)
+        self.observation_space = _to_gymnasium_space(getattr(env, "observation_space", None))
+        self.action_space = _to_gymnasium_space(getattr(env, "action_space", None))
 
     def reset(
         self, *, seed: Optional[int] = None, options: Optional[dict] = None
@@ -107,9 +137,30 @@ def make_cw_env(
     hace_beta: float = 1.0,
 ):
     metaworld = _import_metaworld()
-    ml1 = metaworld.ML1(task_name, seed=seed)
+
+    try:
+        ml1 = metaworld.ML1(task_name, seed=seed)
+    except TypeError:
+        ml1 = metaworld.ML1(task_name)
+
     env = ml1.train_classes[task_name]()
     env.set_task(ml1.train_tasks[0])
+
+    try:
+        env.seed(seed)
+    except Exception:
+        pass
+
+    try:
+        env.action_space.seed(seed)
+    except Exception:
+        pass
+
+    try:
+        env.observation_space.seed(seed)
+    except Exception:
+        pass
+
     try:
         env.reset(seed=seed)
     except TypeError:

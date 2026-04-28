@@ -42,3 +42,9 @@ wandb/
 rl_basics_guide.html
 
 docs/
+
+# External local clone (kept out of repo)
+continual_world/
+
+experiments/cw/logs/
+experiments/cw/results/

@@ -1,0 +1,48 @@
+#CONFIG=configs/cw2_window_push_sac.yaml sbatch --array=0-0 experiments/cw/run_cw_oscar.sh
+experiment: cw2_window_push_sac
+num_seeds: 1
+
+sequence:
+  name: CW2_window_push
+  tasks:
+    - window-close-v1
+    - push-v1
+
+steps_per_task: 500000
+
+agents:
+  - name: vanilla
+    alpha: 1.0
+    beta: 0.0
+  - name: hace_001
+    alpha: 1.0
+    beta: 0.001
+  - name: hace_003
+    alpha: 1.0
+    beta: 0.003
+
+ppo_config:
+  device: cuda
+  algo: sac
+  policy: MlpPolicy
+  learning_rate: 3.0e-4
+  batch_size: 256
+  buffer_size: 1000000
+  gamma: 0.99
+  verbose: 0
+  progress_bar: false
+
+eval:
+  eval_episodes: 50
+  deterministic: false
+
+logging:
+  save_dir: experiments/cw/results
+  tensorboard: true
+  progress_prints: true
+  progress_interval: 50000
+
+pilot:
+  total_steps: 30000
+  eval_episodes: 5
+  eval_deterministic: false

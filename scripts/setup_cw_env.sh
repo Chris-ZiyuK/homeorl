@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Continual World optional deps. Usage: bash scripts/setup_cw_env.sh
-# With editable CW: CW_REPO=/path/to/continual_world bash scripts/setup_cw_env.sh
+# Optional override:
+#   CW_REPO=/path/to/continual_world bash scripts/setup_cw_env.sh
+# Auto-clone when missing:
+#   CW_GIT_URL=https://github.com/awarelab/continual_world.git bash scripts/setup_cw_env.sh
 
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -44,7 +47,22 @@ pip install "cython<3" "setuptools<70" "wheel<0.42" fasteners cffi glfw imageio
 PIP_NO_BUILD_ISOLATION=1 pip install --no-build-isolation --no-deps "mujoco-py>=2.0,<2.1"
 # Install the rest of CW stack (tensorflow/metaworld/etc.).
 pip install -r requirements-cw.txt
-[[ -n "${CW_REPO:-}" ]] && pip install -e "$CW_REPO"
+
+# Continual World editable install:
+# - Use CW_REPO when provided
+# - Else use local ./continual_world when present
+# - Else clone from CW_GIT_URL and install editable
+if [[ -z "${CW_REPO:-}" ]]; then
+  if [[ -d "continual_world" ]]; then
+    CW_REPO="$(pwd)/continual_world"
+  else
+    CW_GIT_URL="${CW_GIT_URL:-https://github.com/awarelab/continual_world.git}"
+    echo "continual_world repo not found; cloning from: $CW_GIT_URL"
+    git clone "$CW_GIT_URL" continual_world
+    CW_REPO="$(pwd)/continual_world"
+  fi
+fi
+pip install -e "$CW_REPO"
 
 
 python - <<'PY'

@@ -1,0 +1,2 @@
+agent,seed,task,n_episodes,return_mean,return_std,length_mean,length_std,success_mean,success_std,solved_rate
+vanilla,0,reach-v1,50,213234.39391745423,989.8008792999815,200.0,0.0,1.0,0.0,1.0

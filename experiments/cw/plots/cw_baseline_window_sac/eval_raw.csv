@@ -1,0 +1,2 @@
+agent,seed,task,n_episodes,return_mean,return_std,length_mean,length_std,success_mean,success_std,solved_rate
+vanilla,0,window-close-v1,50,70250.66151290968,15067.041203579707,200.0,0.0,0.98,0.13999999999999999,0.98

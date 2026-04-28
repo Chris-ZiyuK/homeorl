@@ -1,0 +1,59 @@
+experiment: cw_hace_cw10_tuned
+total_steps: 300000
+num_seeds: 1
+
+sequence:
+  name: CW10
+  tasks:
+    - hammer-v1
+    - push-wall-v1
+    - faucet-close-v1
+    - push-back-v1
+    - stick-pull-v1
+    - handle-press-side-v1
+    - push-v1
+    - shelf-place-v1
+    - window-close-v1
+    - peg-unplug-side-v1
+
+steps_per_task: 300000
+
+agents:
+  - name: vanilla
+    alpha: 1.0
+    beta: 0.0
+  - name: hace_001
+    alpha: 1.0
+    beta: 0.01
+  - name: hace_003
+    alpha: 1.0
+    beta: 0.03
+  - name: hace_01
+    alpha: 1.0
+    beta: 0.1
+
+ppo_config:
+  device: cuda
+  algo: ppo
+  policy: MlpPolicy
+  learning_rate: 1.0e-4
+  n_steps: 4096
+  batch_size: 256
+  n_epochs: 10
+  ent_coef: 0.001
+  gamma: 0.99
+  gae_lambda: 0.95
+  buffer_size: 1000000
+
+eval:
+  eval_episodes: 10
+  deterministic: true
+
+logging:
+  save_dir: experiments/cw/results
+  tensorboard: true
+
+pilot:
+  total_steps: 30000
+  eval_episodes: 2
+  eval_deterministic: true
