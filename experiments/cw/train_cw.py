@@ -232,6 +232,18 @@ def _make_model(algo: str, policy: str, env, seed: int, ppo_cfg: Dict[str, Any],
     if algo_l == "sac":
         from stable_baselines3 import SAC  # type: ignore
 
+        # return SAC(
+        #     policy=policy,
+        #     env=env,
+        #     verbose=int(ppo_cfg.get("verbose", 0)),
+        #     seed=seed,
+        #     learning_rate=float(ppo_cfg.get("learning_rate", 3e-4)),
+        #     batch_size=int(ppo_cfg.get("batch_size", 256)),
+        #     buffer_size=int(ppo_cfg.get("buffer_size", 1_000_000)),
+        #     gamma=float(ppo_cfg.get("gamma", 0.99)),
+        #     tensorboard_log=tb_log,
+        #     device=device
+        # )
         return SAC(
             policy=policy,
             env=env,
@@ -239,10 +251,13 @@ def _make_model(algo: str, policy: str, env, seed: int, ppo_cfg: Dict[str, Any],
             seed=seed,
             learning_rate=float(ppo_cfg.get("learning_rate", 3e-4)),
             batch_size=int(ppo_cfg.get("batch_size", 256)),
-            buffer_size=int(ppo_cfg.get("buffer_size", 1_000_000)),
+            buffer_size=int(ppo_cfg.get("buffer_size", 300_000)),
+            learning_starts=int(ppo_cfg.get("learning_starts", 5_000)),
+            train_freq=int(ppo_cfg.get("train_freq", 4)),
+            gradient_steps=int(ppo_cfg.get("gradient_steps", 1)),
             gamma=float(ppo_cfg.get("gamma", 0.99)),
             tensorboard_log=tb_log,
-            device=device
+            device=device,
         )
     raise ValueError(f"Unsupported ppo_config.algo '{algo}'. Use ppo or sac.")
 

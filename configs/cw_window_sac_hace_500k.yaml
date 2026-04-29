@@ -1,14 +1,9 @@
-#CONFIG=configs/cw2_window_push_sac.yaml sbatch --array=0-0 experiments/cw/run_cw_oscar.sh
-experiment: cw2_window_push_sac
-num_seeds: 1
+experiment: cw_window_sac_hace_500k
+total_steps: 500000
+num_seeds: 4
 
-sequence:
-  name: CW2_window_push
-  tasks:
-    - window-close-v1
-    - push-v1
-
-steps_per_task: 500000
+env:
+  task_name: window-close-v1
 
 agents:
   - name: vanilla
@@ -38,8 +33,3 @@ logging:
   tensorboard: true
   progress_prints: true
   progress_interval: 50000
-
-pilot:
-  total_steps: 30000
-  eval_episodes: 5
-  eval_deterministic: false

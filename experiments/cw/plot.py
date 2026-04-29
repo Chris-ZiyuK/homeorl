@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # Usage:
+# source ~/homeorl/scripts/load_homeorl_env.sh
+# cd ~/homeorl
 # python experiments/cw/plot_results_simple.py --results-dir experiments/cw/results/cw_baseline
 
 from pathlib import Path
