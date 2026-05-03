@@ -2,8 +2,7 @@
 % HACE: Addressing Viability Failure in Sequential Reinforcement Learning
 %       with Homeostatic Auxiliary Rewards
 %
-% CSCI 2951X Course Project — Spring 2026
-% Brown University
+% CSCI 2951X Course Project — Spring 2026, Brown University
 %
 % To compile:
 %   pdflatex main.tex && bibtex main && pdflatex main.tex && pdflatex main.tex
@@ -23,14 +22,12 @@
 \usepackage{booktabs}
 \usepackage{enumitem}
 \usepackage{amsmath,amssymb}
-\usepackage{algorithm}
-\usepackage{algorithmic}
 \usepackage{multirow}
 \usepackage{subcaption}
 \usepackage{xcolor}
 \usepackage{hyperref}
 
-% ── Notation shortcuts ───────────────────────────────────────
+% ── Notation ─────────────────────────────────────────────────
 \newcommand{\setpoint}{H^*}
 \newcommand{\energy}{E}
 \newcommand{\drive}{d}
@@ -73,30 +70,23 @@ with Homeostatic Auxiliary Rewards}
 
 Continual reinforcement learning (CRL) research has focused almost
 exclusively on \emph{catastrophic forgetting}---the tendency for neural
-networks to lose previously acquired skills when adapting to new tasks.
-In embodied settings where agents manage shared physiological resources
-such as energy, we identify a complementary and equally critical failure
-mode: \emph{viability failure}, wherein agents deplete internal resources
-and die before they can learn a new task. We argue that established CRL
-techniques such as Elastic Weight Consolidation (EWC), Experience Replay
-(ER), and L2 regularization are structurally incapable of addressing
-viability failure because it is a \emph{reward-level survival} problem,
-not a parameter-preservation problem. We propose \hace{}
-(Homeostatic Auxiliary for Continual Environments), a simple,
-task-invariant auxiliary reward based on homeostatic drive reduction that
-incentivizes energy management without requiring task-specific
-engineering. We evaluate \hace{} alongside 8 baseline agents---including
-EWC, ER, and L2 regularization---on a purpose-built 10-task sequential
-gridworld benchmark with 3 curated task orderings and 2 boundary modes.
-Our results demonstrate that (1)~\hace{} agents maintain viability
-across task transitions, achieving 3--5$\times$ higher boundary
-solvability than task-only baselines; (2)~traditional CRL methods fail
-to prevent agent death at task boundaries and perform no better than
-unprotected baselines on viability metrics; and (3)~\hace{} is
-orthogonal to forgetting-prevention methods, with \hace{}+EWC addressing
-both failure modes simultaneously. Our findings establish viability
-maintenance as an essential and overlooked prerequisite for continual
-embodied learning.
+networks to lose old skills when adapting to new tasks.  In embodied
+settings where agents manage shared physiological resources, we identify a
+complementary failure mode: \emph{viability failure}, wherein agents
+deplete internal resources and die before they can learn a new task.
+Established CRL techniques such as Elastic Weight Consolidation (EWC) and
+Experience Replay (ER) are structurally unable to address viability
+failure because it is a reward-level survival problem, not a
+parameter-preservation problem.  We propose \hace{} (Homeostatic Auxiliary
+for Continual Environments), a task-invariant auxiliary reward based on
+homeostatic drive reduction that incentivizes energy management without
+task-specific engineering.  On a 10-task sequential gridworld benchmark
+with 9 agent variants and 2 boundary modes, \hace{} agents achieve
+$3\times$ higher boundary solvability and retain $3\times$ more energy at
+task transitions than all CRL baselines, which perform no better than
+unprotected baselines on viability metrics.  Combining \hace{} with EWC
+addresses both viability and forgetting, confirming the two failure modes
+are orthogonal.
 
 \end{abstract}
 
@@ -107,65 +97,46 @@ embodied learning.
 \label{sec:intro}
 % ============================================================================
 
-Reinforcement learning agents deployed in sequential or continual settings
-must adapt to changing objectives without losing previously learned
-capabilities.  The dominant research paradigm in continual RL (CRL) frames
-this challenge almost exclusively as \emph{catastrophic forgetting}---the
-well-documented tendency for neural network parameters to overwrite old
-knowledge when trained on new tasks~\cite{Parisi2019,kirkpatrick2017,continualworld2021}.
-A rich toolkit of methods has emerged to combat forgetting: weight
-regularization (EWC~\cite{kirkpatrick2017}), experience replay~\cite{rolnick2019},
-progressive architectures~\cite{rusu2016}, and policy
-distillation~\cite{rusu2015}.  These methods are evaluated almost exclusively
-on whether old-task performance degrades after new-task training.
+Reinforcement learning agents deployed in continual settings must adapt to
+changing objectives without losing previously learned capabilities.  The
+dominant research paradigm in continual RL (CRL) frames this challenge
+almost exclusively as \emph{catastrophic forgetting}: the tendency for
+parameters to overwrite old knowledge during new-task
+training~\cite{Parisi2019,kirkpatrick2017,continualworld2021}.  A rich
+toolkit has emerged---Elastic Weight Consolidation (EWC~\cite{kirkpatrick2017}),
+Experience Replay (ER~\cite{rolnick2019}), progressive
+architectures~\cite{rusu2016}---all evaluated on whether old-task
+performance degrades after training on new ones.
 
-We argue that this singular focus on forgetting obscures an equally critical
-failure mode that emerges naturally in \emph{embodied} sequential settings:
-\textbf{viability failure}.  When an agent operates in an environment with
-shared physiological constraints---such as an internal energy variable that
-depletes with each action---the transition between tasks can be lethal.  An
-agent that completes Task~$T_i$ with minimal remaining energy may arrive at
-Task~$T_{i+1}$ without sufficient resources to survive long enough to learn.
-No amount of EWC regularization or replayed transitions can save an agent that
-dies in the first three steps of a new task.
+We argue that this focus on forgetting obscures an equally critical failure
+mode in \emph{embodied} sequential settings: \textbf{viability failure}.
+When an environment imposes shared physiological constraints---such as an
+internal energy variable that depletes with each action---a task transition
+can be lethal.  An agent completing Task~$T_i$ with minimal remaining
+energy arrives at Task~$T_{i+1}$ without the resources to survive long
+enough to learn.  No amount of weight regularization or replayed
+transitions can save an agent that dies in its first three steps.
 
-Consider a concrete example from our benchmark.  An agent trained on
-\textsc{Conservation} (high step cost, must be efficient) transitions to
-\textsc{Sprint} (very short time limit, must be fast).  Under carryover
-boundary conditions---where energy is not reset between tasks---a task-only
-agent that learned conservative movement arrives at \textsc{Sprint} with
-critically low energy and zero time to explore.  It dies immediately.  EWC
-preserves the \textsc{Conservation} weights perfectly, but those weights are
-useless if the agent cannot survive.
+Consider a concrete example.  An agent trained on \textsc{Conservation}
+(high step cost, must be efficient) transitions to \textsc{Sprint}
+(very short time limit, must be fast).  Under carryover boundary
+conditions---where energy persists between tasks---the agent arrives at
+\textsc{Sprint} with critically low energy and no time to explore.  It
+dies immediately.  EWC preserves the \textsc{Conservation} weights
+perfectly, but those weights are useless if the agent cannot survive.
 
-This paper makes three contributions:
-
-\begin{enumerate}[leftmargin=*,topsep=2pt,itemsep=1pt]
-  \item We formally identify \textbf{viability failure} as a distinct
-        failure mode in continual embodied RL, separate from catastrophic
-        forgetting, and show that traditional CRL methods are structurally
-        unable to address it (Section~\ref{sec:viability}).
-
-  \item We propose \textbf{\hace{}} (Homeostatic Auxiliary for Continual
-        Environments), a simple, task-invariant auxiliary reward based on
-        biological homeostatic drive reduction that incentivizes energy
-        management across all tasks without task-specific engineering
-        (Section~\ref{sec:hace}).
-
-  \item We design a \textbf{10-task sequential gridworld benchmark} with
-        12 structurally diverse tasks, 3 curated task orderings, 9 agent
-        variants (including EWC, ER, L2, and oracle baselines), and 2
-        boundary modes (reset/carryover) that enables systematic study
-        of both forgetting and viability failure
-        (Section~\ref{sec:benchmark}).
-\end{enumerate}
-
-Our experiments (Section~\ref{sec:experiments}) demonstrate that \hace{}
-agents maintain viability across task boundaries, achieve higher boundary
-solvability, and exhibit stronger forward transfer than both task-only
-agents and standard CRL baselines.  Critically, \hace{} is
-\emph{orthogonal} to forgetting-prevention methods: combining \hace{}
-with EWC addresses both failure modes simultaneously.
+This paper makes three contributions.  First, we formally identify
+\textbf{viability failure} as a distinct failure mode in embodied CRL,
+separate from catastrophic forgetting, and show that traditional CRL
+methods cannot address it (Section~\ref{sec:method}).  Second, we propose
+\textbf{\hace{}}, a task-invariant auxiliary reward based on homeostatic
+drive reduction that incentivizes energy management across all tasks
+without task-specific engineering.  Third, we design a \textbf{10-task
+sequential gridworld benchmark} with 9 agent variants, 3 task orderings,
+and 2 boundary modes, enabling systematic study of both failure modes
+(Section~\ref{sec:setup}).  Our experiments (Section~\ref{sec:results})
+show that \hace{} maintains viability across task transitions while
+traditional CRL methods fail entirely on survival metrics.
 
 
 % ============================================================================
@@ -173,697 +144,356 @@ with EWC addresses both failure modes simultaneously.
 \label{sec:related}
 % ============================================================================
 
-\subsection{Continual Reinforcement Learning}
+\paragraph{Continual RL.}
+EWC~\cite{kirkpatrick2017} constrains important parameters via a
+Fisher-weighted penalty; ER~\cite{rolnick2019} interleaves old
+transitions during new-task training; progressive
+networks~\cite{rusu2016} freeze old columns and add capacity per task.
+These methods have been benchmarked on Continual
+World~\cite{continualworld2021} and CORA~\cite{cora2022}, where episode
+termination is unaffected by resource constraints.  Our work highlights
+that this evaluation paradigm systematically misses viability failure.
 
-The CRL literature focuses on preventing catastrophic forgetting when an
-agent's task changes over time.  Elastic Weight Consolidation
-(EWC;~\cite{kirkpatrick2017}) slows updates to parameters deemed important
-for previous tasks via a Fisher-weighted penalty.  Experience Replay
-(ER;~\cite{rolnick2019}) retains a buffer of past transitions and
-interleaves them during training on new tasks.  Progressive Neural
-Networks~\cite{rusu2016} freeze old columns and add new capacity per task,
-while policy distillation approaches~\cite{rusu2015} transfer knowledge
-via soft targets.  These methods have been benchmarked extensively on
-Continual World~\cite{continualworld2021} and CORA~\cite{cora2022},
-predominantly in robotic manipulation settings where episode termination
-is not affected by resource constraints.  Our work highlights that this
-evaluation paradigm systematically misses viability failure because these
-benchmarks lack shared physiological dynamics.
+\paragraph{Homeostatic RL.}
+Keramati and Gutkin~\cite{keramati2014} formalize reward as deviation
+reduction from an internal setpoint, producing risk-averse and
+anticipatory behaviors.  Yoshida~\cite{yoshida2018,Yoshida} extends this
+to deep RL and connects it to meta-RL.  Konidaris and
+Barto~\cite{konidaris2006} propose adaptive motivational systems.
+However, all prior work studies single or slowly shifting environments
+and does not test whether homeostatic objectives improve sequential task
+learning.
 
-\subsection{Homeostatic Reinforcement Learning}
-
-Homeostatic RL (HRRL) formalizes reward as deviation reduction from an
-internal setpoint, grounding value in the agent's physiological
-state~\cite{keramati2014}.  Keramati and Gutkin show that HRRL produces
-risk-averse and anticipatory behaviors in a single-task setting.  Yoshida
-extends this to deep RL~\cite{yoshida2018} and later connects HRRL to
-meta-RL via recurrent adaptation~\cite{Yoshida}.  Konidaris and Barto
-propose adaptive motivational systems where internal drives guide
-behavior~\cite{konidaris2006}.  However, all prior HRRL work studies
-single or slowly shifting environments.  No existing work tests whether
-homeostatic objectives improve \emph{sequential} task learning, nor
-frames homeostasis as an anti-viability-failure mechanism in CRL.
-
-\subsection{Transfer and Auxiliary Rewards}
-
-Successor features~\cite{Barreto} enable transfer by decomposing value
-into reusable dynamics representations and task-specific reward weights.
-Tomov et al.~\cite{Tomov} show that humans reuse old policies in
-multi-task settings and note that task descriptions could be grounded in
-internal physiological states---an insight our work directly
-operationalizes.  Auxiliary rewards have been used for sample efficiency
-in RL: pixel control~\cite{jaderberg2017} and curiosity-driven
-exploration~\cite{pathak2017}.  \hace{} differs from all of these in
-that the auxiliary signal is not designed for exploration or
-representation learning, but for \emph{viability maintenance}---keeping
-the agent alive so that primary task learning can proceed.
+\paragraph{Transfer and auxiliary rewards.}
+Successor features~\cite{Barreto} decompose value into reusable dynamics
+and task-specific weights.  Tomov et al.~\cite{Tomov} observe that
+humans reuse policies across tasks and that task descriptions could be
+grounded in physiological states---an insight \hace{} operationalizes.
+Unlike curiosity~\cite{pathak2017} or pixel control~\cite{jaderberg2017},
+\hace{} targets \emph{viability maintenance} rather than exploration or
+representation learning.
 
 
 % ============================================================================
-\section{Problem Formulation}
-\label{sec:problem}
+\section{Viability Failure and HACE}
+\label{sec:method}
 % ============================================================================
 
 \subsection{Sequential Task Setting}
 
-We consider an agent that must learn a sequence of tasks
-$T_1, T_2, \ldots, T_n$, where all tasks share:
-\begin{itemize}[leftmargin=*,topsep=1pt,itemsep=1pt]
-  \item a common action space $\mathcal{A} = \{\text{up, down, left, right}\}$,
-  \item an internal energy variable $\energy_t \in [0, \energy_{\max}]$ with
-        per-step cost $c_{\text{step}}$,
-  \item a terminal condition: $\energy_t \leq 0 \implies \text{death}$.
-\end{itemize}
-
-Tasks differ in grid size, hazard configurations, food placement, wall
-layouts, gate mechanisms, step costs, and energy capacities (see
-Table~\ref{tab:tasks}).  Each task is trained for a fixed budget of $K$
-episodes.  At task boundaries, the agent's network parameters are
-retained (sequential learning), while energy is handled according to
-the \emph{boundary mode}:
-
-\begin{itemize}[leftmargin=*,topsep=1pt,itemsep=1pt]
-  \item \textbf{Reset}: energy is reinitialized to the new task's default
-        $\energy_0$ at each boundary.
-  \item \textbf{Carryover}: energy from the last episode of $T_i$ carries
-        over to the first episode of $T_{i+1}$, clamped to
-        $[\energy_{\min}, \energy_{\max}^{(i+1)}]$.
-\end{itemize}
-
-The carryover mode is the ecologically realistic setting: a biological
-agent cannot reset its metabolism.  It is also the setting where viability
-failure is most acute.
+We consider an agent learning a sequence of tasks $T_1, \ldots, T_n$
+sharing a common action space, an internal energy variable
+$\energy_t \in [0, \energy_{\max}]$ with per-step cost $c_{\text{step}}$,
+and a terminal condition $\energy_t \leq 0 \implies \text{death}$.  Tasks
+differ in grid layout, hazards, food sources, walls, and energy economics
+(Section~\ref{sec:setup}).  At task boundaries, the agent retains its
+network parameters.  Energy is handled by the \emph{boundary mode}:
+\textbf{reset} reinitializes energy to each task's default, while
+\textbf{carryover} preserves the terminal energy from the previous task.
+Carryover is the ecologically realistic setting where viability failure is
+most acute.
 
 \subsection{Viability Failure}
-\label{sec:viability}
 
-\begin{definition}[Viability Failure]
-An agent experiences \emph{viability failure} at task boundary $T_i \to T_{i+1}$
-if, under the learned policy $\pi_i$, the expected energy at the end of
-Task~$T_i$ is insufficient to sustain exploration in $T_{i+1}$:
+An agent experiences viability failure at boundary $T_i \to T_{i+1}$ when
+its expected terminal energy after Task~$T_i$ is insufficient to sustain
+exploration in $T_{i+1}$:
 \begin{equation}
   \mathbb{E}_{\pi_i}\!\left[\energy_{T_i}^{\text{terminal}}\right]
-  \;< \; \energy_{\text{viable}}^{(i+1)}
+  \;\!<\;\! \energy_{\text{viable}}^{(i+1)}.
 \end{equation}
-where $\energy_{\text{viable}}^{(i+1)}$ is the minimum energy required to
-reach any rewarding state in $T_{i+1}$.
-\end{definition}
-
-Under viability failure, the agent dies in the first few steps of the new
-task with high probability.  No gradient information about the new task is
-obtained---the agent observes only a short sequence of death trajectories.
-This differs fundamentally from catastrophic forgetting:
-
-\begin{itemize}[leftmargin=*,topsep=1pt,itemsep=1pt]
-  \item \textbf{Forgetting} is a \emph{parameter-level} problem: old
-        weights are overwritten.  Solutions operate on weights (EWC) or
-        data (ER).
-  \item \textbf{Viability failure} is a \emph{reward-level} problem: the
-        agent never survives long enough to receive learning signal.
-        Weight-level solutions are irrelevant---there is nothing to forget
-        if nothing was learned.
-\end{itemize}
-
-\subsection{Why Traditional CRL Methods Cannot Fix Viability Failure}
-
-EWC adds a penalty $\lambda \sum_i F_i (\theta_i - \theta_i^*)^2$ that
-constrains parameter drift from the old task.  This preserves old behavior
-but does nothing to ensure the agent conserves energy.  Experience Replay
-interleaves old transitions during new-task training.  If the old
-transitions come from a task with different energy economics, replaying
-them provides misleading energy context and cannot teach the agent to
-survive under new constraints.  L2 regularization penalizes parameter
-magnitude, providing no task-specific or survival-specific signal.  In all
-cases, the fundamental issue is that these methods optimize at the
-\emph{weight level}, while viability failure occurs at the
-\emph{trajectory level}.
-
-
-% ============================================================================
-\section{Method: HACE}
-\label{sec:hace}
-% ============================================================================
+The agent then dies in the first few steps of the new task, observing only
+death trajectories and receiving no useful gradient signal.  This differs
+fundamentally from catastrophic forgetting: forgetting is a
+\emph{parameter-level} problem (old weights are overwritten), while
+viability failure is a \emph{trajectory-level} problem (the agent never
+survives long enough to learn).  EWC preserves old weights perfectly but
+cannot force the agent to conserve energy.  ER replays old transitions
+from different energy regimes, providing misleading context.  L2
+regularization constrains parameter magnitude with no survival signal.
+All three operate at the wrong level of abstraction.
 
 \subsection{Homeostatic Drive Reduction}
 
-Following the HRRL framework of Keramati and Gutkin~\cite{keramati2014},
-we define an internal \emph{drive} as the deviation of the agent's energy
-from a homeostatic setpoint $\setpoint$:
+Following Keramati and Gutkin~\cite{keramati2014}, we define an internal
+drive as distance from a homeostatic setpoint $\setpoint$:
+$\drive_t = |\setpoint - \energy_t|$.  The \hace{} auxiliary reward is
+the one-step drive reduction:
 \begin{equation}
-  \drive_t \;=\; |\setpoint - \energy_t|
+  \reward_t^H \;=\; |\setpoint - \energy_t| \;-\; |\setpoint - \energy_{t+1}|.
+  \label{eq:drive}
 \end{equation}
-
-The homeostatic auxiliary reward is the one-step drive reduction:
-\begin{equation}
-  \reward_t^H \;=\; \drive_t - \drive_{t+1}
-  \;=\; |\setpoint - \energy_t| - |\setpoint - \energy_{t+1}|
-  \label{eq:drive_reduction}
-\end{equation}
-
-This reward is positive when actions bring the agent closer to homeostasis
+This signal is positive when actions bring the agent closer to homeostasis
 (e.g., collecting food when energy is low) and negative when actions
-increase deviation (e.g., stepping on hazards).  Crucially, this signal is:
+increase deviation.  It is \emph{task-invariant} (unchanged across tasks),
+\emph{dense} (per-step feedback), and \emph{biologically motivated}
+(mirrors organismal drive reduction~\cite{keramati2014,konidaris2006}).
 
-\begin{itemize}[leftmargin=*,topsep=1pt,itemsep=1pt]
-  \item \textbf{Task-invariant}: $\setpoint$ and the drive function do
-        not change across tasks.
-  \item \textbf{Dense}: provides feedback at every timestep.
-  \item \textbf{Biologically motivated}: mirrors how biological organisms
-        regulate internal physiological states~\cite{keramati2014,konidaris2006}.
-\end{itemize}
-
-\subsection{HACE Reward Formulation}
-
-The \hace{} agent combines task-specific reward with the homeostatic
-auxiliary:
-\begin{equation}
-  \reward_t^{\text{HACE}} \;=\;
-    \alpha \cdot \reward_t^{\text{task}} + \reward_t^H
-  \label{eq:hace}
-\end{equation}
-
-where $\alpha$ is the task reward coefficient (default $\alpha = 1.0$).
-The task reward $\reward_t^{\text{task}}$ includes progress-based shaping,
-food bonuses, hazard penalties, and terminal signals.  In all experiments,
-we set $\setpoint = \energy_{\text{cap}}$ for the current task, meaning
-the agent is incentivized to maintain maximum energy.
-
-\subsection{Orthogonality with CRL Methods}
-
-Because \hace{} operates on the reward signal while EWC/ER/L2 operate on
-weights/data, the two approaches are naturally complementary.  We
-demonstrate this with Agent~I (\hace{}+EWC), which adds EWC
-regularization on top of the \hace{} reward.  This combination addresses
-both viability failure (via homeostatic reward) \emph{and} catastrophic
-forgetting (via weight consolidation) simultaneously.
+The full \hace{} reward combines this with the task-specific signal:
+$\reward_t^{\text{HACE}} = \alpha \cdot \reward_t^{\text{task}} + \reward_t^H$,
+where $\alpha = 1.0$ by default and $\setpoint = \energy_{\text{cap}}$.
+Because \hace{} operates at the \emph{reward level} while EWC/ER operate
+at the \emph{weight/data level}, the two are naturally orthogonal: Agent~I
+(\hace{}+EWC) combines both to address viability and forgetting
+simultaneously.
 
 
 % ============================================================================
-\section{Benchmark: Sequential Homeostasis Gridworld}
-\label{sec:benchmark}
+\section{Experimental Setup}
+\label{sec:setup}
 % ============================================================================
 
-\subsection{Task Catalog}
+\subsection{Task Benchmark}
 
-We design 12 structurally diverse gridworld tasks that share common
-energy dynamics but differ in spatial layout, hazard configuration,
-food placement, and behavioral requirements.  Table~\ref{tab:tasks}
-summarizes the full catalog.
+We design 12 structurally diverse gridworld tasks sharing common energy
+dynamics but differing in spatial layout, hazards, food placement, walls,
+gates, step costs, and energy capacities.  Table~\ref{tab:tasks}
+summarizes the catalog.  Each task is a Gymnasium environment: the agent
+moves on a discrete grid, consumes energy per step, collects food to
+restore energy, avoids hazard cells, and navigates walls and gate
+mechanisms.  Episodes terminate on successful exit or energy depletion.
 
 \begin{table}[t]
 \centering
-\caption{Task catalog for the Sequential Homeostasis Gridworld benchmark.
-All tasks share 4 movement actions and terminal-on-death dynamics.
-\emph{Grid}: grid size.  $\energy_0$: initial energy.
-$c_s$: step cost.  \emph{Food}: number of food sources.
-\emph{Haz}: number of hazard cells.  \emph{Wall}: has wall obstacles.
-\emph{Gate}: exit locked until food collected.}
+\caption{Task catalog.  All tasks share 4 movement actions and
+terminal-on-death.  $c_s$: step cost.  F: food count.  H: hazard count.}
 \label{tab:tasks}
 \small
-\begin{tabular}{@{}lccccccl@{}}
+\setlength{\tabcolsep}{3.8pt}
+\begin{tabular}{@{}lcccccl@{}}
 \toprule
 \textbf{Task} & \textbf{Grid} & $\energy_0$ & $c_s$ &
-\textbf{Food} & \textbf{Haz} & \textbf{Wall} & \textbf{Key Challenge} \\
+\textbf{F} & \textbf{H} & \textbf{Key Challenge} \\
 \midrule
-\textsc{Reach}          & 5 & 15 & 1 & 1 & 0 & -- & Pure navigation \\
-\textsc{Recharge}       & 5 &  8 & 1 & 1 & 0 & -- & Must eat to survive \\
-\textsc{Hazard Cross}   & 5 & 12 & 1 & 1 & 2 & -- & Avoidance \\
-\textsc{Detour}         & 5 &  9 & 1 & 1 & 2 & -- & Eat + avoid \\
-\textsc{Wall Maze}      & 6 & 14 & 1 & 1 & 0 & \checkmark & Spatial planning \\
-\textsc{Dual Food}      & 6 & 10 & 1 & 2 & 1 & -- & Decision under scarcity \\
-\textsc{Haz.~Gauntlet}  & 6 & 14 & 1 & 1 & 4 & -- & Dense hazards \\
-\textsc{Conservation}   & 5 & 20 & 2 & 1 & 1 & -- & High step cost \\
-\textsc{Endurance}      & 7 & 16 & 1 & 1 & 2 & -- & Long path \\
-\textsc{Collect Exit}   & 6 & 14 & 1 & 1 & 2 & -- & Gate mechanism \\
-\textsc{Sprint}         & 5 & 14 & 1 & 1 & 0 & -- & Very short time limit \\
-\textsc{Gaunt.~Refuel}  & 7 & 16 & 1 & 2 & 4 & -- & All skills combined \\
+Reach          & 5 & 15 & 1 & 1 & 0 & Navigation \\
+Recharge       & 5 &  8 & 1 & 1 & 0 & Must eat to survive \\
+Hazard Cross   & 5 & 12 & 1 & 1 & 2 & Avoidance \\
+Detour         & 5 &  9 & 1 & 1 & 2 & Eat + avoid \\
+Wall Maze      & 6 & 14 & 1 & 1 & 0 & Spatial planning \\
+Dual Food      & 6 & 10 & 1 & 2 & 1 & Decision under scarcity \\
+Haz.~Gauntlet  & 6 & 14 & 1 & 1 & 4 & Dense hazards \\
+Conservation   & 5 & 20 & 2 & 1 & 1 & High step cost \\
+Endurance      & 7 & 16 & 1 & 1 & 2 & Long path \\
+Collect Exit   & 6 & 14 & 1 & 1 & 2 & Gate mechanism \\
+Sprint         & 5 & 14 & 1 & 1 & 0 & Very short time limit \\
+Gaunt.~Refuel  & 7 & 16 & 1 & 2 & 4 & All skills combined \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Each task is implemented as a Gymnasium environment with shared transition
-dynamics: the agent moves on a discrete grid, consumes energy at each step,
-may collect food to restore energy, must avoid hazard cells that inflict
-additional energy damage, and must navigate walls and gate mechanisms.
-The environment terminates either on successful exit or on energy depletion
-(death).  This shared structure ensures that energy management skills are
-universally relevant while task-specific behavioral demands vary
-substantially.
-
-\subsection{Task Sequences}
-
-We define three curated 10-task orderings designed to probe different
-transfer patterns:
-
-\begin{itemize}[leftmargin=*,topsep=1pt,itemsep=1pt]
-  \item \textbf{$\alpha$ (Energy-Transfer)}: Tasks are ordered so that
-        energy management skills build cumulatively.  Homeostatic agents
-        should show the strongest forward transfer.
-
-  \item \textbf{$\beta$ (Safety-Transfer)}: Safety/avoidance skills are
-        learned first, then applied to resource tasks.  A mixed
-        transfer pattern.
-
-  \item \textbf{$\gamma$ (Interference)}: Deliberately conflicting
-        strategies (e.g., be slow $\to$ be fast) to test robustness
-        to negative transfer.
-\end{itemize}
+We define three curated 10-task orderings: \textbf{$\alpha$
+(Energy-Transfer)} where energy management skills build cumulatively,
+\textbf{$\beta$ (Safety-Transfer)} where avoidance skills are learned
+first, and \textbf{$\gamma$ (Interference)} with deliberately conflicting
+strategies (e.g., Conservation $\to$ Sprint).  Full orderings are in
+Appendix~\ref{app:sequences}.
 
 \subsection{Agent Catalog}
 
-We compare 9 agent variants that systematically vary reward signal,
-observation, CRL method, and training mode.  All agents share the same
-DQN architecture (2-layer MLP, 128 hidden units, $\varepsilon$-greedy
-exploration).
+We compare 9~agent variants (Table~\ref{tab:agents}) that systematically
+vary reward signal, energy observation, CRL method, and training mode.
+All share the same DQN architecture (2-layer MLP, 128 hidden units,
+$\varepsilon$-greedy; see Appendices~\ref{app:hyperparams}
+and~\ref{app:obs} for details).
 
 \begin{table}[t]
 \centering
-\caption{Agent catalog.  \emph{Task R.}: receives task-shaped reward.
-\emph{E Obs}: observes internal energy.  \emph{Homeo R.}: receives
-homeostatic auxiliary reward.  \emph{CRL}: continual learning method.
-\emph{Seq}: parameters carry over between tasks.}
+\caption{Agent catalog.  TR: task reward.  EO: energy observation.
+HR: homeostatic reward.  Seq: sequential (parameter carryover).}
 \label{tab:agents}
 \small
+\setlength{\tabcolsep}{3.5pt}
 \begin{tabular}{@{}llccccc@{}}
 \toprule
-\textbf{ID} & \textbf{Agent} & \textbf{Task R.} &
-\textbf{E Obs} & \textbf{Homeo R.} & \textbf{CRL} & \textbf{Seq} \\
+\textbf{ID} & \textbf{Agent} & \textbf{TR} & \textbf{EO} &
+\textbf{HR} & \textbf{CRL} & \textbf{Seq} \\
 \midrule
-A & Task-only           & \checkmark & --         & --         & -- & \checkmark \\
-B & Energy-aware        & \checkmark & \checkmark & --         & -- & \checkmark \\
-C & \textbf{HACE (ours)} & \checkmark & \checkmark & \checkmark & -- & \checkmark \\
-D & Pure Homeostatic    & --         & \checkmark & \checkmark & -- & \checkmark \\
-E & Task Oracle         & \checkmark & \checkmark & --         & -- & -- \\
-F & EWC                 & \checkmark & \checkmark & --         & EWC & \checkmark \\
-G & L2                  & \checkmark & \checkmark & --         & L2 & \checkmark \\
-H & ER                  & \checkmark & \checkmark & --         & Replay & \checkmark \\
-I & \textbf{HACE+EWC}   & \checkmark & \checkmark & \checkmark & EWC & \checkmark \\
+A & Task-only          & \checkmark & --  & --  & --     & \checkmark \\
+B & Energy-aware       & \checkmark & \checkmark & --  & --     & \checkmark \\
+C & \textbf{HACE}      & \checkmark & \checkmark & \checkmark & --     & \checkmark \\
+D & Pure Homeostatic   & --  & \checkmark & \checkmark & --     & \checkmark \\
+E & Task Oracle        & \checkmark & \checkmark & --  & --     & -- \\
+F & EWC                & \checkmark & \checkmark & --  & EWC    & \checkmark \\
+G & L2                 & \checkmark & \checkmark & --  & L2     & \checkmark \\
+H & Exp.~Replay        & \checkmark & \checkmark & --  & ER     & \checkmark \\
+I & \textbf{HACE+EWC}  & \checkmark & \checkmark & \checkmark & EWC    & \checkmark \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The critical comparisons are:
-\begin{itemize}[leftmargin=*,topsep=1pt,itemsep=1pt]
-  \item \textbf{C vs.~B}: Does homeostatic reward help beyond energy observation?
-  \item \textbf{C vs.~F/G/H}: Does \hace{} outperform traditional CRL methods?
-  \item \textbf{I vs.~C and I vs.~F}: Is \hace{} orthogonal to EWC?
-  \item \textbf{D vs.~C}: Is pure homeostatic reward viable without task reward?
-  \item \textbf{E vs.~all}: Upper bound from independent per-task training.
-\end{itemize}
+\subsection{Metrics}
+
+We evaluate agents on: \textbf{current-task success rate} (fraction of
+evaluation episodes reaching exit), an \textbf{end-of-phase evaluation
+matrix} $R_{i,j}$ (success on task $T_j$ after training through $T_i$),
+\textbf{boundary solvability} (whether the current policy can solve
+$T_{i+1}$ from its actual terminal energy at $T_i$),
+\textbf{average terminal energy} at task boundaries, and standard
+\textbf{forgetting}
+$F_j = \max_{i \geq j} R_{i,j} - R_{n,j}$.
+
+\subsection{Protocol}
+
+All experiments use the $\alpha$ sequence under carryover boundary mode
+(the most challenging setting), with 600 episodes per task, 40 evaluation
+episodes every 50 training episodes, and 10 seeds per agent.  We report
+means with standard deviations.  Section~\ref{sec:factorial} additionally
+compares reset vs.\ carryover.
 
 
 % ============================================================================
-\section{Evaluation Metrics}
-\label{sec:metrics}
+\section{Results}
+\label{sec:results}
 % ============================================================================
 
-\paragraph{Current-task success rate.}
-During training on task $T_i$, we periodically evaluate the policy on
-$T_i$ and record the fraction of evaluation episodes reaching the exit.
-
-\paragraph{End-of-phase evaluation matrix.}
-After completing training on $T_i$, we evaluate the policy on \emph{all}
-tasks and record the success matrix $R_{i,j}$ (success rate on task $T_j$
-after training through $T_i$).
-
-\paragraph{Boundary solvability.}
-At each task boundary $T_i \to T_{i+1}$, we probe whether the current
-policy can solve $T_{i+1}$ starting from the energy level actually achieved
-at the end of $T_i$.  This directly measures viability.
-
-\paragraph{Forward transfer.}
-For each task $T_i$ ($i > 1$), we compare the sequential agent's learning
-speed on $T_i$ to the Task Oracle (Agent~E) trained from scratch on $T_i$
-alone.
-
-\paragraph{Forgetting.}
-For a previously learned task $T_j$:
-$F_j = \max_{i \in \{j,\ldots,n\}} R_{i,j} - R_{n,j}$.
-
-\paragraph{Average terminal energy.}
-The mean energy remaining at the end of evaluation episodes, measuring the
-agent's safety margins and resource-management quality.
-
-
-% ============================================================================
-\section{Experiments}
-\label{sec:experiments}
-% ============================================================================
-
-We present results from three experiment phases of increasing scale.
-
-% ── Experiment 1 ─────────────────────────────────────────────
-\subsection{Experiment 1: Sequential Pilot (5-Task Sequence)}
-\label{sec:pilot}
-
-\subsubsection{Setup}
-As an initial validation, we trained two agents---\emph{task-specific}
-(comparable to Agent~A/B) and \emph{homeostatic} (comparable to
-Agent~D)---on a 5-task legacy sequence: \textsc{Reach} $\to$
-\textsc{Recharge} $\to$ \textsc{Hazard Cross} $\to$ \textsc{Detour}
-$\to$ \textsc{Sprint}.  Both agents use the same DQN architecture and
-are trained for 600 episodes per task without resetting parameters.
-Results are reported across 10 seeds.
-
-\subsubsection{Results}
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\columnwidth]{figures/sequential_pilot.png}
-  \caption{\textbf{Experiment 1: Sequential pilot on the 5-task
-  sequence.}  \emph{Left}: Current-task success rate during sequential
-  training.  The task-specific agent (red) learns early tasks faster, while
-  the homeostatic agent (blue) matches or exceeds performance on later
-  tasks.  \emph{Right}: Final retention across all tasks.  The homeostatic
-  agent shows stronger retention on resource-dependent tasks
-  (\textsc{Hazard Cross}: 0.90 vs.~0.70; \textsc{Detour}: 0.80 vs.~0.60).
-  Error bars: $\pm 1\sigma$ across 10 seeds.}
-  \label{fig:pilot}
-\end{figure}
-
-Figure~\ref{fig:pilot} reveals a consistent pattern:
-
-\begin{enumerate}[leftmargin=*,topsep=1pt,itemsep=1pt]
-  \item \textbf{Early tasks}: The task-specific agent learns
-        \textsc{Reach} faster (reaching 0.6 success within 200 episodes
-        vs.~400 for the homeostatic agent), consistent with direct task
-        reward encoding.
-  \item \textbf{Later tasks}: On \textsc{Hazard Cross}, \textsc{Detour},
-        and \textsc{Sprint}---all requiring resource management and hazard
-        avoidance---the homeostatic agent matches or exceeds the
-        task-specific agent.
-  \item \textbf{Retention}: The homeostatic agent shows stronger retention
-        on later resource-intensive tasks (0.80--0.90 vs.~0.60--0.70),
-        suggesting that homeostatic objectives produce more transferable
-        representations for survival-critical behavior.
-\end{enumerate}
-
-This pilot validates the core hypothesis: homeostatic objectives trade
-slower early-task learning for stronger performance and retention on later
-tasks that depend on shared embodied resource constraints.
-
-
-% ── Experiment 2 ─────────────────────────────────────────────
-\subsection{Experiment 2: Factorial Analysis (Reward $\times$ Boundary)}
-\label{sec:factorial}
-
-\subsubsection{Setup}
-To isolate the effect of boundary mode on viability, we conducted a
-$3 \times 2$ factorial experiment with three reward regimes (\emph{Task-only},
-\emph{Task+Homeostatic}, \emph{Pure Homeostatic}) crossed with two
-boundary modes (\emph{Reset}, \emph{Carryover}).  All agents used the
-5-task alpha sequence with 600 episodes per task, 10 seeds per condition.
-
-\subsubsection{Results}
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\columnwidth]{figures/e2_factorial.png}
-  \caption{\textbf{Experiment 2: Reward Regime $\times$ Boundary Mode.}
-  \emph{Top left/center}: Current-task success under reset and carryover.
-  \emph{Top right}: Boundary solvability---the probability that the
-  current policy can solve the next task from its actual terminal energy.
-  Homeostatic agents achieve 3--5$\times$ higher solvability.
-  \emph{Bottom left/center}: Final evaluation under both modes.  The
-  task-only agent collapses on later tasks under carryover.
-  \emph{Bottom right}: Average terminal energy.}
-  \label{fig:factorial}
-\end{figure}
-
-Figure~\ref{fig:factorial} provides direct evidence for viability failure:
-
-\paragraph{Viability collapse under carryover.}
-Under \textbf{reset} mode, all three reward regimes achieve reasonable
-performance (task-only: 0.70--1.0 success across tasks).  Under
-\textbf{carryover}, the task-only agent's performance collapses on later
-tasks (\textsc{Detour}: $\sim$0.10; \textsc{Sprint}: $\sim$0.10), while
-homeostatic agents maintain 0.75--1.0 performance.  This collapse is
-\emph{not} forgetting---the same weights work fine under reset.  It is
-viability failure: the agent arrives at later tasks with insufficient energy.
-
-\paragraph{Boundary solvability.}
-Under carryover, the task-only agent achieves only $\sim$0.04 boundary
-solvability, while Task+Homeostatic achieves $\sim$0.15 and Pure
-Homeostatic achieves $\sim$0.14.  Even under reset, homeostatic agents
-achieve 3--5$\times$ higher boundary solvability ($\sim$0.20--0.28
-vs.~$\sim$0.05).
-
-\paragraph{Energy conservation.}
-Task+Homeostatic agents maintain the highest average terminal energy
-($\sim$9.0 under reset, $\sim$7.0 under carryover), directly explaining
-their superior boundary solvability.
-
-
-% ── Experiment 3 ─────────────────────────────────────────────
-\subsection{Experiment 3: Full 9-Agent Suite (10-Task $\alpha$ Sequence)}
+\subsection{Full 9-Agent Suite (10-Task $\alpha$, Carryover)}
 \label{sec:full_suite}
 
-\subsubsection{Setup}
-We deployed the complete 9-agent catalog (Table~\ref{tab:agents}) on the
-full 10-task $\alpha$ sequence under carryover boundary conditions, with
-600 episodes per task and 10 seeds per agent.  This experiment directly
-tests the key comparisons: \hace{} vs.~CRL baselines, orthogonality of
-\hace{} and EWC, and the performance ceiling of the Task Oracle.
+Figure~\ref{fig:learning} shows learning curves for all 9 agents across
+the 10-task sequence.  To reduce visual clutter, we highlight the four
+primary agents---Task-Only (A), \hace{} (C), EWC (F), and \hace{}+EWC
+(I)---and render the remaining five in the background.
 
-\subsubsection{Results}
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig_learning_curves.pdf}
+  \caption{Current-task success rate across the 10-task $\alpha$ sequence
+  (carryover).  Task boundaries are marked by dashed lines.  \hace{}
+  (teal) and \hace{}+EWC (vermillion) consistently recover at task
+  transitions, while Task-Only (amber) and EWC (mauve) collapse on later
+  tasks.  Background lines show remaining agents.  Mean $\pm\,1\sigma$
+  across 10 seeds.}
+  \label{fig:learning}
+\end{figure*}
+
+The learning curves reveal three key patterns.  First, traditional CRL
+methods (EWC, L2, ER) provide no viability advantage over the unprotected
+Task-Only baseline in the later half of the sequence.  On tasks 7--10
+(Detour through Gauntlet Refuel), agents without homeostatic reward
+collapse to near-zero success.  Second, \hace{} agents (C and I)
+consistently recover from initial dips at task boundaries, demonstrating
+that homeostatic reward provides a persistent survival signal that enables
+exploration in new tasks.  Third, \hace{}+EWC (I) achieves the most
+consistent performance across the full sequence, combining the viability
+benefit of \hace{} with EWC's weight-protection on earlier tasks.
+
+Figure~\ref{fig:boundary} quantifies the viability mechanism directly.
+Panel~(a) shows average boundary solvability: \hace{} and \hace{}+EWC
+achieve $3\times$ higher boundary solvability than EWC, ER, or Task-Only.
+This confirms that viability failure is the bottleneck---CRL methods that
+only protect weights do not improve the agent's ability to survive the
+next task.  Panel~(b) reveals the underlying cause: \hace{} agents retain
+$3$--$5\times$ more energy at task boundaries (11.2 and 9.1 vs.\ 2--4 for
+all other agents), directly enabling continued exploration.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\columnwidth]{figures/e3_full_suite.png}
-  \caption{\textbf{Experiment 3: Full 9-agent suite on the 10-task
-  $\alpha$ sequence (carryover).}  \emph{Left}: Current-task success
-  over 6000 episodes of sequential training.  \emph{Right}: End-of-phase
-  performance per task after training on the full sequence.  \hace{}
-  (Agent~C, green) and \hace{}+EWC (Agent~I, yellow) consistently
-  outperform CRL baselines (F/G/H) on later tasks.}
-  \label{fig:full_suite}
+  \includegraphics[width=\columnwidth]{figures/fig_boundary_energy.pdf}
+  \caption{(a) Average boundary solvability across 9 task transitions.
+  (b) Average terminal energy at task boundaries.  \hace{} variants
+  retain $3$--$5\times$ more energy than all CRL baselines, directly
+  enabling higher boundary solvability.}
+  \label{fig:boundary}
 \end{figure}
 
-Figure~\ref{fig:full_suite} confirms the key findings at full scale:
+Figure~\ref{fig:heatmap} presents the end-of-sequence success matrix.
+The heatmap makes the contrast stark: Task-Only (A) retains near-zero
+performance across all 10 tasks after reaching the end of the
+sequence, while \hace{}+EWC (I) maintains $>$0.25 success on
+Gauntlet Refuel---the hardest integrated task---and achieves the highest
+average success across all tasks (0.335).  Even EWC (F) and ER (H),
+despite protecting earlier-task performance somewhat (Reach: 0.40--0.53),
+score zero on the final task.  \hace{} alone (C) is the only non-oracle
+agent to achieve substantial success ($>$0.60) on Gauntlet Refuel, a task
+demanding all four skills (navigation, food collection, hazard avoidance,
+efficient energy use).
 
-\paragraph{CRL baselines fail on viability.}
-Agents F (EWC), G (L2), and H (ER) show no meaningful improvement over
-Agent~A (task-only) on later tasks under carryover conditions.  These
-methods preserve old weights or replay old data, but neither mechanism
-addresses the energy depletion that kills the agent at task boundaries.
-This validates our theoretical analysis: viability failure is a
-trajectory-level problem that weight-level methods cannot solve.
-
-\paragraph{HACE provides consistent benefit.}
-Agent~C (\hace{}) achieves consistently higher success rates on
-resource-critical tasks in the second half of the sequence (tasks~6--10).
-The homeostatic auxiliary reward provides a persistent incentive to
-manage energy, producing agents that arrive at each task boundary with
-sufficient resources to survive and explore.
-
-\paragraph{HACE+EWC addresses both failure modes.}
-Agent~I (\hace{}+EWC) demonstrates the orthogonality claim: it achieves
-\hace{}-level viability while also benefiting from EWC's
-forgetting-prevention on earlier tasks.  This confirms that the two
-approaches target independent failure modes and combine additively.
-
-\paragraph{Task Oracle sets the ceiling.}
-Agent~E (Task Oracle), which resets its network at each task boundary,
-achieves the highest per-task performance but by construction cannot
-transfer knowledge.  Sequential agents with \hace{} approach or exceed
-the oracle on several later tasks, demonstrating positive forward
-transfer from cumulative energy-management learning.
+\begin{figure}[!htb]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/fig_performance_heatmap.pdf}
+  \caption{End-of-sequence success rate (agents $\times$ tasks) for the
+  10-task $\alpha$ sequence under carryover.  Darker cells indicate
+  higher success.  \hace{}+EWC (bottom row) achieves the highest average
+  performance; \hace{} (C) is the only agent to solve Gauntlet Refuel.}
+  \label{fig:heatmap}
+\end{figure}
 
 
-% ============================================================================
-\section{Analysis}
-\label{sec:analysis}
-% ============================================================================
+\subsection{Reset vs.\ Carryover: Isolating Viability Failure}
+\label{sec:factorial}
 
-\subsection{Viability Failure Is the True Bottleneck}
+To confirm that the performance collapse under carryover is due to
+viability failure rather than forgetting, we ran a $3 \times 2$ factorial
+experiment (3 reward regimes $\times$ 2 boundary modes) on a 5-task
+pilot sequence, with 10 seeds per condition.
 
-Our factorial results (Section~\ref{sec:factorial}) demonstrate that the
-dramatic performance collapse observed under carryover conditions is
-\emph{not} catastrophic forgetting.  The same network weights achieve
-high performance under reset mode---the parameters are intact.  The
-problem is that the agent cannot survive long enough in the new task to
-\emph{use} those parameters.  This is the defining characteristic of
-viability failure.
+\begin{figure}[!htb]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/fig_viability_collapse.pdf}
+  \caption{Final evaluation under reset (left) vs.\ carryover (right).
+  Under reset, all agents perform comparably.  Under carryover, Task-Only
+  (amber) collapses while \hace{} (teal) maintains performance.  The
+  discrepancy proves the collapse is viability failure, not forgetting:
+  the same weights work under reset.}
+  \label{fig:collapse}
+\end{figure}
 
-This finding has important implications for the CRL research agenda.
-The standard evaluation paradigm---measuring forgetting under conditions
-where viability is guaranteed (infinite energy, no death)---systematically
-overlooks a failure mode that may be \emph{more common} and
-\emph{more severe} in real embodied settings.  An EWC agent with perfect
-weight preservation will fail entirely in an embodied sequential
-benchmark if it does not manage energy.
-
-\subsection{Orthogonality of Reward-Level and Weight-Level Solutions}
-
-Our 9-agent factorial design cleanly separates the two failure modes.
-Agents with \hace{} reward (C, D, I) consistently outperform matched
-agents without it (A, B, F, G, H) on viability metrics (boundary
-solvability, terminal energy, death rate), regardless of CRL method.
-Conversely, agents with EWC (F, I) show lower forgetting than matched
-agents without it (B, C).  Agent~I (\hace{}+EWC) achieves the best of
-both worlds: high viability \emph{and} low forgetting.
-
-This orthogonality suggests a principled decomposition of the continual
-embodied RL problem into two independent axes:
-\begin{enumerate}[leftmargin=*,topsep=1pt,itemsep=1pt]
-  \item \textbf{Staying alive} (viability) $\to$ solved by reward-level
-        interventions (\hace{}).
-  \item \textbf{Remembering how} (forgetting) $\to$ solved by
-        weight/data-level interventions (EWC, ER).
-\end{enumerate}
-
-\subsection{Forward Transfer Through Energy Management}
-
-The pilot and full-suite results show that homeostatic agents develop
-transferable energy-management skills: collect food when energy is low,
-avoid hazards, conserve steps.  These skills are useful across all tasks
-because all tasks share energy dynamics.  Task-specific agents may learn
-these behaviors incidentally but do not retain them because they receive
-no explicit reward for energy management after the task objective changes.
-This explains the asymmetric transfer pattern: homeostatic agents sacrifice
-speed on early, simple tasks but gain robustness on later, complex tasks.
+Figure~\ref{fig:collapse} provides the direct evidence.  Under reset mode,
+all three reward regimes achieve comparable performance: Task-Only reaches
+0.45--0.75 success on Detour.  Under carryover, Task-Only collapses to
+0.30 while \hace{} maintains 0.80.  Crucially, the \emph{same network
+weights} produce these divergent outcomes---the only difference is whether
+energy resets between tasks.  This rules out forgetting as the explanation
+and isolates viability failure as the true bottleneck.  Homeostatic agents
+maintain higher terminal energy (2.95 vs.\ 0.35 for Task-Only at sequence
+end), which directly translates to survival in subsequent tasks.
 
 
 % ============================================================================
-\section{Discussion and Limitations}
+\section{Discussion and Conclusion}
 \label{sec:discussion}
 % ============================================================================
 
-\paragraph{Viability as a missing evaluation dimension.}
-Our results argue that CRL benchmarks should explicitly include viability
-metrics---death rate, boundary solvability, terminal energy---alongside
-forgetting.  Existing benchmarks like Continual World~\cite{continualworld2021}
-lack shared physiological dynamics, which may explain why viability failure
-has been overlooked.
+Our results establish three findings that have implications for the
+broader CRL research agenda.
 
-\paragraph{Simplicity of HACE.}
-The \hace{} auxiliary reward (Equation~\ref{eq:drive_reduction}) is
-remarkably simple: a single-line modification to any RL training loop.
-It requires no task-specific tuning, no additional learnable parameters,
-and no architectural changes.  This simplicity is a feature, not a
-limitation---it makes \hace{} immediately applicable to any embodied
-sequential RL setting with a shared resource variable.
+\paragraph{Viability failure is a distinct, overlooked failure mode.}
+The reset-vs-carryover experiment (Section~\ref{sec:factorial})
+unambiguously demonstrates that the performance collapse under carryover
+conditions is not catastrophic forgetting---the same weights succeed under
+reset.  The full 9-agent suite confirms that established CRL methods (EWC,
+L2, ER) perform no better than unprotected baselines on viability metrics.
+This suggests that the standard CRL evaluation paradigm, which assumes
+infinite energy and no death, systematically overlooks the most acute
+failure mode in embodied settings.
 
-\paragraph{Limitations.}
+\paragraph{HACE is simple, effective, and orthogonal to CRL methods.}
+The \hace{} auxiliary reward (Equation~\ref{eq:drive}) is a single-line
+modification to any RL training loop.  It requires no task-specific
+tuning, no extra parameters, and no architectural changes---yet it
+produces $3\times$ higher boundary solvability and enables agent C to be
+the only non-oracle agent solving Gauntlet Refuel (0.65 success).
+Agent~I (\hace{}+EWC) achieves the best of both worlds: \hace{}-level
+viability with EWC's retention of earlier tasks, achieving the highest
+overall average success (0.335).  This orthogonality suggests a principled
+decomposition of the embodied CRL problem: \emph{staying alive} (reward
+level) and \emph{remembering how} (weight level) are independent axes
+requiring independent solutions.
 
-\begin{itemize}[leftmargin=*,topsep=1pt,itemsep=1pt]
-  \item \textbf{Environment complexity}: Our benchmark uses tabular
-        gridworlds with vector observations.  Scaling to visual
-        observations and richer 3D environments is necessary to validate
-        generality.
-  \item \textbf{Architecture}: All results use DQN with a 2-layer MLP.
-        Replication with PPO, recurrent, and Transformer architectures
-        is needed to ensure the finding is architecture-invariant.
-  \item \textbf{Single resource variable}: Real embodied agents manage
-        multiple internal variables (hunger, thirst, fatigue).  Extending
-        \hace{} to multi-dimensional homeostasis is an important direction.
-  \item \textbf{Statistical power}: Current results use 10 seeds.
-        Expanding to 20+ seeds with bootstrap confidence intervals and
-        correction for multiple comparisons would strengthen claims.
-  \item \textbf{Setpoint selection}: We fix $\setpoint = \energy_{\text{cap}}$.
-        The sensitivity to this choice, and whether it should be learned,
-        remains unexplored.
-\end{itemize}
+\paragraph{Limitations and future work.}
+Our benchmark uses tabular gridworlds with vector observations; scaling
+to visual inputs and richer 3D environments is needed to confirm
+generality.  All results use DQN, and replication with policy-gradient
+or Transformer-based architectures would further validate the finding.
+We model a single resource (energy), whereas real agents manage multiple
+coupled drives.  Finally, we fix $\setpoint = \energy_{\text{cap}}$;
+learning or adapting the setpoint per task remains unexplored.  Despite
+these limitations, the conceptual contribution---that viability failure
+is a distinct bottleneck that CRL methods cannot address---holds
+independently of environment complexity, and \hace{}'s simplicity makes
+it immediately applicable to any embodied sequential RL setting with
+shared resource constraints.
 
-
-% ============================================================================
-\section{Conclusion}
-\label{sec:conclusion}
-% ============================================================================
-
-We have identified viability failure as a critical but overlooked failure
-mode in continual embodied reinforcement learning.  Unlike catastrophic
-forgetting, viability failure cannot be addressed by weight-level or
-data-level techniques; it requires a reward-level intervention that
-incentivizes resource management.  \hace{}---a simple, task-invariant
-auxiliary reward based on homeostatic drive reduction---provides exactly
-this intervention.
-
-Our experiments on a purpose-built 10-task sequential gridworld benchmark
-demonstrate three key findings: (1)~\hace{} agents maintain viability
-across task boundaries, achieving 3--5$\times$ higher boundary solvability
-than task-only baselines; (2)~traditional CRL methods (EWC, ER, L2) are
-structurally unable to prevent viability failure and perform no better than
-unprotected baselines on survival metrics; and (3)~\hace{} is orthogonal
-to EWC, enabling Agent~I (\hace{}+EWC) to address both viability and
-forgetting simultaneously.
-
-The simplicity of \hace{} (a one-line reward modification) and its
-orthogonality to existing CRL methods suggest broad applicability: any
-embodied sequential RL agent with shared physiological constraints could
-benefit from homeostatic auxiliary rewards.  We believe that the CRL
-community should expand its evaluation paradigm beyond forgetting to
-include viability, and that the distinction between ``remembering how''
-and ``staying alive to learn'' deserves sustained attention.
-
-
-% ============================================================================
-% Appendix
-% ============================================================================
-\appendix
-
-\section{Hyperparameters}
-\label{app:hyperparams}
-
-\begin{table}[h]
-\centering
-\caption{Shared hyperparameters across all agents.}
-\small
-\begin{tabular}{@{}ll@{}}
-\toprule
-\textbf{Parameter} & \textbf{Value} \\
-\midrule
-Architecture & 2-layer MLP (128 hidden units) \\
-Optimizer & Adam \\
-Learning rate & $5 \times 10^{-4}$ \\
-Discount $\gamma$ & 0.99 \\
-Batch size & 64 \\
-Replay buffer size & 20{,}000 \\
-Target network update & every 25 episodes \\
-$\varepsilon$-greedy start & 1.0 \\
-$\varepsilon$-greedy end & 0.05 \\
-$\varepsilon$ decay (episodes) & 300 \\
-Episodes per task & 600 \\
-Eval interval & every 50 episodes \\
-Eval episodes & 40 \\
-\midrule
-EWC $\lambda$ (Agents F, I) & 400.0 \\
-EWC Fisher samples & 1{,}000 \\
-L2 $\lambda$ (Agent G) & 100.0 \\
-ER reservoir size (Agent H) & 5{,}000 \\
-ER reservoir ratio & 0.5 \\
-\hace{} setpoint $\setpoint$ & $\energy_{\text{cap}}$ (per task) \\
-\hace{} internal coef & 1.0 \\
-Task reward coef $\alpha$ & 1.0 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\section{Task Sequence Details}
-\label{app:sequences}
-
-\begin{table}[h]
-\centering
-\caption{Full task sequence definitions.}
-\small
-\begin{tabular}{@{}cl@{}}
-\toprule
-\textbf{Sequence} & \textbf{Task Order} \\
-\midrule
-$\alpha$ & Reach $\to$ Recharge $\to$ Dual Food $\to$ Conservation $\to$ \\
-         & Endurance $\to$ Collect Exit $\to$ Detour $\to$ Wall Maze $\to$ \\
-         & Sprint $\to$ Gauntlet Refuel \\
-\midrule
-$\beta$  & Reach $\to$ Hazard Cross $\to$ Haz.~Gauntlet $\to$ Wall Maze $\to$ \\
-         & Detour $\to$ Recharge $\to$ Sprint $\to$ Conservation $\to$ \\
-         & Collect Exit $\to$ Gauntlet Refuel \\
-\midrule
-$\gamma$ & Conservation $\to$ Sprint $\to$ Haz.~Gauntlet $\to$ Reach $\to$ \\
-         & Endurance $\to$ Dual Food $\to$ Hazard Cross $\to$ Collect Exit $\to$ \\
-         & Recharge $\to$ Wall Maze \\
-\bottomrule
-\end{tabular}
-\end{table}
 
 
 % ============================================================================
@@ -889,58 +519,46 @@ Extended abstract, Computational and Cognitive Neuroscience, 2025.
 \bibitem{konidaris2006}
 George Konidaris and Andrew Barto.
 An Adaptive Robot Motivational System.
-In \emph{Proceedings of the 9th International Conference on the
-  Simulation of Adaptive Behavior}, pages 346--356, 2006.
+In \emph{Proc.\ 9th Intl.\ Conf.\ Simulation of Adaptive Behavior},
+  pp.\ 346--356, 2006.
 
 \bibitem{kirkpatrick2017}
-James Kirkpatrick, Razvan Pascanu, Neil Rabinowitz, Joel Veness, Guillaume
-  Desjardins, Andrei~A. Rusu, Kieran Milan, John Quan, Tiago Ramalho,
-  Agnieszka Grabska-Barwinska, et~al.
+James Kirkpatrick et~al.
 Overcoming catastrophic forgetting in neural networks.
-\emph{Proceedings of the National Academy of Sciences},
-  114(13):3521--3526, 2017.
+\emph{PNAS}, 114(13):3521--3526, 2017.
 
 \bibitem{rolnick2019}
-David Rolnick, Arun Ahuja, Jonathan Schwarz, Timothy Lillicrap, and Gregory
-  Wayne.
+David Rolnick, Arun Ahuja, Jonathan Schwarz, Timothy Lillicrap, and
+  Gregory Wayne.
 Experience replay for continual learning.
-In \emph{Advances in Neural Information Processing Systems 32}, 2019.
+In \emph{NeurIPS 32}, 2019.
 
 \bibitem{rusu2016}
-Andrei~A. Rusu, Neil~C. Rabinowitz, Guillaume Desjardins, Hubert Soyer, James
-  Kirkpatrick, Koray Kavukcuoglu, Razvan Pascanu, and Raia Hadsell.
+Andrei~A. Rusu et~al.
 Progressive neural networks.
-\emph{arXiv preprint arXiv:1606.04671}, 2016.
-
-\bibitem{rusu2015}
-Andrei~A. Rusu, Sergio~Gomez Colmenarejo, Caglar Gulcehre, Guillaume
-  Desjardins, James Kirkpatrick, Razvan Pascanu, Volodymyr Mnih, Koray
-  Kavukcuoglu, and Raia Hadsell.
-Policy distillation.
-\emph{arXiv preprint arXiv:1511.06295}, 2015.
+\emph{arXiv:1606.04671}, 2016.
 
 \bibitem{Parisi2019}
-German~I. Parisi, Ronald Kemker, Jose~L. Part, Christopher Kanan, and Stefan
-  Wermter.
+German~I. Parisi, Ronald Kemker, Jose~L. Part, Christopher Kanan, and
+  Stefan Wermter.
 Continual lifelong learning with neural networks: A review.
 \emph{Neural Networks}, 113:54--71, 2019.
 
 \bibitem{continualworld2021}
-Michal Wolczyk, Razvan Pascanu, Lukasz Zajac, Andrei~P. Rusu, and Piotr Milos.
-Continual World: A robotic benchmark for continual reinforcement learning.
-In \emph{Advances in Neural Information Processing Systems 34}, 2021.
+Michal Wolczyk et~al.
+Continual World: A robotic benchmark for continual RL.
+In \emph{NeurIPS 34}, 2021.
 
 \bibitem{cora2022}
-Sam Powers, Eliot Xing, Eric Kolve, Roozbeh Mottaghi, and Abhinav Gupta.
+Sam Powers et~al.
 CORA: Benchmarks, baselines, and metrics as a platform for continual
-  reinforcement learning agents.
-In \emph{Proceedings of the 1st Conference on Lifelong Learning Agents}, 2022.
+  RL agents.
+In \emph{CoLLAs}, 2022.
 
 \bibitem{Barreto}
-Andre Barreto, Will Dabney, Remi Munos, Jonathan~J. Hunt, Tom Schaul, Hado~P.
-  van Hasselt, and David Silver.
-Successor features for transfer in reinforcement learning.
-In \emph{Advances in Neural Information Processing Systems 30}, 2017.
+Andre Barreto et~al.
+Successor features for transfer in RL.
+In \emph{NeurIPS 30}, 2017.
 
 \bibitem{Tomov}
 Momchil~S. Tomov, Eric Schulz, and Samuel~J. Gershman.
@@ -948,21 +566,157 @@ Multi-task reinforcement learning in humans.
 \emph{Nature Human Behaviour}, 5(6):764--773, 2021.
 
 \bibitem{jaderberg2017}
-Max Jaderberg, Volodymyr Mnih, Wojciech~Marian Czarnecki, Tom Schaul, Joel~Z.
-  Leibo, David Silver, and Koray Kavukcuoglu.
+Max Jaderberg et~al.
 Reinforcement learning with unsupervised auxiliary tasks.
-In \emph{International Conference on Learning Representations}, 2017.
+In \emph{ICLR}, 2017.
 
 \bibitem{pathak2017}
-Deepak Pathak, Pulkit Agrawal, Alexei~A. Efros, and Trevor Darrell.
+Deepak Pathak et~al.
 Curiosity-driven exploration by self-supervised prediction.
-In \emph{International Conference on Machine Learning}, pages 2778--2787, 2017.
-
-\bibitem{Yoshida2016}
-Naoto Yoshida.
-On Reward Function for Survival.
-\emph{arXiv preprint arXiv:1606.05767}, 2016.
+In \emph{ICML}, pp.\ 2778--2787, 2017.
 
 \end{thebibliography}
+
+% ============================================================================
+% APPENDIX
+% ============================================================================
+\clearpage
+\onecolumn
+\appendix
+
+\section{Hyperparameters}
+\label{app:hyperparams}
+
+Table~\ref{tab:hyperparams} lists all hyperparameters shared across
+agents.  Agent-specific parameters (EWC $\lambda$, ER reservoir size)
+are also included.
+
+\begin{table}[h]
+\centering
+\caption{Training hyperparameters.}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Parameter} & \textbf{Value} \\
+\midrule
+Architecture & 2-layer MLP, 128 hidden units \\
+Optimizer & Adam \\
+Learning rate & $5 \times 10^{-4}$ \\
+Discount $\gamma$ & 0.99 \\
+Batch size & 64 \\
+Replay buffer & 20{,}000 transitions \\
+Target network update & every 25 episodes \\
+$\varepsilon$-greedy & 1.0 $\to$ 0.05 over 300 episodes \\
+Episodes per task & 600 \\
+Evaluation & 40 episodes every 50 training episodes \\
+\midrule
+EWC $\lambda$ (F, I) & 400.0 \\
+EWC Fisher samples & 1{,}000 \\
+L2 $\lambda$ (G) & 100.0 \\
+ER reservoir (H) & 5{,}000 transitions, ratio 0.5 \\
+\hace{} setpoint & $\energy_{\text{cap}}$ per task \\
+\hace{} coefficient & 1.0 \\
+Task reward coefficient $\alpha$ & 1.0 \\
+\bottomrule
+\end{tabular}
+\label{tab:hyperparams}
+\end{table}
+
+
+\section{Task Sequence Definitions}
+\label{app:sequences}
+
+Table~\ref{tab:sequences} lists the three curated 10-task orderings used
+in our experiments.  Sequence~$\alpha$ is the primary ordering used in
+all main-text experiments; $\beta$ and~$\gamma$ are reserved for future
+cross-sequence generalization analyses.
+
+\begin{table}[h]
+\centering
+\caption{Full 10-task sequence orderings.}
+\label{tab:sequences}
+\begin{tabular}{@{}cp{0.88\textwidth}@{}}
+\toprule
+\textbf{Seq.} & \textbf{Task Order} \\
+\midrule
+$\alpha$ & Reach $\to$ Recharge $\to$ Dual Food $\to$ Conservation $\to$
+           Endurance $\to$ Collect Exit $\to$ Detour $\to$ Wall Maze $\to$
+           Sprint $\to$ Gauntlet Refuel \\
+\midrule
+$\beta$  & Reach $\to$ Hazard Cross $\to$ Haz.~Gauntlet $\to$ Wall Maze $\to$
+           Detour $\to$ Recharge $\to$ Sprint $\to$ Conservation $\to$
+           Collect Exit $\to$ Gauntlet Refuel \\
+\midrule
+$\gamma$ & Conservation $\to$ Sprint $\to$ Haz.~Gauntlet $\to$ Reach $\to$
+           Endurance $\to$ Dual Food $\to$ Hazard Cross $\to$ Collect Exit $\to$
+           Recharge $\to$ Wall Maze \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\section{Preliminary Experiment: 5-Task Sequential Pilot}
+\label{app:pilot}
+
+Before deploying the full 9-agent suite, we conducted a smaller-scale
+pilot to validate the core hypothesis.  We trained two agents---a
+task-specific agent (comparable to Agent~A/B) and a homeostatic agent
+(comparable to Agent~D)---on a 5-task legacy sequence:
+Reach $\to$ Recharge $\to$ Hazard Cross $\to$ Detour $\to$ Sprint, with
+600 episodes per task and 10 seeds.
+
+The pilot (Figure~\ref{fig:pilot}) revealed a consistent tradeoff:
+task-specific reward learns early, simple tasks faster (Reach: 0.6
+within 200 episodes vs.\ 400 for homeostatic), but the homeostatic agent
+matches or exceeds performance on later tasks requiring resource
+management and hazard avoidance.  Final retention on Hazard Cross was
+0.90 vs.\ 0.70, and on Detour 0.80 vs.\ 0.60.  This preliminary finding
+motivated the full-scale 9-agent factorial design presented in the main
+text.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.85\textwidth]{figures/sequential_pilot.png}
+  \caption{5-task sequential pilot.  \emph{Left}: Current-task success
+  rate during sequential training.  The task-specific agent (red) learns
+  early tasks faster; the homeostatic agent (blue) matches or exceeds on
+  later tasks.  \emph{Right}: Final retention across all five tasks.  The
+  homeostatic agent shows stronger retention on resource-dependent tasks
+  (Hazard Cross: 0.90 vs.\ 0.70; Detour: 0.80 vs.\ 0.60).}
+  \label{fig:pilot}
+\end{figure}
+
+
+\section{Observation Space Details}
+\label{app:obs}
+
+All agents receive the same 19-dimensional vector observation
+(Table~\ref{tab:obs}).  The observation encodes the agent's position,
+goal location, food and hazard positions, and---critically---the agent's
+current energy level.  All spatial features are normalized by grid size;
+energy is normalized by the task's energy cap.
+
+\begin{table}[h]
+\centering
+\caption{Observation vector layout.  All spatial features are normalized
+to $[0,1]$.  Agent~A receives a masked energy value ($-1$) to isolate
+the effect of reward signal from observation content.}
+\label{tab:obs}
+\small
+\begin{tabular}{@{}cll@{}}
+\toprule
+\textbf{Indices} & \textbf{Content} & \textbf{Normalization} \\
+\midrule
+0--1 & Agent position (row, col) & $/$ (grid\_size $-$ 1) \\
+2--3 & Exit position (row, col) & $/$ (grid\_size $-$ 1) \\
+4--6 & Food 1: row, col, available & $/$~grid; boolean \\
+7--9 & Food 2: row, col, available & $/$~grid; boolean \\
+10   & Energy level & $/$~energy\_cap (or $-1$ if masked) \\
+11   & Task index & $/$~(num\_tasks $-$ 1) \\
+12--17 & Hazard positions (up to 3) & $/$~grid ($-0.25$ if absent) \\
+18   & Gate locked & Boolean \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 
 \end{document}

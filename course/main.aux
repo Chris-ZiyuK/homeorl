@@ -1,0 +1,108 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{Parisi2019,kirkpatrick2017,continualworld2021}
+\citation{kirkpatrick2017}
+\citation{rolnick2019}
+\citation{rusu2016}
+\citation{kirkpatrick2017}
+\citation{rolnick2019}
+\citation{rusu2016}
+\citation{continualworld2021}
+\citation{cora2022}
+\@writefile{toc}{\contentsline {section}{Abstract}{1}{section*.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\newlabel{sec:intro}{{1}{1}{Introduction}{section.1}{}}
+\citation{keramati2014}
+\citation{yoshida2018,Yoshida}
+\citation{konidaris2006}
+\citation{Barreto}
+\citation{Tomov}
+\citation{pathak2017}
+\citation{jaderberg2017}
+\citation{keramati2014}
+\citation{keramati2014,konidaris2006}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{2}{section.2}\protected@file@percent }
+\newlabel{sec:related}{{2}{2}{Related Work}{section.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{Continual RL.}{2}{section*.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Homeostatic RL.}{2}{section*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Transfer and auxiliary rewards.}{2}{section*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Viability Failure and HACE}{2}{section.3}\protected@file@percent }
+\newlabel{sec:method}{{3}{2}{Viability Failure and HACE}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Sequential Task Setting}{2}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Viability Failure}{2}{subsection.3.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Task catalog. All tasks share 4 movement actions and terminal-on-death. $c_s$: step cost. F: food count. H: hazard count.}}{2}{table.caption.6}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{tab:tasks}{{1}{2}{Task catalog. All tasks share 4 movement actions and terminal-on-death. $c_s$: step cost. F: food count. H: hazard count}{table.caption.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Homeostatic Drive Reduction}{2}{subsection.3.3}\protected@file@percent }
+\newlabel{eq:drive}{{2}{2}{Homeostatic Drive Reduction}{equation.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Experimental Setup}{2}{section.4}\protected@file@percent }
+\newlabel{sec:setup}{{4}{2}{Experimental Setup}{section.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Task Benchmark}{2}{subsection.4.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Agent catalog. TR: task reward. EO: energy observation. HR: homeostatic reward. Seq: sequential (parameter carryover).}}{3}{table.caption.7}\protected@file@percent }
+\newlabel{tab:agents}{{2}{3}{Agent catalog. TR: task reward. EO: energy observation. HR: homeostatic reward. Seq: sequential (parameter carryover)}{table.caption.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Agent Catalog}{3}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Metrics}{3}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Protocol}{3}{subsection.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Results}{3}{section.5}\protected@file@percent }
+\newlabel{sec:results}{{5}{3}{Results}{section.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Full 9-Agent Suite (10-Task $\alpha $, Carryover)}{3}{subsection.5.1}\protected@file@percent }
+\newlabel{sec:full_suite}{{5.1}{3}{Full 9-Agent Suite (10-Task $\alpha $, Carryover)}{subsection.5.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Reset vs.\ Carryover: Isolating Viability Failure}{3}{subsection.5.2}\protected@file@percent }
+\newlabel{sec:factorial}{{5.2}{3}{Reset vs.\ Carryover: Isolating Viability Failure}{subsection.5.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Current-task success rate across the 10-task $\alpha $ sequence (carryover). Task boundaries are marked by dashed lines. \textsc  {Hace}{} (teal) and \textsc  {Hace}{}+EWC (vermillion) consistently recover at task transitions, while Task-Only (amber) and EWC (mauve) collapse on later tasks. Background lines show remaining agents. Mean $\pm \,1\sigma $ across 10 seeds.}}{4}{figure.caption.8}\protected@file@percent }
+\newlabel{fig:learning}{{1}{4}{Current-task success rate across the 10-task $\alpha $ sequence (carryover). Task boundaries are marked by dashed lines. \hace {} (teal) and \hace {}+EWC (vermillion) consistently recover at task transitions, while Task-Only (amber) and EWC (mauve) collapse on later tasks. Background lines show remaining agents. Mean $\pm \,1\sigma $ across 10 seeds}{figure.caption.8}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces (a) Average boundary solvability across 9 task transitions. (b) Average terminal energy at task boundaries. \textsc  {Hace}{} variants retain $3$--$5\times $ more energy than all CRL baselines, directly enabling higher boundary solvability.}}{4}{figure.caption.9}\protected@file@percent }
+\newlabel{fig:boundary}{{2}{4}{(a) Average boundary solvability across 9 task transitions. (b) Average terminal energy at task boundaries. \hace {} variants retain $3$--$5\times $ more energy than all CRL baselines, directly enabling higher boundary solvability}{figure.caption.9}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Discussion and Conclusion}{4}{section.6}\protected@file@percent }
+\newlabel{sec:discussion}{{6}{4}{Discussion and Conclusion}{section.6}{}}
+\@writefile{toc}{\contentsline {paragraph}{Viability failure is a distinct, overlooked failure mode.}{4}{section*.12}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces End-of-sequence success rate (agents $\times $ tasks) for the 10-task $\alpha $ sequence under carryover. Darker cells indicate higher success. \textsc  {Hace}{}+EWC (bottom row) achieves the highest average performance; \textsc  {Hace}{} (C) is the only agent to solve Gauntlet Refuel.}}{4}{figure.caption.10}\protected@file@percent }
+\newlabel{fig:heatmap}{{3}{4}{End-of-sequence success rate (agents $\times $ tasks) for the 10-task $\alpha $ sequence under carryover. Darker cells indicate higher success. \hace {}+EWC (bottom row) achieves the highest average performance; \hace {} (C) is the only agent to solve Gauntlet Refuel}{figure.caption.10}{}}
+\@writefile{toc}{\contentsline {paragraph}{HACE is simple, effective, and orthogonal to CRL methods.}{4}{section*.13}\protected@file@percent }
+\bibstyle{ACM-Reference-Format}
+\bibcite{keramati2014}{{1}{}{{}}{{}}}
+\bibcite{yoshida2018}{{2}{}{{}}{{}}}
+\bibcite{Yoshida}{{3}{}{{}}{{}}}
+\bibcite{konidaris2006}{{4}{}{{}}{{}}}
+\bibcite{kirkpatrick2017}{{5}{}{{}}{{}}}
+\bibcite{rolnick2019}{{6}{}{{}}{{}}}
+\bibcite{rusu2016}{{7}{}{{}}{{}}}
+\bibcite{Parisi2019}{{8}{}{{}}{{}}}
+\bibcite{continualworld2021}{{9}{}{{}}{{}}}
+\bibcite{cora2022}{{10}{}{{}}{{}}}
+\bibcite{Barreto}{{11}{}{{}}{{}}}
+\bibcite{Tomov}{{12}{}{{}}{{}}}
+\bibcite{jaderberg2017}{{13}{}{{}}{{}}}
+\bibcite{pathak2017}{{14}{}{{}}{{}}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Final evaluation under reset (left) vs.\ carryover (right). Under reset, all agents perform comparably. Under carryover, Task-Only (amber) collapses while \textsc  {Hace}{} (teal) maintains performance. The discrepancy proves the collapse is viability failure, not forgetting: the same weights work under reset.}}{5}{figure.caption.11}\protected@file@percent }
+\newlabel{fig:collapse}{{4}{5}{Final evaluation under reset (left) vs.\ carryover (right). Under reset, all agents perform comparably. Under carryover, Task-Only (amber) collapses while \hace {} (teal) maintains performance. The discrepancy proves the collapse is viability failure, not forgetting: the same weights work under reset}{figure.caption.11}{}}
+\@writefile{toc}{\contentsline {paragraph}{Limitations and future work.}{5}{section*.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{References}{5}{section*.16}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {A}Hyperparameters}{6}{appendix.A}\protected@file@percent }
+\newlabel{app:hyperparams}{{A}{6}{Hyperparameters}{appendix.A}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Training hyperparameters.}}{6}{table.caption.17}\protected@file@percent }
+\newlabel{tab:hyperparams}{{3}{6}{Training hyperparameters}{table.caption.17}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {B}Task Sequence Definitions}{6}{appendix.B}\protected@file@percent }
+\newlabel{app:sequences}{{B}{6}{Task Sequence Definitions}{appendix.B}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Full 10-task sequence orderings.}}{6}{table.caption.18}\protected@file@percent }
+\newlabel{tab:sequences}{{4}{6}{Full 10-task sequence orderings}{table.caption.18}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {C}Preliminary Experiment: 5-Task Sequential Pilot}{6}{appendix.C}\protected@file@percent }
+\newlabel{app:pilot}{{C}{6}{Preliminary Experiment: 5-Task Sequential Pilot}{appendix.C}{}}
+\newlabel{tocindent-1}{0pt}
+\newlabel{tocindent0}{0pt}
+\newlabel{tocindent1}{7.01pt}
+\newlabel{tocindent2}{11.49998pt}
+\newlabel{tocindent3}{0pt}
+\newlabel{tocindent4}{0pt}
+\newlabel{tocindent5}{0pt}
+\providecommand\NAT@force@numbers{}\NAT@force@numbers
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces 5-task sequential pilot. \emph  {Left}: Current-task success rate during sequential training. The task-specific agent (red) learns early tasks faster; the homeostatic agent (blue) matches or exceeds on later tasks. \emph  {Right}: Final retention across all five tasks. The homeostatic agent shows stronger retention on resource-dependent tasks (Hazard Cross: 0.90 vs.\ 0.70; Detour: 0.80 vs.\ 0.60).}}{7}{figure.caption.19}\protected@file@percent }
+\newlabel{fig:pilot}{{5}{7}{5-task sequential pilot. \emph {Left}: Current-task success rate during sequential training. The task-specific agent (red) learns early tasks faster; the homeostatic agent (blue) matches or exceeds on later tasks. \emph {Right}: Final retention across all five tasks. The homeostatic agent shows stronger retention on resource-dependent tasks (Hazard Cross: 0.90 vs.\ 0.70; Detour: 0.80 vs.\ 0.60)}{figure.caption.19}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {D}Observation Space Details}{7}{appendix.D}\protected@file@percent }
+\newlabel{app:obs}{{D}{7}{Observation Space Details}{appendix.D}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Observation vector layout. All spatial features are normalized to $[0,1]$. Agent\nonbreakingspace A receives a masked energy value ($-1$) to isolate the effect of reward signal from observation content.}}{7}{table.caption.20}\protected@file@percent }
+\newlabel{tab:obs}{{5}{7}{Observation vector layout. All spatial features are normalized to $[0,1]$. Agent~A receives a masked energy value ($-1$) to isolate the effect of reward signal from observation content}{table.caption.20}{}}
+\newlabel{TotPages}{{7}{7}{}{page.7}{}}
+\gdef \@abspage@last{7}
