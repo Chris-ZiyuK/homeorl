@@ -4,6 +4,8 @@
 #   pip install -r requirements.txt -r requirements-cw.txt
 
 tensorflow>=2.0
+# MetaWorld uses classic gym step() (4 returns). gym>=0.26 TimeLimit expects 5 returns from inner env.
+gym>=0.20,<0.26
 # NOTE: `mujoco-py` is installed separately in scripts/setup_cw_env.sh
 # with a legacy-compatible build flow.
 metaworld @ git+https://github.com/rlworkgroup/metaworld.git@0875192baaa91c43523708f55866d98eaf3facaf#egg=metaworld

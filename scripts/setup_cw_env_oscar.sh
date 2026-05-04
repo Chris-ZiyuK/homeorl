@@ -178,6 +178,9 @@ if [[ -z "${CW_REPO:-}" ]]; then
 fi
 python -m pip install -e "$CW_REPO"
 
+# MetaWorld / continual_world need classic gym step API; metaworld may pull a newer `gym` otherwise.
+python -m pip install "gym>=0.20,<0.26"
+
 # -----------------------------
 # 5. Smoke tests
 # -----------------------------
