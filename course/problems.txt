@@ -1,0 +1,1274 @@
+下面按**你可以直接逐条改 tex**的方式列。重点是“课程 final deliverable”标准：不需要把实验扩很多，但要让表述更稳、更像真实研究报告，避免 overclaim 和 AI 味。原文我基于你上传的 tex 来看。
+
+---
+
+## 1. Abstract 里的实验规模描述不准确
+
+**位置：Abstract**
+
+原文大意：
+
+> On a 10-task sequential gridworld benchmark with 9 agent variants and 2 boundary modes...
+
+**问题：**
+正文 protocol 里主实验是 **10-task alpha + carryover**；reset vs carryover 是 **5-task pilot**。现在 abstract 容易让人以为你完整跑了 `10 tasks × 9 agents × 2 boundary modes`。
+
+**建议改成：**
+
+```tex
+On a 10-task sequential gridworld benchmark under carryover boundary
+conditions, supplemented by a 5-task reset-vs-carryover factorial study,
+\hace{} agents achieve ...
+```
+
+或者更简洁：
+
+```tex
+On a 10-task carryover benchmark, with a complementary 5-task
+reset-vs-carryover study, \hace{} agents achieve ...
+```
+
+---
+
+## 2. Abstract 里的 “confirming orthogonal” 说太满
+
+**位置：Abstract 最后一句**
+
+原文：
+
+```tex
+Combining \hace{} with EWC addresses both viability and forgetting,
+confirming the two failure modes are orthogonal.
+```
+
+**问题：**
+“confirming orthogonal” 太强。你只做了 HACE+EWC 一个组合，最多说明二者可以部分分离，不足以证明完全正交。
+
+**建议改成：**
+
+```tex
+Combining \hace{} with EWC improves both viability and retention,
+suggesting that viability maintenance and forgetting mitigation are
+partially separable axes in embodied CRL.
+```
+
+---
+
+## 3. Introduction 里 “Conservation → Sprint” 例子和主实验不完全对应
+
+**位置：Introduction，concrete example 段落**
+
+原文：
+
+```tex
+An agent trained on \textsc{Conservation} ... transitions to \textsc{Sprint} ...
+```
+
+**问题：**
+这个 transition 在 gamma 里有，但主实验 alpha 不是 Conservation → Sprint。作为 illustrative example 可以，但要说明它不是 main alpha 结果，否则读者会觉得你在暗示主实验里就有这个 transition。
+
+**建议改成：**
+
+```tex
+As an illustrative transition, consider an agent trained on
+\textsc{Conservation} ... moving to \textsc{Sprint} ...
+```
+
+或者直接换成 alpha 里真实的 transition，比如：
+
+```tex
+For example, an agent that completes \textsc{Collect Exit} or
+\textsc{Detour} with little remaining energy may enter the next task
+without enough resources to explore.
+```
+
+---
+
+## 4. “traditional CRL methods cannot address it” 语气偏绝对
+
+**位置：Introduction contribution / Method**
+
+原文类似：
+
+```tex
+traditional CRL methods cannot address it
+```
+
+**问题：**
+可以说它们“不直接针对”或“在我们的 benchmark 里没有改善”，但不要说“不能 address”。否则像强行立靶。
+
+**建议改成：**
+
+```tex
+traditional CRL methods do not directly target this failure mode
+```
+
+或者：
+
+```tex
+in our benchmark, traditional CRL methods do not improve viability metrics
+```
+
+---
+
+## 5. “structurally unable” 需要降调
+
+**位置：Abstract**
+
+原文：
+
+```tex
+Established CRL techniques such as Elastic Weight Consolidation (EWC) and
+Experience Replay (ER) are structurally unable to address viability
+failure ...
+```
+
+**问题：**
+“structurally unable” 太强，也比较 AI 论文味。
+
+**建议改成：**
+
+```tex
+Established CRL techniques such as Elastic Weight Consolidation (EWC) and
+Experience Replay (ER) do not directly address viability failure, because
+they operate on parameter retention or data reuse rather than resource-state
+management.
+```
+
+---
+
+## 6. “No amount of weight regularization...” 可以保留，但只出现一次
+
+**位置：Introduction**
+
+原文：
+
+```tex
+No amount of weight regularization or replayed transitions can save an agent
+that dies in its first three steps.
+```
+
+**评价：**
+这句话很有冲击力，可以保留。它不像 AI，反而比较有作者声音。但后文不要再用类似 “wrong level of abstraction / fail entirely / true bottleneck” 连续加强，否则会显得过度宣传。
+
+---
+
+## 7. “All three operate at the wrong level of abstraction” 太像 slogan
+
+**位置：Viability Failure subsection**
+
+原文：
+
+```tex
+All three operate at the wrong level of abstraction.
+```
+
+**问题：**
+这句话很有力，但有点口号化。课程 paper 可以有一点风格，但最好更具体。
+
+**建议改成：**
+
+```tex
+Thus, these methods target parameter or data retention, whereas viability
+failure depends on the agent's realized resource state at the task boundary.
+```
+
+---
+
+## 8. HACE 的 setpoint = energy cap 需要解释，否则 homeostasis 概念会被质疑
+
+**位置：Homeostatic Drive Reduction**
+
+原文：
+
+```tex
+where $\alpha = 1.0$ by default and $\setpoint = \energy_{\text{cap}}$.
+```
+
+**问题：**
+如果 setpoint 是 energy cap，这更像“保持满能量”或“energy preservation shaping”，而不是传统意义上的中间稳态。不是错误，但需要主动说明。
+
+**建议在这句后面加：**
+
+```tex
+In this benchmark, setting the homeostatic point to the energy cap makes
+\hace{} a conservative energy-preservation signal: the agent is rewarded
+for avoiding depleted boundary states rather than for merely maximizing
+task reward.
+```
+
+如果想更严谨一点：
+
+```tex
+We use this instantiation because the central risk in our environments is
+depletion-induced death; other domains may require intermediate or adaptive
+setpoints.
+```
+
+---
+
+## 9. “task-invariant” 和 “setpoint per task” 有轻微张力
+
+**位置：Homeostatic Drive Reduction / Hyperparameters**
+
+原文：
+
+```tex
+It is task-invariant ...
+```
+
+但 appendix 又写：
+
+```tex
+\hace{} setpoint & $\energy_{\text{cap}}$ per task
+```
+
+**问题：**
+形式是 task-invariant，但参数跟 task energy cap 走。建议澄清。
+
+**建议改成：**
+
+```tex
+Its functional form is task-invariant: across tasks, the agent receives
+the same drive-reduction signal, with energy normalized by each task's
+energy cap.
+```
+
+---
+
+## 10. “12 tasks” 和 “10-task benchmark” 要解释清楚
+
+**位置：Experimental Setup - Task Benchmark**
+
+原文：
+
+```tex
+We design 12 structurally diverse gridworld tasks ...
+```
+
+前后又多次说：
+
+```tex
+10-task sequential gridworld benchmark
+```
+
+**问题：**
+不算矛盾，但读者会问：到底是 12 个任务还是 10 个？
+
+**建议第一句改成：**
+
+```tex
+We design a catalog of 12 structurally diverse gridworld tasks, from which
+we instantiate curated 10-task sequences for sequential training.
+```
+
+---
+
+## 11. “3 task orderings” 现在像是贡献，但其实没完整实验
+
+**位置：Introduction contributions / Experimental Setup**
+
+原文：
+
+```tex
+with 9 agent variants, 3 task orderings, and 2 boundary modes
+```
+
+**问题：**
+正文只用了 alpha。beta/gamma 在 appendix 里说是 future cross-sequence generalization analyses。不要把它们写成已经完整验证的实验贡献。
+
+**建议改成：**
+
+```tex
+with 9 agent variants and a primary 10-task ordering, together with
+additional predefined orderings for future cross-sequence analysis.
+```
+
+或者更简单：
+
+```tex
+with 9 agent variants and a curated 10-task sequence.
+```
+
+---
+
+## 12. Protocol 中 “All experiments use alpha...” 和前文 3 orderings 不一致
+
+**位置：Protocol**
+
+原文：
+
+```tex
+All experiments use the $\alpha$ sequence under carryover boundary mode ...
+```
+
+**建议补一句解释：**
+
+```tex
+Although the benchmark defines three possible orderings, this course
+deliverable focuses on the primary $\alpha$ sequence; the other orderings
+are included to document the benchmark design and support future work.
+```
+
+---
+
+## 13. Reset vs carryover 部分的 “same network weights” 是最大风险点
+
+**位置：Reset vs Carryover subsection**
+
+原文：
+
+```tex
+Crucially, the \emph{same network weights} produce these divergent outcomes---
+the only difference is whether energy resets between tasks.
+```
+
+**问题：**
+只有在你拿同一个 checkpoint 分别用 reset/carryover 初始 energy 做 evaluation 时，这句话才成立。
+如果 reset 和 carryover 是两个条件分别训练出来的，那 weights 不一样，这句话就是硬伤。
+
+**安全改法：**
+
+```tex
+Crucially, the task definitions, architecture, and training protocol are
+held fixed; the key manipulation is whether energy is reset or carried
+across task boundaries.
+```
+
+然后下一句改成：
+
+```tex
+This supports the interpretation that resource-state carryover, rather
+than forgetting alone, drives the observed collapse.
+```
+
+如果你确实做了同一 checkpoint 的 counterfactual evaluation，可以写：
+
+```tex
+In a counterfactual evaluation using the same trained checkpoint, changing
+only the boundary energy state produces divergent outcomes ...
+```
+
+但只有真的做了才能这样写。
+
+---
+
+## 14. “proves the collapse is viability failure” 太强
+
+**位置：Figure 4 caption / Reset vs Carryover**
+
+原文：
+
+```tex
+The discrepancy proves the collapse is viability failure, not forgetting:
+the same weights work under reset.
+```
+
+**问题：**
+“proves” 太强，而且和上面的 same weights 风险绑定。
+
+**建议 caption 改成：**
+
+```tex
+The discrepancy supports viability failure as the primary explanation:
+when boundary energy is reset, performance recovers despite the same task
+sequence and learning setup.
+```
+
+如果不是 same weights，就不要写 same weights。
+
+---
+
+## 15. “true bottleneck” 过强
+
+**位置：Reset vs Carryover subsection**
+
+原文：
+
+```tex
+isolates viability failure as the true bottleneck
+```
+
+**建议改成：**
+
+```tex
+supports viability failure as a major bottleneck
+```
+
+或者：
+
+```tex
+identifies boundary resource depletion as a plausible mechanism behind the
+collapse
+```
+
+---
+
+## 16. “Task-Only collapses to 0.30” 不适合叫 collapse
+
+**位置：Reset vs Carryover**
+
+原文：
+
+```tex
+Under carryover, Task-Only collapses to 0.30 while \hace{} maintains 0.80.
+```
+
+**问题：**
+0.30 不是 near-zero。用 collapse 有点过度。
+
+**建议改成：**
+
+```tex
+Under carryover, Task-Only drops to 0.30 while \hace{} maintains 0.80.
+```
+
+或者：
+
+```tex
+Task-Only degrades substantially under carryover ...
+```
+
+---
+
+## 17. “near-zero success” 要和具体数字对齐
+
+**位置：Results full suite**
+
+原文：
+
+```tex
+agents without homeostatic reward collapse to near-zero success
+```
+
+**问题：**
+如果某些 agent 在部分 task 还有 0.25、0.30 或 0.40，就不要统一说 near-zero。否则会显得夸张。
+
+**建议改成：**
+
+```tex
+agents without homeostatic reward show substantial degradation on later
+tasks
+```
+
+或者：
+
+```tex
+often approach near-zero success on the hardest later tasks
+```
+
+---
+
+## 18. “HACE is the only non-oracle agent to solve Gauntlet Refuel” 需要定义 solve
+
+**位置：Heatmap paragraph / Discussion**
+
+原文：
+
+```tex
+\hace{} alone (C) is the only non-oracle agent to achieve substantial success
+($>$0.60) on Gauntlet Refuel
+```
+
+和：
+
+```tex
+agent C to be the only non-oracle agent solving Gauntlet Refuel
+```
+
+**问题：**
+如果 HACE+EWC 也有 >0.25 success，那 “solve” 的定义不清楚。建议别用 solve，除非定义阈值。
+
+**建议改成：**
+
+```tex
+\hace{} alone (C) achieves the highest Gauntlet Refuel success among
+non-oracle agents ($>$0.60).
+```
+
+Discussion 里也改成：
+
+```tex
+enables Agent C to achieve the strongest non-oracle performance on
+Gauntlet Refuel.
+```
+
+---
+
+## 19. “EWC/ER score zero on final task” 要确认是否所有 seeds 平均就是 0
+
+**位置：Heatmap paragraph**
+
+原文：
+
+```tex
+score zero on the final task
+```
+
+**问题：**
+如果图里确实是 0，可以保留。如果是四舍五入成 0，要写 “near-zero”。
+
+**建议：**
+
+```tex
+achieve near-zero success on the final task
+```
+
+---
+
+## 20. “Established CRL methods perform no better than unprotected baselines” 要限定在你的 metrics
+
+**位置：Abstract / Discussion**
+
+原文：
+
+```tex
+which perform no better than unprotected baselines on viability metrics
+```
+
+这个基本可以，但更稳一点：
+
+```tex
+which do not improve over unprotected baselines on our viability metrics
+```
+
+---
+
+## 21. ER 的机制解释有点未经验证
+
+**位置：Viability Failure subsection**
+
+原文：
+
+```tex
+ER replays old transitions from different energy regimes, providing
+misleading context.
+```
+
+**问题：**
+“misleading context” 是机制判断，除非你分析了 replay data distribution，否则稍微过度。
+
+**建议改成：**
+
+```tex
+ER replays old transitions, but those transitions do not necessarily
+address the agent's depleted resource state at the new task boundary.
+```
+
+---
+
+## 22. Related Work 里的 “all prior work” 太绝对
+
+**位置：Homeostatic RL paragraph**
+
+原文：
+
+```tex
+However, all prior work studies single or slowly shifting environments ...
+```
+
+**问题：**
+“All prior work” 很容易被反例击穿。
+
+**建议改成：**
+
+```tex
+Much of this prior work studies single or slowly shifting environments ...
+```
+
+或者：
+
+```tex
+These works do not directly evaluate the boundary-induced viability
+failure studied here.
+```
+
+---
+
+## 23. “systematically misses viability failure” 可以降调
+
+**位置：Related Work / Discussion**
+
+原文：
+
+```tex
+this evaluation paradigm systematically misses viability failure
+```
+
+**建议改成：**
+
+```tex
+this evaluation paradigm can miss viability failure
+```
+
+或者：
+
+```tex
+this evaluation paradigm does not directly test for viability failure
+```
+
+---
+
+## 24. Observation space 描述要避免和 Agent A 冲突
+
+**位置：Appendix Observation Space Details**
+
+原文：
+
+```tex
+All agents receive the same 19-dimensional vector observation ...
+```
+
+但表格说 A 的 energy masked。
+
+**建议改成：**
+
+```tex
+All agents use the same 19-dimensional observation layout.  For agents
+without energy observation, the energy coordinate is masked with a sentinel
+value, allowing us to keep the input dimensionality fixed across agents.
+```
+
+---
+
+## 25. “Task Oracle” 名字可能让读者误解
+
+**位置：Agent Catalog**
+
+Agent E：
+
+```tex
+Task Oracle
+```
+
+**问题：**
+Oracle 一般暗示有 privileged information。但这里看起来是 non-sequential / independently trained task baseline。建议在正文或 caption 解释。
+
+**建议加一句：**
+
+```tex
+The Task Oracle is not given privileged state information; it denotes
+independent per-task training without sequential parameter carryover.
+```
+
+或者把名字改成：
+
+```tex
+Single-task Oracle
+```
+
+更准确。
+
+---
+
+## 26. “boundary solvability” 需要更具体定义
+
+**位置：Metrics**
+
+原文：
+
+```tex
+boundary solvability (whether the current policy can solve $T_{i+1}$ from
+its actual terminal energy at $T_i$)
+```
+
+**问题：**
+这个 metric 很关键，但现在定义略抽象。最好说明是怎么估的：rollout? number of episodes? same policy? from copied terminal energy?
+
+**建议补一句：**
+
+```tex
+Operationally, we estimate this by evaluating the current policy on
+$T_{i+1}$ while initializing energy to the terminal energy distribution
+observed after $T_i$.
+```
+
+如果不是这个实现，按实际实现改。
+
+---
+
+## 27. Figure caption 里颜色描述可以保留，但注意 acmart 黑白打印
+
+**位置：Figure captions**
+
+例如：
+
+```tex
+\hace{} (teal) and \hace{}+EWC (vermillion) ...
+```
+
+**问题：**
+课程 final 没问题。但如果 PDF 黑白打印，颜色不明显。可以加 line style 或 agent label。
+
+**建议：**
+不用必须改。但可以写成：
+
+```tex
+\hace{} and \hace{}+EWC, highlighted with thicker lines, ...
+```
+
+---
+
+## 28. “HACE requires no task-specific tuning” 需要小心
+
+**位置：Discussion**
+
+原文：
+
+```tex
+It requires no task-specific tuning
+```
+
+**问题：**
+你虽然没有调 reward，但 setpoint 是 per-task energy cap。如果 energy cap 是 task-specific，严格说不完全无 task-specific information。
+
+**建议改成：**
+
+```tex
+It requires no task-specific reward engineering beyond the environment's
+existing energy scale.
+```
+
+或者：
+
+```tex
+It does not require hand-designed rewards for individual tasks.
+```
+
+---
+
+## 29. “no extra parameters” 不准确
+
+**位置：Discussion**
+
+原文：
+
+```tex
+no extra parameters
+```
+
+**问题：**
+HACE 至少有 setpoint 和 coefficient。虽然不是 model parameters，但 “no extra parameters” 容易被挑。
+
+**建议改成：**
+
+```tex
+no architectural changes and only a small number of transparent reward
+hyperparameters.
+```
+
+---
+
+## 30. “immediately applicable to any embodied sequential RL setting” 太大
+
+**位置：Discussion 最后一段**
+
+原文：
+
+```tex
+\hace{}'s simplicity makes it immediately applicable to any embodied
+sequential RL setting with shared resource constraints.
+```
+
+**问题：**
+太像 AI 结尾，也太大。
+
+**建议改成：**
+
+```tex
+\hace{}'s simplicity makes it straightforward to test in other embodied
+sequential RL settings with shared resource constraints.
+```
+
+---
+
+## 31. “conceptual contribution holds independently of environment complexity” 应该删或降调
+
+**位置：Discussion 最后一段**
+
+原文：
+
+```tex
+the conceptual contribution ... holds independently of environment complexity
+```
+
+**问题：**
+这是明显 overclaim。你没有证明环境复杂度无关。
+
+**建议改成：**
+
+```tex
+Although the simplicity of the benchmark limits claims about generality,
+the results motivate viability failure as a useful lens for studying
+embodied continual RL.
+```
+
+---
+
+## 32. “traditional CRL methods fail entirely” 不要用
+
+**位置：Results / Discussion**
+
+如果文中有类似：
+
+```tex
+traditional CRL methods fail entirely on survival metrics
+```
+
+**建议统一改成：**
+
+```tex
+traditional CRL methods do not improve survival metrics in our benchmark
+```
+
+或者：
+
+```tex
+traditional CRL methods provide limited viability benefits in this setting
+```
+
+---
+
+## 33. “boundary solvability 3x higher” 要说明 baseline 是谁
+
+**位置：Abstract / Results / Discussion**
+
+原文多处：
+
+```tex
+$3\times$ higher boundary solvability
+```
+
+**问题：**
+3x 是相对 Task-only？EWC？all non-HACE agents？最好说清楚。
+
+**建议：**
+
+```tex
+approximately $3\times$ higher boundary solvability than the strongest
+non-homeostatic CRL baseline
+```
+
+如果不是 strongest，就写：
+
+```tex
+than non-homeostatic baselines
+```
+
+---
+
+## 34. “retain 3x more energy” 也要避免绝对化
+
+**位置：Abstract / Results**
+
+原文：
+
+```tex
+retain $3\times$ more energy at task transitions than all CRL baselines
+```
+
+**建议：**
+
+```tex
+retain roughly $3\times$ more energy at task transitions than
+non-homeostatic baselines
+```
+
+如果有 3–5x，就保持一致：
+
+```tex
+retain roughly $3$--$5\times$ more terminal energy ...
+```
+
+---
+
+## 35. “CRL baselines perform no better than unprotected baselines” 要注意 EWC 在 forgetting 上可能更好
+
+**位置：Abstract / Results**
+
+原文：
+
+```tex
+CRL baselines perform no better than unprotected baselines
+```
+
+**问题：**
+EWC/ER 可能在 earlier-task retention 上有 improvement，所以要限定为 viability metrics。
+
+**建议：**
+
+```tex
+CRL baselines improve retention in some cases but do not improve boundary
+viability metrics.
+```
+
+这句其实更强，因为它强调你不是 strawman。
+
+---
+
+## 36. Results 中 “three key patterns” 可以更自然
+
+**位置：Results**
+
+原文：
+
+```tex
+The learning curves reveal three key patterns.
+```
+
+**问题：**
+不是错，但有一点 AI report 味。
+
+**建议改成：**
+
+```tex
+Several patterns are visible in the learning curves.
+```
+
+或者：
+
+```tex
+The learning curves suggest three main takeaways.
+```
+
+---
+
+## 37. “makes the contrast stark” 有一点口语化/宣传感
+
+**位置：Heatmap paragraph**
+
+原文：
+
+```tex
+The heatmap makes the contrast stark:
+```
+
+**建议改成：**
+
+```tex
+The heatmap summarizes the end-of-sequence contrast:
+```
+
+---
+
+## 38. Discussion 的三个 paragraph 标题很好，但内容要降调
+
+**位置：Discussion**
+
+这些标题可以保留：
+
+```tex
+Viability failure is a distinct, overlooked failure mode.
+HACE is simple, effective, and orthogonal to CRL methods.
+Limitations and future work.
+```
+
+但第二个标题里的 “orthogonal” 可以改：
+
+```tex
+HACE is simple, effective, and complementary to CRL methods.
+```
+
+这比 orthogonal 更稳。
+
+---
+
+## 39. “unambiguously demonstrates” 改掉
+
+**位置：Discussion 第一段**
+
+原文：
+
+```tex
+unambiguously demonstrates
+```
+
+**建议：**
+
+```tex
+provides evidence that
+```
+
+或者：
+
+```tex
+strongly suggests that
+```
+
+---
+
+## 40. “the same weights succeed under reset” 如果不是真的同 checkpoint，删掉
+
+**位置：Discussion 第一段**
+
+原文类似：
+
+```tex
+the same weights succeed under reset
+```
+
+**建议改成：**
+
+```tex
+performance recovers when boundary energy is reset under the same task
+sequence and training setup
+```
+
+---
+
+## 41. “the standard CRL evaluation paradigm assumes infinite energy and no death” 稍微夸张
+
+**位置：Discussion 第一段**
+
+原文：
+
+```tex
+standard CRL evaluation paradigm, which assumes infinite energy and no death
+```
+
+**问题：**
+有些环境也有 termination，只是不建模 shared physiological resource。建议更准确。
+
+**建议：**
+
+```tex
+standard CRL benchmarks often do not model shared internal resources that
+carry across task boundaries.
+```
+
+---
+
+## 42. Appendix 里 “reserved for future” 会削弱 main claim，但可以保留
+
+**位置：Task Sequence Definitions**
+
+原文：
+
+```tex
+$\beta$ and $\gamma$ are reserved for future cross-sequence generalization analyses.
+```
+
+**问题：**
+这句话很诚实，但如果 main text 把三条 sequence 写成贡献，这里会矛盾。改 main text 即可。appendix 可以保留。
+
+---
+
+## 43. Pilot 里 “task-specific agent comparable to Agent A/B” 有点模糊
+
+**位置：Appendix Preliminary Experiment**
+
+原文：
+
+```tex
+a task-specific agent (comparable to Agent~A/B)
+```
+
+**问题：**
+A 和 B 差别是 energy observation，一个 masked，一个 unmasked。comparable to A/B 模糊。
+
+**建议改成：**
+
+```tex
+a task-reward baseline and a pure homeostatic baseline
+```
+
+如果它到底有没有 energy observation，直接写清楚。
+
+---
+
+## 44. Reference 里有些 citation key/entry 看起来不规范
+
+**位置：Bibliography**
+
+需要检查：
+
+```tex
+\bibitem{Yoshida}
+Naoto Yoshida.
+Meta-Reinforcement Learning in Homeostatic Regulation.
+Extended abstract, Computational and Cognitive Neuroscience, 2025.
+```
+
+**问题：**
+这个看起来可能不是真正正式出版物，citation key 也和 yoshida2018 重复风格不一致。课程 final 不一定致命，但最好确认来源。
+
+另外：
+
+```tex
+\bibitem{Barreto}
+...
+\bibitem{Tomov}
+...
+```
+
+key 大写也不是问题，但风格不统一。建议统一小写：
+
+```tex
+barreto2017
+tomov2021
+```
+
+---
+
+## 45. “HACE: Homeostatic Auxiliary for Continual Environments” 这个展开略怪
+
+**位置：Abstract / Method**
+
+原文：
+
+```tex
+Homeostatic Auxiliary for Continual Environments
+```
+
+**问题：**
+Auxiliary 是形容词，不太像名词。可以接受，但略别扭。
+
+**可选改法：**
+
+```tex
+Homeostatic Auxiliary Control for Continual Environments
+```
+
+或者：
+
+```tex
+Homeostatic Auxiliary reward for Continual Environments
+```
+
+不过 acronym HACE 不一定完美对应，课程论文可以不改。
+
+---
+
+## 46. “viability failure” 定义里的 threshold 没有 operationalized
+
+**位置：Viability Failure subsection**
+
+原文：
+
+```tex
+E[...] < E_viable^{(i+1)}
+```
+
+**问题：**
+这个公式很好，但 `E_viable` 怎么定义？最小路径能量？empirical solvability threshold？如果不解释，会显得理论定义和实验 metric 脱节。
+
+**建议加一句：**
+
+```tex
+In our experiments, we operationalize this threshold empirically through
+boundary solvability: whether the policy can complete the next task when
+initialized from the terminal energy distribution of the previous task.
+```
+
+---
+
+## 47. “death trajectories and no useful gradient signal” 可以更精确
+
+**位置：Viability Failure subsection**
+
+原文：
+
+```tex
+observing only death trajectories and receiving no useful gradient signal
+```
+
+**问题：**
+DQN 仍然有 TD signal，只是信息贫乏/偏向死亡。建议改：
+
+```tex
+observing mostly short death trajectories and receiving little informative
+signal about successful behavior in the new task.
+```
+
+---
+
+## 48. “biologically motivated” 可以保留，但不要过度展开
+
+**位置：Homeostatic Drive Reduction**
+
+原文：
+
+```tex
+biologically motivated
+```
+
+这个没问题，但不要往 symbol grounding / cognition 扩太多。现在 Related Work 里还算克制。
+
+---
+
+## 49. “full 9-agent factorial design” 不准确
+
+**位置：Appendix pilot**
+
+原文：
+
+```tex
+full-scale 9-agent factorial design
+```
+
+**问题：**
+9 agents 不是严格 factorial design，因为 A-I 不是所有因素完全交叉组合。比如 reward, EO, CRL, Seq 没有完整排列。
+
+**建议改成：**
+
+```tex
+full-scale 9-agent comparative design
+```
+
+或者：
+
+```tex
+full 9-agent experimental suite
+```
+
+---
+
+## 50. 最后建议统一替换的词
+
+你可以全局搜这些词，逐个看要不要降调：
+
+```tex
+prove
+proves
+confirm
+confirms
+unambiguously
+entirely
+structurally unable
+wrong level of abstraction
+true bottleneck
+all prior work
+all CRL baselines
+immediately applicable
+holds independently
+```
+
+推荐替换词：
+
+```tex
+suggest
+supports
+provides evidence that
+is consistent with
+in our benchmark
+does not directly address
+provides limited benefit
+major bottleneck
+complementary
+straightforward to test
+```
+
+---
+
+## 最优先修改顺序
+
+你时间紧的话，先改这 8 个：
+
+1. Abstract 实验规模：10-task carryover + 5-task reset/carryover。
+2. 删/改 “same network weights”，除非你真的做了同一 checkpoint evaluation。
+3. 把 “proves / unambiguously / confirms orthogonal” 全部降调。
+4. 解释 12-task catalog vs 10-task sequence。
+5. 解释 HACE setpoint = energy cap 的含义。
+6. 把 “3 task orderings” 从已完成贡献改成 benchmark design / future analysis。
+7. 把 “solve Gauntlet Refuel” 改成 “highest success” 或定义 solve threshold。
+8. Observation appendix 里说明 Agent A energy coordinate is masked。
