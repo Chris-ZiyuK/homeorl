@@ -46,10 +46,10 @@ from src.envs.sequential_homeostasis_env import (
     TASK_SEQUENCES,
 )
 
-from src.envs.minihack_homeostasis_env import (
-    MiniHackHomeostasisEnv,
-    MH_TASK_SPECS,
-    MH_TASK_SEQUENCE,
+from src.envs.minigrid_homeostasis_env import (
+    MiniGridHomeostasisEnv,
+    MG_TASK_SPECS,
+    MG_TASK_SEQUENCE,
 )
 
 from src.agents.dqn_agent import DQNAgent
@@ -141,7 +141,7 @@ DEFAULT_CONFIG = {
     "tasks": None,  # will be resolved from task_sequence
     "agents": ["A_task_only", "B_energy_aware", "C_hace", "D_pure_homeostatic",
                "E_task_oracle", "F_ewc", "G_l2", "H_er", "I_hace_ewc"],
-    "episodes_per_task": 600,
+    "episodes_per_task": 2000,
     "eval_interval": 50,
     "eval_episodes": 40,
     "num_seeds": 10,
@@ -158,7 +158,7 @@ DEFAULT_CONFIG = {
         "target_update": 25,
         "eps_start": 1.0,
         "eps_end": 0.05,
-        "eps_decay": 300,
+        "eps_decay": 1200,
     },
     "environment": {
         "internal_coef": 1.0,
@@ -240,7 +240,8 @@ def create_agent(agent_spec, obs_dim, n_actions, agent_cfg):
 def resolve_phase_start_energy(task_name, cfg, previous_energy):
     if cfg["boundary_mode"] != "carryover" or previous_energy is None:
         return None
-    task_cap = TASK_SPECS[task_name]["energy_cap"]
+    task_specs = cfg.get("task_specs", TASK_SPECS)
+    task_cap = task_specs[task_name]["energy_cap"]
     return float(np.clip(previous_energy, cfg["carryover_min_energy"], task_cap))
 
 
@@ -395,7 +396,7 @@ def train_agent(agent_name, cfg, seed):
             next_task = tasks[task_idx + 1]
             terminal_energy = task_matrix[task_name]["avg_energy_left"]
             if terminal_energy is not None and terminal_energy > 0:
-                next_cap = TASK_SPECS[next_task]["energy_cap"]
+                next_cap = cfg["task_specs"][next_task]["energy_cap"]
                 probe_start = float(np.clip(
                     terminal_energy, cfg["carryover_min_energy"], next_cap
                 ))
@@ -605,8 +606,8 @@ def main():
     parser.add_argument("--output_dir", type=str, default=None)
     parser.add_argument("--agents", type=str, nargs="+", default=None,
                         help="Override which agents to run.")
-    parser.add_argument( "--env", type=str, default="gridworld",
-        choices=["gridworld", "minihack"], help="Environment backend to use.")
+    parser.add_argument("--env", type=str, default="gridworld",
+    choices=["gridworld", "minigrid"], help="Environment backend to use.")
     args = parser.parse_args()
     cfg = load_config(args.config if os.path.exists(args.config) else None)
 
@@ -621,14 +622,16 @@ def main():
 
     cfg["tasks"] = resolve_tasks(cfg)
     # Resolve environment class
-    if args.env == "minihack":
-        cfg["env_class"] = MiniHackHomeostasisEnv
-        cfg["tasks"] = MH_TASK_SEQUENCE
-        cfg["logging"]["save_dir"] = cfg["logging"]["save_dir"] + "_minihack"
-        cfg["logging"]["json_name"] = "minihack_" + cfg["logging"]["json_name"]
-        cfg["logging"]["plot_name"] = "minihack_" + cfg["logging"]["plot_name"]
+    if args.env == "minigrid":
+        cfg["env_class"] = MiniGridHomeostasisEnv
+        cfg["tasks"] = MG_TASK_SEQUENCE
+        cfg["task_specs"] = MG_TASK_SPECS
+        cfg["logging"]["save_dir"] = cfg["logging"]["save_dir"] + "_minigrid"
+        cfg["logging"]["json_name"] = "minigrid_" + cfg["logging"]["json_name"]
+        cfg["logging"]["plot_name"] = "minigrid_" + cfg["logging"]["plot_name"]
     else:
         cfg["env_class"] = SequentialHomeostasisEnv
+        cfg["task_specs"] = TASK_SPECS
 
     # Determine which seeds to run
     if args.seed_index is not None:
