@@ -1,0 +1,101 @@
+\begin{thebibliography}{14}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{#1}
+\expandafter\ifx\csname urlstyle\endcsname\relax\else
+  \urlstyle{same}\fi
+\expandafter\ifx\csname href\endcsname\relax
+  \def\doi{\begingroup \urlstyle{same}\Url}
+\else
+  \def\doi#1{\href{https://doi.org/#1}{\nolinkurl{#1}}}
+\fi
+
+\bibitem[Parisi et~al.(2019)Parisi, Kemker, Part, Kanan, and
+  Wermter]{Parisi2019}
+PARISI G~I, KEMKER R, PART J~L, et~al.
+\newblock Continual lifelong learning with neural networks: a
+  review\allowbreak[J].
+\newblock Neural Networks, 2019, 113: 54-71.
+
+\bibitem[Kirkpatrick et~al.(2017)]{kirkpatrick2017}
+KIRKPATRICK J et~al.
+\newblock Overcoming catastrophic forgetting in neural networks\allowbreak[J].
+\newblock Proceedings of the National Academy of Sciences, 2017, 114\allowbreak
+  (13): 3521-3526.
+
+\bibitem[Wolczyk et~al.(2021)]{continualworld2021}
+WOLCZYK M et~al.
+\newblock Continual world: a robotic benchmark for continual reinforcement
+  learning\allowbreak[C]//\allowbreak
+{Advances in Neural Information Processing Systems 34}.
+\newblock 2021.
+
+\bibitem[Rolnick et~al.(2019)Rolnick, Ahuja, Schwarz, Lillicrap, and
+  Wayne]{rolnick2019}
+ROLNICK D, AHUJA A, SCHWARZ J, et~al.
+\newblock Experience replay for continual learning\allowbreak[C]//\allowbreak
+{Advances in Neural Information Processing Systems 32}.
+\newblock 2019.
+
+\bibitem[Rusu et~al.(2016)]{rusu2016}
+RUSU A~A et~al.
+\newblock Progressive neural networks\allowbreak[Z].
+\newblock 2016.
+
+\bibitem[Powers et~al.(2022)]{cora2022}
+POWERS S et~al.
+\newblock {CORA}: benchmarks, baselines, and metrics as a platform for
+  continual reinforcement learning agents\allowbreak[C]//\allowbreak
+{Conference on Lifelong Learning Agents (CoLLAs)}.
+\newblock 2022.
+
+\bibitem[Keramati et~al.(2014)Keramati and Gutkin]{keramati2014}
+KERAMATI M, GUTKIN B.
+\newblock Homeostatic reinforcement learning for integrating reward collection
+  and physiological stability\allowbreak[J].
+\newblock eLife, 2014, 3: e04811.
+
+\bibitem[Yoshida(2018)]{yoshida2018}
+YOSHIDA N.
+\newblock Homeostatic agent for general environment\allowbreak[J].
+\newblock Journal of Artificial General Intelligence, 2018, 8\allowbreak (1):
+  1-22.
+
+\bibitem[Yoshida(2025)]{Yoshida}
+YOSHIDA N.
+\newblock Meta-reinforcement learning in homeostatic regulation\allowbreak[Z].
+\newblock 2025.
+
+\bibitem[Konidaris et~al.(2006)Konidaris and Barto]{konidaris2006}
+KONIDARIS G, BARTO A.
+\newblock An adaptive robot motivational system\allowbreak[C]//\allowbreak
+{Proceedings of the 9th International Conference on Simulation of Adaptive
+  Behavior}.
+\newblock 2006: 346-356.
+
+\bibitem[Barreto et~al.(2017)]{Barreto}
+BARRETO A et~al.
+\newblock Successor features for transfer in reinforcement
+  learning\allowbreak[C]//\allowbreak
+{Advances in Neural Information Processing Systems 30}.
+\newblock 2017.
+
+\bibitem[Tomov et~al.(2021)Tomov, Schulz, and Gershman]{Tomov}
+TOMOV M~S, SCHULZ E, GERSHMAN S~J.
+\newblock Multi-task reinforcement learning in humans\allowbreak[J].
+\newblock Nature Human Behaviour, 2021, 5\allowbreak (6): 764-773.
+
+\bibitem[Pathak et~al.(2017)]{pathak2017}
+PATHAK D et~al.
+\newblock Curiosity-driven exploration by self-supervised
+  prediction\allowbreak[C]//\allowbreak
+{Proceedings of the 34th International Conference on Machine Learning}.
+\newblock 2017: 2778-2787.
+
+\bibitem[Jaderberg et~al.(2017)]{jaderberg2017}
+JADERBERG M et~al.
+\newblock Reinforcement learning with unsupervised auxiliary
+  tasks\allowbreak[C]//\allowbreak
+{International Conference on Learning Representations}.
+\newblock 2017.
+
+\end{thebibliography}

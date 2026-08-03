@@ -1,0 +1,97 @@
+\relax 
+\bibstyle{gbt7714-2015-numeric}
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand*\HyPL@Entry[1]{}
+\HyPL@Entry{0<</S/D>>}
+\citation{Parisi2019,kirkpatrick2017,continualworld2021}
+\citation{kirkpatrick2017}
+\citation{rolnick2019}
+\citation{rusu2016}
+\citation{kirkpatrick2017}
+\citation{rolnick2019}
+\citation{rusu2016}
+\citation{continualworld2021}
+\citation{cora2022}
+\citation{keramati2014}
+\citation{yoshida2018,Yoshida}
+\citation{konidaris2006}
+\citation{Barreto}
+\citation{Tomov}
+\citation{pathak2017}
+\citation{jaderberg2017}
+\@writefile{toc}{\contentsline {section}{\numberline {1}引言}{2}{section.1}\protected@file@percent }
+\newlabel{sec:intro}{{1}{2}{引言}{section.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}相关工作}{2}{section.2}\protected@file@percent }
+\newlabel{sec:related}{{2}{2}{相关工作}{section.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{持续强化学习。}{2}{paragraph*.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{稳态强化学习。}{2}{paragraph*.2}\protected@file@percent }
+\citation{keramati2014}
+\citation{keramati2014,konidaris2006}
+\@writefile{toc}{\contentsline {paragraph}{迁移与辅助奖励。}{3}{paragraph*.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}生存可行性失效与 HACE 方法}{3}{section.3}\protected@file@percent }
+\newlabel{sec:method}{{3}{3}{生存可行性失效与 HACE 方法}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}序列任务设定}{3}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}生存可行性失效}{3}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}稳态驱力降低}{3}{subsection.3.3}\protected@file@percent }
+\newlabel{eq:drive}{{2}{3}{稳态驱力降低}{equation.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces 任务目录。所有任务共享 4 个移动动作与“能量耗尽即终止”规则。$c_s$：单步消耗；F：食物数量；H：危险格数量。任务名保留英文原名。}}{4}{table.1}\protected@file@percent }
+\newlabel{tab:tasks}{{1}{4}{任务目录。所有任务共享 4 个移动动作与“能量耗尽即终止”规则。$c_s$：单步消耗；F：食物数量；H：危险格数量。任务名保留英文原名。}{table.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces 智能体目录。TR：任务奖励；EO：能量观测；HR：稳态奖励；Seq：序列训练（参数继承）。}}{4}{table.2}\protected@file@percent }
+\newlabel{tab:agents}{{2}{4}{智能体目录。TR：任务奖励；EO：能量观测；HR：稳态奖励；Seq：序列训练（参数继承）。}{table.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}实验设置}{4}{section.4}\protected@file@percent }
+\newlabel{sec:setup}{{4}{4}{实验设置}{section.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}任务基准}{4}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}智能体目录}{4}{subsection.4.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces 10 任务 $\alpha $ 序列（继承模式）下的当前任务成功率（图中文字为英文）。虚线标记任务边界。\textsc  {Hace}{}（青色）与 \textsc  {Hace}{}+EWC（朱红色）在任务切换处持续恢复，而仅任务奖励（琥珀色）与 EWC（紫红色）在后期任务上崩溃。背景线为其余智能体。10 个种子的均值 $\pm \,1\sigma $。}}{5}{figure.1}\protected@file@percent }
+\newlabel{fig:learning}{{1}{5}{10 任务 $\alpha $ 序列（继承模式）下的当前任务成功率（图中文字为英文）。虚线标记任务边界。\hace {}（青色）与 \hace {}+EWC（朱红色）在任务切换处持续恢复，而仅任务奖励（琥珀色）与 EWC（紫红色）在后期任务上崩溃。背景线为其余智能体。10 个种子的均值 $\pm \,1\sigma $。}{figure.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}评价指标}{5}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}实验协议}{5}{subsection.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}实验结果}{5}{section.5}\protected@file@percent }
+\newlabel{sec:results}{{5}{5}{实验结果}{section.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}9 智能体全套实验（10 任务 $\alpha $ 序列，继承模式）}{5}{subsection.5.1}\protected@file@percent }
+\newlabel{sec:full_suite}{{5.1}{5}{9 智能体全套实验（10 任务 $\alpha $ 序列，继承模式）}{subsection.5.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces (a) 9 次任务切换的平均边界可解性。(b) 任务边界处的平均终端能量。\textsc  {Hace}{} 变体保留的能量是所有 CRL 基线的 3--5 倍，直接带来更高的边界可解性（图中文字为英文）。}}{6}{figure.2}\protected@file@percent }
+\newlabel{fig:boundary}{{2}{6}{(a) 9 次任务切换的平均边界可解性。(b) 任务边界处的平均终端能量。\hace {} 变体保留的能量是所有 CRL 基线的 3--5 倍，直接带来更高的边界可解性（图中文字为英文）。}{figure.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}重置对比继承：隔离生存可行性失效}{6}{subsection.5.2}\protected@file@percent }
+\newlabel{sec:factorial}{{5.2}{6}{重置对比继承：隔离生存可行性失效}{subsection.5.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}讨论与结论}{6}{section.6}\protected@file@percent }
+\newlabel{sec:discussion}{{6}{6}{讨论与结论}{section.6}{}}
+\@writefile{toc}{\contentsline {paragraph}{生存可行性失效是一种独立的、被忽视的失效模式。}{6}{paragraph*.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces 10 任务 $\alpha $ 序列（继承模式）序列末成功率（智能体 $\times $ 任务）（图中文字为英文）。颜色越深成功率越高。\textsc  {Hace}{}+EWC（底行）平均性能最高；\textsc  {Hace}{}（C）在 Gauntlet Refuel 上取得最强的非先知性能。}}{7}{figure.3}\protected@file@percent }
+\newlabel{fig:heatmap}{{3}{7}{10 任务 $\alpha $ 序列（继承模式）序列末成功率（智能体 $\times $ 任务）（图中文字为英文）。颜色越深成功率越高。\hace {}+EWC（底行）平均性能最高；\hace {}（C）在 Gauntlet Refuel 上取得最强的非先知性能。}{figure.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces 重置（左）与继承（右）模式下的最终评估（图中文字为英文）。重置模式下所有智能体表现相当；继承模式下仅任务奖励（琥珀色）退化而 \textsc  {Hace}{}（青色）保持性能。这一差异支持生存可行性失效是主要解释：当边界能量被重置时，同样的任务序列与学习设置下性能得以恢复。}}{7}{figure.4}\protected@file@percent }
+\newlabel{fig:collapse}{{4}{7}{重置（左）与继承（右）模式下的最终评估（图中文字为英文）。重置模式下所有智能体表现相当；继承模式下仅任务奖励（琥珀色）退化而 \hace {}（青色）保持性能。这一差异支持生存可行性失效是主要解释：当边界能量被重置时，同样的任务序列与学习设置下性能得以恢复。}{figure.4}{}}
+\@writefile{toc}{\contentsline {paragraph}{HACE 简单、有效，且与 CRL 方法互补。}{7}{paragraph*.5}\protected@file@percent }
+\bibdata{refs}
+\bibcite{Parisi2019}{{1}{2019}{{Parisi et~al.}}{{Parisi, Kemker, Part, Kanan, and Wermter}}}
+\bibcite{kirkpatrick2017}{{2}{2017}{{Kirkpatrick et~al.}}{{}}}
+\bibcite{continualworld2021}{{3}{2021}{{Wolczyk et~al.}}{{}}}
+\bibcite{rolnick2019}{{4}{2019}{{Rolnick et~al.}}{{Rolnick, Ahuja, Schwarz, Lillicrap, and Wayne}}}
+\bibcite{rusu2016}{{5}{2016}{{Rusu et~al.}}{{}}}
+\bibcite{cora2022}{{6}{2022}{{Powers et~al.}}{{}}}
+\bibcite{keramati2014}{{7}{2014}{{Keramati et~al.}}{{Keramati and Gutkin}}}
+\bibcite{yoshida2018}{{8}{2018}{{Yoshida}}{{}}}
+\bibcite{Yoshida}{{9}{2025}{{Yoshida}}{{}}}
+\bibcite{konidaris2006}{{10}{2006}{{Konidaris et~al.}}{{Konidaris and Barto}}}
+\bibcite{Barreto}{{11}{2017}{{Barreto et~al.}}{{}}}
+\bibcite{Tomov}{{12}{2021}{{Tomov et~al.}}{{Tomov, Schulz, and Gershman}}}
+\bibcite{pathak2017}{{13}{2017}{{Pathak et~al.}}{{}}}
+\bibcite{jaderberg2017}{{14}{2017}{{Jaderberg et~al.}}{{}}}
+\@writefile{toc}{\contentsline {paragraph}{局限性与未来工作。}{8}{paragraph*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {A}超参数}{9}{appendix.A}\protected@file@percent }
+\newlabel{app:hyperparams}{{A}{9}{超参数}{appendix.A}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces 训练超参数。}}{9}{table.3}\protected@file@percent }
+\newlabel{tab:hyperparams}{{3}{9}{训练超参数。}{table.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {B}任务序列定义}{9}{appendix.B}\protected@file@percent }
+\newlabel{app:sequences}{{B}{9}{任务序列定义}{appendix.B}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces 完整的 10 任务序列排序。}}{9}{table.4}\protected@file@percent }
+\newlabel{tab:sequences}{{4}{9}{完整的 10 任务序列排序。}{table.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {C}预实验：5 任务序列先导研究}{10}{appendix.C}\protected@file@percent }
+\newlabel{app:pilot}{{C}{10}{预实验：5 任务序列先导研究}{appendix.C}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces 5 任务序列先导实验（图中文字为英文）。\emph  {左}：序列训练期间的当前任务成功率。任务特定奖励智能体（红色）在早期任务上学得更快；稳态智能体（蓝色）在后期任务上追平或超越。\emph  {右}：全部五个任务的最终保持。稳态智能体在依赖资源管理的任务上保持更强（Hazard Cross：0.90 对 0.70；Detour：0.80 对 0.60）。}}{10}{figure.5}\protected@file@percent }
+\newlabel{fig:pilot}{{5}{10}{5 任务序列先导实验（图中文字为英文）。\emph {左}：序列训练期间的当前任务成功率。任务特定奖励智能体（红色）在早期任务上学得更快；稳态智能体（蓝色）在后期任务上追平或超越。\emph {右}：全部五个任务的最终保持。稳态智能体在依赖资源管理的任务上保持更强（Hazard Cross：0.90 对 0.70；Detour：0.80 对 0.60）。}{figure.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {D}观测空间细节}{10}{appendix.D}\protected@file@percent }
+\newlabel{app:obs}{{D}{10}{观测空间细节}{appendix.D}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces 观测向量布局。所有空间特征归一化到 $[0,1]$。智能体~A 接收遮蔽的能量值（$-1$），以便将奖励信号的作用与观测内容隔离。}}{10}{table.5}\protected@file@percent }
+\newlabel{tab:obs}{{5}{10}{观测向量布局。所有空间特征归一化到 $[0,1]$。智能体~A 接收遮蔽的能量值（$-1$），以便将奖励信号的作用与观测内容隔离。}{table.5}{}}
+\gdef \@abspage@last{10}
